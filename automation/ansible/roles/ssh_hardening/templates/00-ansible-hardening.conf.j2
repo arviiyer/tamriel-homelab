@@ -1,0 +1,18 @@
+# Managed by Ansible. Local edits will be overwritten.
+
+PermitRootLogin {{ ssh_permit_root_login }}
+PubkeyAuthentication yes
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+AuthenticationMethods publickey
+
+AllowUsers{% for user in ssh_allowed_users %} {{ user }}{% endfor %}
+
+MaxAuthTries {{ ssh_max_auth_tries }}
+ClientAliveInterval {{ ssh_client_alive_interval }}
+ClientAliveCountMax {{ ssh_client_alive_count_max }}
+
+KerberosAuthentication no
+GSSAPIAuthentication no
+X11Forwarding no
+PermitEmptyPasswords no

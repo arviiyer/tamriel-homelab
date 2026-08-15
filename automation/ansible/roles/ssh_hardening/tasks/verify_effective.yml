@@ -1,0 +1,39 @@
+---
+- name: Read effective SSH policy for every allowed user
+  ansible.builtin.command:
+    argv:
+      - /usr/sbin/sshd
+      - -T
+      - -C
+      - "user={{ item }},host={{ ssh_validation_source_host }},addr={{ ssh_validation_source_address }}"
+  loop: "{{ ssh_allowed_users }}"
+  changed_when: false
+  register: sshd_effective_configs
+
+- name: Verify effective SSH policy for every allowed user
+  ansible.builtin.assert:
+    that:
+      - >-
+        (ssh_permit_root_login == 'no'
+         and item.stdout_lines | select('match', '^permitrootlogin ') | list == ['permitrootlogin no'])
+        or
+        (ssh_permit_root_login == 'prohibit-password'
+         and item.stdout_lines | select('match', '^permitrootlogin ') | list in [['permitrootlogin prohibit-password'], ['permitrootlogin without-password']])
+      - item.stdout_lines | select("match", "^pubkeyauthentication ") | list == ["pubkeyauthentication yes"]
+      - item.stdout_lines | select("match", "^passwordauthentication ") | list == ["passwordauthentication no"]
+      - item.stdout_lines | select("match", "^kbdinteractiveauthentication ") | list == ["kbdinteractiveauthentication no"]
+      - item.stdout_lines | select("match", "^authenticationmethods ") | list == ["authenticationmethods publickey"]
+      - item.stdout_lines | select("match", "^allowusers ") | list == ["allowusers " ~ (ssh_allowed_users | join(" "))]
+      - item.stdout_lines | select("match", "^maxauthtries ") | list == ["maxauthtries " ~ (ssh_max_auth_tries | string)]
+      - item.stdout_lines | select("match", "^clientaliveinterval ") | list == ["clientaliveinterval " ~ (ssh_client_alive_interval | string)]
+      - item.stdout_lines | select("match", "^clientalivecountmax ") | list == ["clientalivecountmax " ~ (ssh_client_alive_count_max | string)]
+      - item.stdout_lines | select("match", "^kerberosauthentication ") | list == ["kerberosauthentication no"]
+      - item.stdout_lines | select("match", "^gssapiauthentication ") | list == ["gssapiauthentication no"]
+      - item.stdout_lines | select("match", "^x11forwarding ") | list == ["x11forwarding no"]
+      - item.stdout_lines | select("match", "^permitemptypasswords ") | list == ["permitemptypasswords no"]
+    fail_msg: >-
+      Effective OpenSSH policy for {{ item.item }} does not match the requested
+      hardening controls.
+  loop: "{{ sshd_effective_configs.results }}"
+  loop_control:
+    label: "{{ item.item }}"

@@ -1,0 +1,146 @@
+groups:
+  - name: trivy-findings
+    rules:
+      - alert: TrivyNewCriticalVulnerability
+        expr: >-
+          sum by (repository, image)
+          (trivy_new_vulnerabilities{severity="CRITICAL"}) > 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: New critical vulnerability in {{ $labels.repository }}
+          description: >-
+            The latest complete scan found {{ $value }} new critical
+            vulnerability findings in {{ $labels.image }}.
+
+      - alert: TrivyNewFixableHighVulnerability
+        expr: >-
+          sum by (repository, image)
+          (trivy_new_vulnerabilities{severity="HIGH",has_fix="true"}) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: New fixable high vulnerability in {{ $labels.repository }}
+          description: >-
+            The latest complete scan found {{ $value }} new high-severity
+            vulnerability findings with an available fix in {{ $labels.image }}.
+
+      - alert: TrivyVulnerabilitySeverityIncreasedToCritical
+        expr: >-
+          sum by (repository, image)
+          (trivy_vulnerability_changes{change="severity_increased",severity="CRITICAL"}) > 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: Vulnerability severity increased to critical
+          description: >-
+            The security feed reclassified {{ $value }} existing vulnerability
+            findings as critical in {{ $labels.image }}.
+
+      - alert: TrivyHighOrCriticalVulnerabilityFixBecameAvailable
+        expr: >-
+          sum by (repository, image)
+          (trivy_vulnerability_changes{change="fix_available",severity=~"HIGH|CRITICAL"}) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Fix became available for a high or critical vulnerability
+          description: >-
+            A fix is now available for {{ $value }} existing high- or critical-severity
+            vulnerability findings in {{ $labels.image }}.
+
+      - alert: TrivySecretDetected
+        expr: sum by (repository) (trivy_secrets) > 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: Secret detected in {{ $labels.repository }}
+          description: >-
+            The checked-out repository tree contains {{ $value }} potential
+            secret findings. Validate the finding and rotate exposed credentials.
+
+      - alert: TrivyNewCriticalMisconfiguration
+        expr: >-
+          sum by (repository)
+          (trivy_new_misconfigurations{severity="CRITICAL"}) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: New critical misconfiguration in {{ $labels.repository }}
+          description: >-
+            The latest complete scan found {{ $value }} new critical
+            configuration findings.
+
+  - name: trivy-control-health
+    rules:
+      - alert: TrivyScanHealthMissing
+        expr: absent(trivy_scan_attempt_timestamp_seconds)
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: Trivy scan health metrics are missing
+          description: >-
+            The scanner has not published an attempt timestamp. Verify its
+            schedule and Pushgateway integration.
+
+      - alert: TrivyLatestScanFailed
+        expr: trivy_scan_success == 0
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: Latest Trivy scan attempt failed
+          description: >-
+            One or more repositories or images failed to scan. The last
+            complete baseline was preserved.
+
+      - alert: TrivyRepositoryScanFailed
+        expr: trivy_scan_repository_success == 0
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: Trivy scan failed for {{ $labels.repository }}
+          description: >-
+            At least one configured scanner failed for this repository. Its
+            results were not promoted into the baseline.
+
+      - alert: TrivyScanAttemptStale
+        expr: time() - trivy_scan_attempt_timestamp_seconds > 8 * 24 * 60 * 60
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: Trivy scan has not been attempted recently
+          description: >-
+            No scan attempt has reported health metrics within the expected
+            eight-day window.
+
+      - alert: TrivySuccessfulBaselineStale
+        expr: time() - trivy_scan_last_success_timestamp_seconds > 8 * 24 * 60 * 60
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: Trivy has no recent complete baseline
+          description: >-
+            The most recent complete scan is older than eight days. Finding
+            metrics may no longer represent the configured repositories.
+
+      - alert: TrivySuccessfulBaselineMissing
+        expr: absent(trivy_scan_last_success_timestamp_seconds)
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: Trivy complete-baseline metrics are missing
+          description: >-
+            Scan health may still be present, but no successful findings
+            baseline is available from Pushgateway.

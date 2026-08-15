@@ -1,0 +1,4 @@
+# alias<TAB>clone URL<TAB>revision
+apps	https://git.example.com/platform/apps.git	main
+identity	https://git.example.com/platform/identity.git	main
+observability	https://git.example.com/platform/observability.git	main

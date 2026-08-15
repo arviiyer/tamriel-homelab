@@ -1,0 +1,358 @@
+---
+- name: Refuse SSH policy changes in check mode
+  ansible.builtin.assert:
+    that:
+      - not ansible_check_mode
+    fail_msg: >-
+      SSH transaction and reconnect validation cannot run in check mode. Use a
+      staged host with console access for the first deployment.
+
+- name: Validate SSH hardening inputs
+  ansible.builtin.assert:
+    that:
+      - ansible_os_family == "Debian"
+      - ansible_user is defined
+      - ansible_user in ssh_allowed_users
+      - ssh_key_access_prevalidated | bool
+      - ssh_console_recovery_prevalidated | bool
+      - ssh_validation_source_address | length > 0
+      - ssh_validation_source_host | length > 0
+      - ansible_password is not defined
+      - ansible_ssh_pass is not defined
+      - ansible_ssh_password is not defined
+      - ssh_permit_root_login in ["no", "prohibit-password"]
+      - ssh_allowed_users is sequence
+      - ssh_allowed_users is not string
+      - ssh_allowed_users | length > 0
+      - ssh_allowed_users | select("match", "^[a-z_][a-z0-9_-]*[$]?$", ignorecase=True) | list | length == ssh_allowed_users | length
+      - ssh_max_auth_tries | int >= 1
+      - ssh_max_auth_tries | int <= 10
+      - ssh_client_alive_interval | int >= 0
+      - ssh_client_alive_count_max | int >= 0
+    fail_msg: SSH variables are invalid or would deny the active Ansible user.
+
+- name: Ensure the OpenSSH include directory exists
+  ansible.builtin.file:
+    path: /etc/ssh/sshd_config.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Read the primary OpenSSH daemon configuration
+  ansible.builtin.slurp:
+    src: /etc/ssh/sshd_config
+  register: sshd_primary_config
+
+- name: Require the distribution-managed include directive
+  ansible.builtin.assert:
+    that:
+      - >-
+        (sshd_primary_config.content | b64decode) is
+        regex('(?m)^\s*Include\s+/etc/ssh/sshd_config[.]d/[*][.]conf\s*$')
+      - >-
+        (sshd_primary_config.content | b64decode
+         | regex_findall('(?mi)^\s*Include\s+')) | length == 1
+      - >-
+        (sshd_primary_config.content | b64decode) is not
+        regex('(?mi)^\s*Match\s+')
+      - >-
+        (sshd_primary_config.content | b64decode) is not
+        regex('(?mi)^\s*(AllowUsers|AllowGroups|DenyUsers|DenyGroups)\s+')
+    fail_msg: >-
+      The primary SSH configuration must contain exactly one standard drop-in
+      include and no Match or cumulative access-control directives.
+
+- name: Discover existing OpenSSH drop-ins
+  ansible.builtin.find:
+    paths: /etc/ssh/sshd_config.d
+    patterns: "*.conf"
+    file_type: file
+  register: sshd_dropins
+
+- name: Discover symlinked OpenSSH drop-ins
+  ansible.builtin.find:
+    paths: /etc/ssh/sshd_config.d
+    patterns: "*.conf"
+    file_type: link
+  register: sshd_symlinked_dropins
+
+- name: Reject symlinked OpenSSH drop-ins
+  ansible.builtin.assert:
+    that:
+      - sshd_symlinked_dropins.matched == 0
+    fail_msg: Symlinked OpenSSH drop-ins must be reviewed before applying this role.
+
+- name: Read unmanaged OpenSSH drop-ins
+  ansible.builtin.slurp:
+    src: "{{ item.path }}"
+  loop: >-
+    {{ sshd_dropins.files
+       | rejectattr('path', 'equalto', '/etc/ssh/sshd_config.d/00-ansible-hardening.conf')
+       | list }}
+  loop_control:
+    label: "{{ item.path }}"
+  register: sshd_unmanaged_dropins
+
+- name: Reject competing OpenSSH authentication policy
+  ansible.builtin.assert:
+    that:
+      - >-
+        (item.content | b64decode) is not
+        regex('(?mi)^\s*(AllowUsers|AllowGroups|DenyUsers|DenyGroups)\s+')
+      - >-
+        (item.content | b64decode) is not
+        regex('(?mi)^\s*(Include|Match)\s+')
+    fail_msg: >-
+      {{ item.source }} defines a directive owned by ssh_hardening. Reconcile the
+      competing policy before applying this role.
+  loop: "{{ sshd_unmanaged_dropins.results | default([]) }}"
+  loop_control:
+    label: "{{ item.source }}"
+
+- name: Inspect SSH transaction markers
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop:
+    - /run/ansible-ssh-hardening.previous
+    - /run/ansible-ssh-hardening-rollback.sh
+  register: ssh_transaction_markers
+
+- name: Refuse unresolved SSH transaction state
+  ansible.builtin.assert:
+    that:
+      - ssh_transaction_markers.results | selectattr("stat.exists") | list | length == 0
+    fail_msg: >-
+      A prior SSH hardening transaction is unresolved. Inspect the rollback unit
+      and transaction files before retrying.
+
+- name: Render the candidate SSH policy outside the live configuration
+  ansible.builtin.template:
+    src: 00-ansible-hardening.conf.j2
+    dest: /run/00-ansible-hardening.conf.candidate
+    owner: root
+    group: root
+    mode: "0600"
+    validate: /usr/sbin/sshd -t -f %s
+
+- name: Inspect the candidate SSH policy
+  ansible.builtin.stat:
+    path: /run/00-ansible-hardening.conf.candidate
+    checksum_algorithm: sha256
+  register: ssh_policy_candidate
+
+- name: Inspect the live SSH policy
+  ansible.builtin.stat:
+    path: /etc/ssh/sshd_config.d/00-ansible-hardening.conf
+    checksum_algorithm: sha256
+  register: ssh_policy_previous
+
+- name: Determine whether the SSH policy changed
+  ansible.builtin.set_fact:
+    ssh_policy_change_required: >-
+      {{ not ssh_policy_previous.stat.exists
+         or ssh_policy_previous.stat.checksum != ssh_policy_candidate.stat.checksum }}
+
+- name: Prepare the previous SSH policy backup
+  ansible.builtin.copy:
+    src: /etc/ssh/sshd_config.d/00-ansible-hardening.conf
+    dest: /run/ansible-ssh-hardening.previous
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0600"
+  when:
+    - ssh_policy_change_required
+    - ssh_policy_previous.stat.exists
+
+- name: Remove a stale previous-policy file
+  ansible.builtin.file:
+    path: /run/ansible-ssh-hardening.previous
+    state: absent
+  when:
+    - ssh_policy_change_required
+    - not ssh_policy_previous.stat.exists
+
+- name: Install the SSH rollback helper
+  ansible.builtin.template:
+    src: rollback-ssh-policy.sh.j2
+    dest: /run/ansible-ssh-hardening-rollback.sh
+    owner: root
+    group: root
+    mode: "0700"
+  when: ssh_policy_change_required
+
+- name: Apply SSH policy as a rollback-protected transaction
+  when: ssh_policy_change_required
+  block:
+
+    - name: Arm automatic SSH rollback
+      ansible.builtin.command:
+        argv:
+          - /usr/bin/systemd-run
+          - --unit=ansible-ssh-hardening-rollback
+          - --on-active=2m
+          - /run/ansible-ssh-hardening-rollback.sh
+      changed_when: true
+
+    - name: Install the candidate SSH policy
+      ansible.builtin.copy:
+        src: /run/00-ansible-hardening.conf.candidate
+        dest: /etc/ssh/sshd_config.d/00-ansible-hardening.conf
+        remote_src: true
+        owner: root
+        group: root
+        mode: "0600"
+
+    - name: Validate the complete OpenSSH configuration
+      ansible.builtin.command:
+        argv:
+          - /usr/sbin/sshd
+          - -t
+      changed_when: false
+
+    - name: Reload OpenSSH
+      ansible.builtin.systemd_service:
+        name: ssh
+        state: reloaded
+
+    - name: Reset the Ansible SSH connection
+      ansible.builtin.meta: reset_connection
+
+    - name: Wait for a fresh key-based connection
+      ansible.builtin.wait_for_connection:
+        connect_timeout: 5
+        sleep: 3
+        timeout: 180
+
+    - name: Confirm the candidate survived the reconnect window
+      ansible.builtin.stat:
+        path: /etc/ssh/sshd_config.d/00-ansible-hardening.conf
+        checksum_algorithm: sha256
+      register: ssh_policy_after_reconnect
+
+    - name: Require the candidate policy to remain installed
+      ansible.builtin.assert:
+        that:
+          - ssh_policy_after_reconnect.stat.exists
+          - ssh_policy_after_reconnect.stat.checksum == ssh_policy_candidate.stat.checksum
+        fail_msg: The rollback watchdog restored the prior SSH policy.
+
+    - name: Verify the changed effective SSH policy
+      ansible.builtin.include_tasks: verify_effective.yml
+
+    - name: Cancel the automatic SSH rollback timer
+      ansible.builtin.command:
+        argv:
+          - /usr/bin/systemctl
+          - stop
+          - ansible-ssh-hardening-rollback.timer
+      changed_when: true
+
+    - name: Read rollback timer load and active state
+      ansible.builtin.command:
+        argv:
+          - /usr/bin/systemctl
+          - show
+          - --property=LoadState
+          - --property=ActiveState
+          - --value
+          - ansible-ssh-hardening-rollback.timer
+      changed_when: false
+      register: ssh_rollback_timer_state
+
+    - name: Read rollback service load and active state
+      ansible.builtin.command:
+        argv:
+          - /usr/bin/systemctl
+          - show
+          - --property=LoadState
+          - --property=ActiveState
+          - --value
+          - ansible-ssh-hardening-rollback.service
+      changed_when: false
+      register: ssh_rollback_service_state
+
+    - name: Stop an activated rollback service
+      ansible.builtin.command:
+        argv:
+          - /usr/bin/systemctl
+          - stop
+          - ansible-ssh-hardening-rollback.service
+      changed_when: true
+      when: >-
+        ssh_rollback_service_state.stdout_lines[0] != 'not-found'
+        or ssh_rollback_service_state.stdout_lines[1] != 'inactive'
+
+    - name: Read final rollback service state
+      ansible.builtin.command:
+        argv:
+          - /usr/bin/systemctl
+          - show
+          - --property=LoadState
+          - --property=ActiveState
+          - --value
+          - ansible-ssh-hardening-rollback.service
+      changed_when: false
+      register: ssh_rollback_service_final_state
+
+    - name: Verify rollback units are inactive
+      ansible.builtin.assert:
+        that:
+          - ssh_rollback_timer_state.stdout_lines[1] == "inactive"
+          - ssh_rollback_service_final_state.stdout_lines[1] == "inactive"
+        fail_msg: Rollback units could not be confirmed inactive.
+
+    - name: Recheck the committed SSH policy after stopping rollback
+      ansible.builtin.stat:
+        path: /etc/ssh/sshd_config.d/00-ansible-hardening.conf
+        checksum_algorithm: sha256
+      register: ssh_policy_after_rollback_stop
+
+    - name: Require the candidate policy at the commit boundary
+      ansible.builtin.assert:
+        that:
+          - ssh_policy_after_rollback_stop.stat.exists
+          - ssh_policy_after_rollback_stop.stat.checksum == ssh_policy_candidate.stat.checksum
+        fail_msg: The rollback service changed the SSH policy before commit.
+
+  rescue:
+    - name: Restore the previous SSH policy immediately
+      ansible.builtin.command:
+        argv:
+          - /run/ansible-ssh-hardening-rollback.sh
+      changed_when: true
+
+    - name: Cancel the scheduled rollback after immediate restoration
+      ansible.builtin.command:
+        argv:
+          - /usr/bin/systemctl
+          - stop
+          - ansible-ssh-hardening-rollback.timer
+          - ansible-ssh-hardening-rollback.service
+      changed_when: true
+      failed_when: false
+
+    - name: Stop after attempting to restore the previous SSH policy
+      ansible.builtin.fail:
+        msg: >-
+          SSH policy validation failed. Automatic and immediate rollback were
+          requested; verify access and daemon state through the recovery console.
+
+- name: Remove SSH transaction files after commit
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /run/ansible-ssh-hardening.previous
+    - /run/ansible-ssh-hardening-rollback.sh
+  when: ssh_policy_change_required
+
+- name: Verify the unchanged effective SSH policy
+  ansible.builtin.include_tasks: verify_effective.yml
+  when: not ssh_policy_change_required
+
+- name: Remove the candidate SSH policy
+  ansible.builtin.file:
+    path: /run/00-ansible-hardening.conf.candidate
+    state: absent

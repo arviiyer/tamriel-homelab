@@ -1,0 +1,43 @@
+---
+all:
+  vars:
+    ansible_user: operator
+    ssh_key_access_prevalidated: true
+    ssh_console_recovery_prevalidated: true
+    ssh_validation_source_address: 192.0.2.100
+    ssh_validation_source_host: admin.example.com
+    ssh_allowed_users:
+      - operator
+  children:
+    hypervisors:
+      vars:
+        ansible_user: root
+        ansible_become: false
+        ssh_permit_root_login: prohibit-password
+        ssh_allowed_users:
+          - root
+      hosts:
+        pve-01:
+          ansible_host: 192.0.2.11
+        pve-02:
+          ansible_host: 192.0.2.12
+        pve-03:
+          ansible_host: 192.0.2.13
+    service_vms:
+      vars:
+        ssh_permit_root_login: "no"
+      hosts:
+        identity-01:
+          ansible_host: 198.51.100.21
+        observability-01:
+          ansible_host: 198.51.100.22
+        apps-01:
+          ansible_host: 198.51.100.23
+        security-01:
+          ansible_host: 198.51.100.24
+    edge:
+      vars:
+        ssh_permit_root_login: "no"
+      hosts:
+        edge-01:
+          ansible_host: 203.0.113.5

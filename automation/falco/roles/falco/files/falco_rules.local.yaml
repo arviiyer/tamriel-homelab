@@ -1,0 +1,39 @@
+---
+# These synthetic exceptions demonstrate the tuning standard, not the complete
+# operated-environment suppression set. Each exception combines process,
+# resource, and workload identity so it cannot silence a rule host-wide.
+- rule: Read sensitive file untrusted
+  override:
+    exceptions: append
+  exceptions:
+    - name: example_postgres_healthcheck_shadow_read
+      fields:
+        - proc.name
+        - fd.name
+        - container.image.repository
+      comps:
+        - "="
+        - "="
+        - "="
+      values:
+        - - pg_isready
+          - /etc/shadow
+          - registry.example.com/platform/postgres
+
+- rule: Drop and execute new binary in container
+  override:
+    exceptions: append
+  exceptions:
+    - name: example_image_builder_package_hook
+      fields:
+        - proc.exepath
+        - proc.pname
+        - container.image.repository
+      comps:
+        - "="
+        - "="
+        - "="
+      values:
+        - - /usr/bin/openssl
+          - update-ca-certi
+          - registry.example.com/platform/image-builder

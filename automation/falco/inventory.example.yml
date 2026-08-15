@@ -1,0 +1,12 @@
+---
+all:
+  children:
+    falco_sensors:
+      vars:
+        ansible_user: operator
+        falco_sidekick_url: http://security-01.example.com:2801
+      hosts:
+        identity-01:
+          ansible_host: 198.51.100.21
+        apps-01:
+          ansible_host: 198.51.100.23

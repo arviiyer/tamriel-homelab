@@ -1,0 +1,18 @@
+#!/bin/sh
+set -eu
+
+{% if unattended_policy_previous.stat.exists %}
+/usr/bin/install -o root -g root -m 0644 \
+    /run/50unattended-upgrades.previous \
+    /etc/apt/apt.conf.d/50unattended-upgrades
+{% else %}
+/usr/bin/rm -f /etc/apt/apt.conf.d/50unattended-upgrades
+{% endif %}
+{% if periodic_policy_previous.stat.exists %}
+/usr/bin/install -o root -g root -m 0644 \
+    /run/20auto-upgrades.previous \
+    /etc/apt/apt.conf.d/20auto-upgrades
+{% else %}
+/usr/bin/rm -f /etc/apt/apt.conf.d/20auto-upgrades
+{% endif %}
+/usr/bin/systemctl restart unattended-upgrades

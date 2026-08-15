@@ -1,0 +1,65 @@
+rules_files:
+  - /etc/falco/falco_rules.yaml
+  - /etc/falco/ansible-rules/{{ falco_rules_digest }}.yaml
+
+watch_config_files: false
+
+engine:
+  kind: modern_ebpf
+  modern_ebpf:
+    cpus_for_each_buffer: {{ falco_cpus_for_each_buffer }}
+    buf_size_preset: 4
+    drop_failed_exit: false
+
+plugins:
+  - name: container
+    library_path: /usr/share/falco/plugins/libcontainer.so
+    init_config:
+      label_max_len: 100
+      with_size: false
+
+load_plugins:
+  - container
+
+priority: {{ falco_minimum_priority }}
+json_output: true
+json_include_output_property: true
+json_include_output_fields_property: true
+json_include_tags_property: true
+buffered_outputs: false
+
+outputs_queue:
+  capacity: {{ falco_output_queue_capacity }}
+
+stdout_output:
+  enabled: false
+
+syslog_output:
+  enabled: true
+
+file_output:
+  enabled: false
+
+http_output:
+  enabled: true
+  url: {{ falco_sidekick_url | to_json }}
+  user_agent: falcosecurity/falco
+  insecure: false
+  keep_alive: true
+  max_consecutive_timeouts: 3
+
+webserver:
+  enabled: true
+  listen_address: 127.0.0.1
+  listen_port: 8765
+  k8s_healthz_endpoint: /healthz
+  prometheus_metrics_enabled: false
+  ssl_enabled: false
+
+log_stderr: true
+log_syslog: true
+log_level: info
+
+libs_logger:
+  enabled: true
+  severity: info

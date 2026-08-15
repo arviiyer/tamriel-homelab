@@ -1,0 +1,10 @@
+---
+ssh_permit_root_login: "no"
+ssh_allowed_users: []
+ssh_key_access_prevalidated: false
+ssh_console_recovery_prevalidated: false
+ssh_validation_source_address: ""
+ssh_validation_source_host: ""
+ssh_max_auth_tries: 3
+ssh_client_alive_interval: 300
+ssh_client_alive_count_max: 2

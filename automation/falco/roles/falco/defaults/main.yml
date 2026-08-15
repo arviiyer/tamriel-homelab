@@ -1,0 +1,13 @@
+---
+falco_package_version: "0.44.1"
+falco_package_key_url: https://falco.org/repo/falcosecurity-packages.asc
+falco_package_key_checksum: sha256:b4ea2e03c13bd49f1fbbbcb10f7eec5404b6663218109cac7c3a08a6232c8c04
+falco_package_repository_url: https://download.falco.org/packages/deb
+
+# The inventory must set this to a Falcosidekick endpoint reachable only from
+# the sensor network. Keep credentials out of the URL.
+falco_sidekick_url: ""
+falco_minimum_priority: notice
+falco_cpus_for_each_buffer: 2
+falco_output_queue_capacity: 10000
+falco_service_name: falco-modern-bpf.service

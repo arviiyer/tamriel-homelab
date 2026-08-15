@@ -1,0 +1,3 @@
+FALCOSIDEKICK_BIND_ADDRESS=198.51.100.24
+LOKI_URL=http://observability-01.example.com:3100
+ALERTMANAGER_URL=http://observability-01.example.com:9093

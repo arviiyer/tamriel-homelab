@@ -1,0 +1,35 @@
+# This public portfolio is allowlist-only. New top-level paths are ignored until
+# they are intentionally added here after publication review.
+*
+
+!.gitignore
+!AGENTS.md
+!LICENSE
+!README.md
+!ROADMAP.md
+!SECURITY.md
+
+!.github/
+!.github/**
+!automation/
+!automation/**
+!diagrams/
+!diagrams/**
+!docs/
+!docs/**
+!evidence/
+!evidence/**
+!scripts/
+!scripts/**
+!tests/
+!tests/**
+
+# Local validation output is never publication evidence.
+**/__pycache__/
+*.py[cod]
+automation/trivy/repositories.tsv
+automation/trivy/var/
+
+# Screenshots require an explicit force-add after redaction and review.
+evidence/screenshots/*
+!evidence/screenshots/README.md

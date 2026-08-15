@@ -1,0 +1,31 @@
+{
+  "SchemaVersion": 2,
+  "ArtifactName": "apps",
+  "ArtifactType": "filesystem",
+  "ReportID": "current-apps-misconfig",
+  "Results": [
+    {
+      "Target": "compose.yaml",
+      "Misconfigurations": [
+        {
+          "ID": "DS-001",
+          "Title": "Container should use a read-only root filesystem",
+          "Severity": "HIGH",
+          "CauseMetadata": {
+            "Resource": "api",
+            "StartLine": 4
+          }
+        },
+        {
+          "ID": "DS-002",
+          "Title": "Container should prevent privilege escalation",
+          "Severity": "CRITICAL",
+          "CauseMetadata": {
+            "Resource": "api",
+            "StartLine": 7
+          }
+        }
+      ]
+    }
+  ]
+}

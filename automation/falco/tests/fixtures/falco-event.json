@@ -1,0 +1,21 @@
+{
+  "hostname": "apps-01",
+  "output": "A shell was started in a container (user=example-user command=sh container=example-app)",
+  "priority": "Warning",
+  "rule": "Terminal shell in container",
+  "source": "syscall",
+  "tags": [
+    "container",
+    "process"
+  ],
+  "time": "2026-08-01T12:00:00.000000000Z",
+  "output_fields": {
+    "container.id": "synthetic-container",
+    "container.image.repository": "registry.example.com/platform/example-app",
+    "container.name": "example-app",
+    "evt.type": "execve",
+    "proc.cmdline": "sh",
+    "proc.name": "sh",
+    "user.name": "example-user"
+  }
+}

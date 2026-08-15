@@ -1,0 +1,235 @@
+---
+- name: Refuse unattended-upgrades changes in check mode
+  ansible.builtin.assert:
+    that:
+      - not ansible_check_mode
+    fail_msg: >-
+      Candidate parsing and effective apt-policy validation cannot run in check
+      mode. Stage this role on a disposable Debian host instead.
+
+- name: Validate unattended-upgrades inputs
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution == "Debian"
+      - unattended_upgrades_origin_patterns is sequence
+      - unattended_upgrades_origin_patterns is not string
+      - unattended_upgrades_origin_patterns | length == 1
+      - unattended_upgrades_origin_patterns[0] == "origin=Debian,codename=${distro_codename}-security,label=Debian-Security"
+      - unattended_upgrades_automatic_reboot is boolean
+      - not unattended_upgrades_automatic_reboot
+      - unattended_upgrades_mail is string
+      - unattended_upgrades_mail is not regex('[";{}\n\r]')
+    fail_msg: Unattended-upgrades variables are invalid for this Debian policy.
+
+- name: Inspect apt-policy transaction markers
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop:
+    - /run/50unattended-upgrades.previous
+    - /run/20auto-upgrades.previous
+    - /run/ansible-unattended-upgrades-rollback.sh
+  register: unattended_upgrades_transaction_markers
+
+- name: Refuse unresolved apt-policy transaction state
+  ansible.builtin.assert:
+    that:
+      - >-
+        unattended_upgrades_transaction_markers.results
+        | selectattr('stat.exists') | list | length == 0
+    fail_msg: >-
+      A prior apt-policy transaction is unresolved. Inspect and recover the
+      transaction files before retrying.
+
+- name: Refresh the apt package index
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Install automatic security-update packages
+  ansible.builtin.apt:
+    name:
+      - apt-listchanges
+      - unattended-upgrades
+    state: present
+
+- name: Render unattended-upgrades policy candidate
+  ansible.builtin.template:
+    src: 50unattended-upgrades.j2
+    dest: /run/50unattended-upgrades.candidate
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render periodic-update policy candidate
+  ansible.builtin.template:
+    src: 20auto-upgrades.j2
+    dest: /run/20auto-upgrades.candidate
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Parse the isolated unattended-upgrades candidate
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/apt-config
+      - -o
+      - Dir::Etc::parts=/dev/null
+      - -c
+      - /run/50unattended-upgrades.candidate
+      - dump
+  changed_when: false
+  register: unattended_upgrades_candidate_config
+
+- name: Parse the isolated periodic-update candidate
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/apt-config
+      - -o
+      - Dir::Etc::parts=/dev/null
+      - -c
+      - /run/20auto-upgrades.candidate
+      - dump
+  changed_when: false
+  register: unattended_upgrades_periodic_candidate_config
+
+- name: Verify isolated apt candidates
+  ansible.builtin.assert:
+    that:
+      - >-
+        unattended_upgrades_candidate_config.stdout_lines
+        | select('match', '(?i)^Unattended-Upgrade::Origins-Pattern::')
+        | list
+        == ['Unattended-Upgrade::Origins-Pattern:: "origin=Debian,codename=${distro_codename}-security,label=Debian-Security";']
+      - >-
+        unattended_upgrades_candidate_config.stdout_lines
+        | select('match', '(?i)^Unattended-Upgrade::Allowed-Origins::')
+        | list
+        | length == 0
+      - >-
+        unattended_upgrades_candidate_config.stdout_lines
+        | select('match', '^Unattended-Upgrade::Automatic-Reboot ')
+        | list == ['Unattended-Upgrade::Automatic-Reboot "false";']
+      - >-
+        unattended_upgrades_periodic_candidate_config.stdout_lines
+        | select('match', '^APT::Periodic::Unattended-Upgrade ')
+        | list == ['APT::Periodic::Unattended-Upgrade "1";']
+    fail_msg: Isolated apt candidate validation failed.
+
+- name: Inspect the live unattended-upgrades policy
+  ansible.builtin.stat:
+    path: /etc/apt/apt.conf.d/50unattended-upgrades
+  register: unattended_policy_previous
+
+- name: Inspect the live periodic-update policy
+  ansible.builtin.stat:
+    path: /etc/apt/apt.conf.d/20auto-upgrades
+  register: periodic_policy_previous
+
+- name: Save the live unattended-upgrades policy
+  ansible.builtin.copy:
+    src: /etc/apt/apt.conf.d/50unattended-upgrades
+    dest: /run/50unattended-upgrades.previous
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0644"
+  when: unattended_policy_previous.stat.exists
+
+- name: Save the live periodic-update policy
+  ansible.builtin.copy:
+    src: /etc/apt/apt.conf.d/20auto-upgrades
+    dest: /run/20auto-upgrades.previous
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0644"
+  when: periodic_policy_previous.stat.exists
+
+- name: Install the apt-policy rollback helper
+  ansible.builtin.template:
+    src: rollback-apt-policy.sh.j2
+    dest: /run/ansible-unattended-upgrades-rollback.sh
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Install and verify apt policy as one transaction
+  block:
+    - name: Install unattended-upgrades policy
+      ansible.builtin.copy:
+        src: /run/50unattended-upgrades.candidate
+        dest: /etc/apt/apt.conf.d/50unattended-upgrades
+        remote_src: true
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Restart unattended-upgrades
+
+    - name: Enable periodic security updates
+      ansible.builtin.copy:
+        src: /run/20auto-upgrades.candidate
+        dest: /etc/apt/apt.conf.d/20auto-upgrades
+        remote_src: true
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Restart unattended-upgrades
+
+    - name: Read the effective apt configuration
+      ansible.builtin.command:
+        argv:
+          - /usr/bin/apt-config
+          - dump
+      changed_when: false
+      register: unattended_upgrades_apt_config
+
+    - name: Verify effective unattended-upgrades controls
+      ansible.builtin.assert:
+        that:
+          - >-
+            unattended_upgrades_apt_config.stdout_lines
+            | select('match', '(?i)^Unattended-Upgrade::Origins-Pattern::')
+            | list
+            == ['Unattended-Upgrade::Origins-Pattern:: "origin=Debian,codename=${distro_codename}-security,label=Debian-Security";']
+          - >-
+            unattended_upgrades_apt_config.stdout_lines
+            | select('match', '(?i)^Unattended-Upgrade::Allowed-Origins::')
+            | list
+            | length == 0
+          - >-
+            unattended_upgrades_apt_config.stdout_lines
+            | select('match', '^Unattended-Upgrade::Automatic-Reboot ')
+            | list == ['Unattended-Upgrade::Automatic-Reboot "false";']
+          - >-
+            unattended_upgrades_apt_config.stdout_lines
+            | select('match', '^APT::Periodic::Unattended-Upgrade ')
+            | list == ['APT::Periodic::Unattended-Upgrade "1";']
+        fail_msg: The effective apt configuration is not security-only.
+
+  rescue:
+    - name: Restore the previous apt policies
+      ansible.builtin.command:
+        argv:
+          - /run/ansible-unattended-upgrades-rollback.sh
+      changed_when: true
+
+    - name: Stop after restoring the previous apt policies
+      ansible.builtin.fail:
+        msg: Apt policy validation failed; the previous policy was restored.
+
+- name: Enable the unattended-upgrades service
+  ansible.builtin.systemd_service:
+    name: unattended-upgrades
+    enabled: true
+    state: started
+
+- name: Remove apt policy candidate files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /run/50unattended-upgrades.candidate
+    - /run/20auto-upgrades.candidate
+    - /run/50unattended-upgrades.previous
+    - /run/20auto-upgrades.previous
+    - /run/ansible-unattended-upgrades-rollback.sh

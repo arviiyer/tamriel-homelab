@@ -1,0 +1,6 @@
+---
+- name: Configure automatic security updates
+  ansible.builtin.import_playbook: unattended-upgrades.yml
+
+- name: Apply SSH hardening
+  ansible.builtin.import_playbook: ssh-hardening.yml

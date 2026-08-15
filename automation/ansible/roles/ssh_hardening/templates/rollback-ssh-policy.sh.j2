@@ -1,0 +1,13 @@
+#!/bin/sh
+set -eu
+
+target=/etc/ssh/sshd_config.d/00-ansible-hardening.conf
+backup=/run/ansible-ssh-hardening.previous
+
+{% if ssh_policy_previous.stat.exists %}
+/usr/bin/install -o root -g root -m 0600 "$backup" "$target"
+{% else %}
+/usr/bin/rm -f "$target"
+{% endif %}
+/usr/sbin/sshd -t
+/usr/bin/systemctl reload ssh

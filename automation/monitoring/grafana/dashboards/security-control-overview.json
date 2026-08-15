@@ -1,0 +1,639 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations and alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": false,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0},
+      "id": 1,
+      "panels": [],
+      "title": "Control Health",
+      "type": "row"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "security-prometheus"},
+      "description": "Whether the latest scan attempt completed every configured scanner and promoted a baseline. No data means health telemetry is missing.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [
+            {
+              "options": {
+                "0": {"color": "red", "index": 0, "text": "FAILED"},
+                "1": {"color": "green", "index": 1, "text": "PASSED"}
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 1}
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 5, "w": 6, "x": 0, "y": 1},
+      "id": 2,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "textMode": "auto"
+      },
+      "pluginVersion": "12.4.1",
+      "targets": [
+        {
+          "datasource": {"type": "prometheus", "uid": "security-prometheus"},
+          "editorMode": "code",
+          "expr": "max(trivy_scan_success)",
+          "instant": true,
+          "legendFormat": "Latest attempt",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Latest Scan Attempt",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "security-prometheus"},
+      "description": "Elapsed time since any scan attempt reported health. Warning begins at seven days; critical begins at eight days.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "orange", "value": 604800},
+              {"color": "red", "value": 691200}
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 5, "w": 6, "x": 6, "y": 1},
+      "id": 3,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "textMode": "auto"
+      },
+      "pluginVersion": "12.4.1",
+      "targets": [
+        {
+          "datasource": {"type": "prometheus", "uid": "security-prometheus"},
+          "editorMode": "code",
+          "expr": "time() - max(trivy_scan_attempt_timestamp_seconds)",
+          "instant": true,
+          "legendFormat": "Attempt age",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Attempt Age",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "security-prometheus"},
+      "description": "Elapsed time since a complete baseline was promoted. This distinguishes current findings from stale retained state.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "orange", "value": 604800},
+              {"color": "red", "value": 691200}
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 5, "w": 6, "x": 12, "y": 1},
+      "id": 4,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "textMode": "auto"
+      },
+      "pluginVersion": "12.4.1",
+      "targets": [
+        {
+          "datasource": {"type": "prometheus", "uid": "security-prometheus"},
+          "editorMode": "code",
+          "expr": "time() - max(trivy_scan_last_success_timestamp_seconds)",
+          "instant": true,
+          "legendFormat": "Baseline age",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Successful Baseline Age",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "security-prometheus"},
+      "description": "Configured repositories that did not complete every scanner in the latest attempt. Zero is shown only when attempt telemetry exists.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "red", "value": 1}
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 5, "w": 6, "x": 18, "y": 1},
+      "id": 5,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "textMode": "auto"
+      },
+      "pluginVersion": "12.4.1",
+      "targets": [
+        {
+          "datasource": {"type": "prometheus", "uid": "security-prometheus"},
+          "editorMode": "code",
+          "expr": "sum(trivy_scan_repository_success == 0) or on() (0 * max(trivy_scan_attempt_timestamp_seconds))",
+          "instant": true,
+          "legendFormat": "Failed repositories",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Failed Repositories",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 6},
+      "id": 6,
+      "panels": [],
+      "title": "Actionable Finding Deltas",
+      "type": "row"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "security-prometheus"},
+      "description": "Critical vulnerabilities that were absent from the previous complete baseline.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]},
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 5, "w": 4, "x": 0, "y": 7},
+      "id": 7,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "12.4.1",
+      "targets": [
+        {
+          "datasource": {"type": "prometheus", "uid": "security-prometheus"},
+          "editorMode": "code",
+          "expr": "sum(trivy_new_vulnerabilities{severity=\"CRITICAL\"}) or on() (0 * max(trivy_scan_last_success_timestamp_seconds))",
+          "instant": true,
+          "legendFormat": "New critical",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "New Critical Vulnerabilities",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "security-prometheus"},
+      "description": "New high-severity vulnerabilities with a fix available now.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 1}]},
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 5, "w": 4, "x": 4, "y": 7},
+      "id": 8,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "12.4.1",
+      "targets": [
+        {
+          "datasource": {"type": "prometheus", "uid": "security-prometheus"},
+          "editorMode": "code",
+          "expr": "sum(trivy_new_vulnerabilities{severity=\"HIGH\",has_fix=\"true\"}) or on() (0 * max(trivy_scan_last_success_timestamp_seconds))",
+          "instant": true,
+          "legendFormat": "New fixable high",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "New Fixable High Vulnerabilities",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "security-prometheus"},
+      "description": "Existing vulnerabilities reclassified as critical since the previous complete baseline.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]},
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 5, "w": 4, "x": 8, "y": 7},
+      "id": 9,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "12.4.1",
+      "targets": [
+        {
+          "datasource": {"type": "prometheus", "uid": "security-prometheus"},
+          "editorMode": "code",
+          "expr": "sum(trivy_vulnerability_changes{change=\"severity_increased\",severity=\"CRITICAL\"}) or on() (0 * max(trivy_scan_last_success_timestamp_seconds))",
+          "instant": true,
+          "legendFormat": "Critical escalations",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Severity Increased to Critical",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "security-prometheus"},
+      "description": "Existing high or critical vulnerabilities for which the scanner now reports an available fix.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 1}]},
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 5, "w": 4, "x": 12, "y": 7},
+      "id": 10,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "12.4.1",
+      "targets": [
+        {
+          "datasource": {"type": "prometheus", "uid": "security-prometheus"},
+          "editorMode": "code",
+          "expr": "sum(trivy_vulnerability_changes{change=\"fix_available\",severity=~\"HIGH|CRITICAL\"}) or on() (0 * max(trivy_scan_last_success_timestamp_seconds))",
+          "instant": true,
+          "legendFormat": "Newly fixable",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "High-impact Fixes Available",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "security-prometheus"},
+      "description": "Potential secrets present in the current checked-out repository trees. Any nonzero value requires validation and rotation review.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [{"options": {"0": {"color": "green", "index": 0, "text": "CLEAR"}}, "type": "value"}],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]},
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 5, "w": 4, "x": 16, "y": 7},
+      "id": 11,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "12.4.1",
+      "targets": [
+        {
+          "datasource": {"type": "prometheus", "uid": "security-prometheus"},
+          "editorMode": "code",
+          "expr": "sum(trivy_secrets) or on() (0 * max(trivy_scan_last_success_timestamp_seconds))",
+          "instant": true,
+          "legendFormat": "Current secrets",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Current Secret Findings",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "security-prometheus"},
+      "description": "Critical configuration findings introduced since the previous complete baseline.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]},
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 5, "w": 4, "x": 20, "y": 7},
+      "id": 12,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "12.4.1",
+      "targets": [
+        {
+          "datasource": {"type": "prometheus", "uid": "security-prometheus"},
+          "editorMode": "code",
+          "expr": "sum(trivy_new_misconfigurations{severity=\"CRITICAL\"}) or on() (0 * max(trivy_scan_last_success_timestamp_seconds))",
+          "instant": true,
+          "legendFormat": "New critical misconfigurations",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "New Critical Misconfigurations",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "security-prometheus"},
+      "description": "Current high and critical vulnerability totals grouped by public repository alias, image, and severity.",
+      "fieldConfig": {
+        "defaults": {"custom": {"filterable": true}},
+        "overrides": []
+      },
+      "gridPos": {"h": 9, "w": 24, "x": 0, "y": 12},
+      "id": 13,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {"countRows": false, "fields": "", "reducer": ["sum"], "show": false},
+        "showHeader": true
+      },
+      "pluginVersion": "12.4.1",
+      "targets": [
+        {
+          "datasource": {"type": "prometheus", "uid": "security-prometheus"},
+          "editorMode": "code",
+          "expr": "sum by (repository, image, severity) (trivy_vulnerabilities{severity=~\"CRITICAL|HIGH\"})",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{repository}} {{image}} {{severity}}",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "High-impact Findings by Workload",
+      "transformations": [
+        {"id": "labelsToFields", "options": {"mode": "columns"}},
+        {"id": "filterFieldsByName", "options": {"include": {"names": ["repository", "image", "severity", "Value"]}}}
+      ],
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 21},
+      "id": 14,
+      "panels": [],
+      "title": "Runtime Detection",
+      "type": "row"
+    },
+    {
+      "datasource": {"type": "loki", "uid": "security-loki"},
+      "description": "All Falco events at notice or higher observed in the selected dashboard range.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}]},
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 5, "w": 6, "x": 0, "y": 22},
+      "id": 15,
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "12.4.1",
+      "targets": [
+        {
+          "datasource": {"type": "loki", "uid": "security-loki"},
+          "editorMode": "code",
+          "expr": "sum(count_over_time({source=\"syscall\"}[$__range]))",
+          "legendFormat": "Runtime events",
+          "queryType": "instant",
+          "refId": "A"
+        }
+      ],
+      "title": "Runtime Events",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "loki", "uid": "security-loki"},
+      "description": "Falco events at warning or higher that cross the public Alertmanager routing threshold.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 1}]},
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 5, "w": 6, "x": 6, "y": 22},
+      "id": 16,
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "12.4.1",
+      "targets": [
+        {
+          "datasource": {"type": "loki", "uid": "security-loki"},
+          "editorMode": "code",
+          "expr": "sum(count_over_time({source=\"syscall\", priority=~\"Warning|Error|Critical|Alert|Emergency\"}[$__range]))",
+          "legendFormat": "Warning or higher",
+          "queryType": "instant",
+          "refId": "A"
+        }
+      ],
+      "title": "Warning or Higher Events",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "loki", "uid": "security-loki"},
+      "description": "Count of public host aliases that produced a Falco event in the selected range.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}]},
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 5, "w": 6, "x": 12, "y": 22},
+      "id": 17,
+      "options": {"colorMode": "value", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "12.4.1",
+      "targets": [
+        {
+          "datasource": {"type": "loki", "uid": "security-loki"},
+          "editorMode": "code",
+          "expr": "count(sum by (hostname) (count_over_time({source=\"syscall\"}[$__range])) > 0)",
+          "legendFormat": "Active sensors",
+          "queryType": "instant",
+          "refId": "A"
+        }
+      ],
+      "title": "Active Runtime Sensors",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "loki", "uid": "security-loki"},
+      "description": "Count of distinct Falco rules observed in the selected range. This is activity, not a detection-coverage score.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}]},
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 5, "w": 6, "x": 18, "y": 22},
+      "id": 18,
+      "options": {"colorMode": "value", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "12.4.1",
+      "targets": [
+        {
+          "datasource": {"type": "loki", "uid": "security-loki"},
+          "editorMode": "code",
+          "expr": "count(sum by (rule) (count_over_time({source=\"syscall\"}[$__range])) > 0)",
+          "legendFormat": "Distinct rules",
+          "queryType": "instant",
+          "refId": "A"
+        }
+      ],
+      "title": "Distinct Runtime Rules",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "loki", "uid": "security-loki"},
+      "description": "Falco event rate grouped by priority for the selected time range.",
+      "fieldConfig": {
+        "defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 18, "lineInterpolation": "smooth", "lineWidth": 2, "showPoints": "never", "spanNulls": false}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}, "unit": "ops"},
+        "overrides": []
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 27},
+      "id": 19,
+      "options": {"legend": {"calcs": ["sum"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"hideZeros": false, "mode": "multi", "sort": "desc"}},
+      "pluginVersion": "12.4.1",
+      "targets": [
+        {
+          "datasource": {"type": "loki", "uid": "security-loki"},
+          "editorMode": "code",
+          "expr": "sum by (priority) (rate({source=\"syscall\"}[$__interval]))",
+          "legendFormat": "{{priority}}",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Runtime Event Rate by Priority",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "loki", "uid": "security-loki"},
+      "description": "The ten Falco rules producing the most events in the selected range, used to prioritize investigation and tuning.",
+      "fieldConfig": {
+        "defaults": {"color": {"mode": "continuous-GrYlRd"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 1}]}},
+        "overrides": []
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 27},
+      "id": 20,
+      "options": {"displayMode": "gradient", "minVizHeight": 10, "minVizWidth": 0, "namePlacement": "auto", "orientation": "horizontal", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "showUnfilled": true, "sizing": "auto", "valueMode": "color"},
+      "pluginVersion": "12.4.1",
+      "targets": [
+        {
+          "datasource": {"type": "loki", "uid": "security-loki"},
+          "editorMode": "code",
+          "expr": "topk(10, sum by (rule) (count_over_time({source=\"syscall\"}[$__range])))",
+          "legendFormat": "{{rule}}",
+          "queryType": "instant",
+          "refId": "A"
+        }
+      ],
+      "title": "Most Active Runtime Rules",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {"type": "loki", "uid": "security-loki"},
+      "description": "Structured Falco events for investigation. Raw operated-environment events are not included in this repository.",
+      "gridPos": {"h": 12, "w": 24, "x": 0, "y": 35},
+      "id": 21,
+      "options": {"dedupStrategy": "none", "enableLogDetails": true, "prettifyLogMessage": true, "showCommonLabels": false, "showLabels": false, "showTime": true, "sortOrder": "Descending", "wrapLogMessage": true},
+      "pluginVersion": "12.4.1",
+      "targets": [
+        {
+          "datasource": {"type": "loki", "uid": "security-loki"},
+          "editorMode": "code",
+          "expr": "{source=\"syscall\"}",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Recent Runtime Events",
+      "type": "logs"
+    }
+  ],
+  "preload": false,
+  "refresh": "1m",
+  "schemaVersion": 42,
+  "tags": ["security", "trivy", "falco"],
+  "templating": {"list": []},
+  "time": {"from": "now-7d", "to": "now"},
+  "timepicker": {"refresh_intervals": ["30s", "1m", "5m", "15m", "1h"]},
+  "timezone": "browser",
+  "title": "Security Control Overview",
+  "uid": "security-control-overview",
+  "version": 1,
+  "weekStart": ""
+}

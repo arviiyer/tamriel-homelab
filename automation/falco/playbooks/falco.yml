@@ -1,0 +1,10 @@
+---
+- name: Deploy host runtime detection
+  hosts: falco_sensors
+  become: true
+  gather_facts: true
+  serial: 1
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  roles:
+    - falco

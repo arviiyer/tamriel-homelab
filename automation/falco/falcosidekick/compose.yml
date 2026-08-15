@@ -1,0 +1,24 @@
+services:
+  falcosidekick:
+    image: falcosecurity/falcosidekick:2.34.1@sha256:d4f0d7c538ede3fe4a491143c45c0787bf4fc24e6fcac6d39dff6721d75a9419
+    restart: unless-stopped
+    user: "1234:1234"
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,noexec,nosuid,nodev
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "${FALCOSIDEKICK_BIND_ADDRESS:?set FALCOSIDEKICK_BIND_ADDRESS}:2801:2801"
+    environment:
+      LOKI_HOSTPORT: "${LOKI_URL:?set LOKI_URL}"
+      LOKI_MINIMUMPRIORITY: notice
+      LOKI_FORMAT: json
+      ALERTMANAGER_HOSTPORT: "${ALERTMANAGER_URL:?set ALERTMANAGER_URL}"
+      ALERTMANAGER_MINIMUMPRIORITY: warning
+      ALERTMANAGER_ENDPOINT: /api/v2/alerts
+      ALERTMANAGER_EXTRALABELS: environment:example
+      CUSTOMFIELDS: environment:example
+      DEBUG: "false"

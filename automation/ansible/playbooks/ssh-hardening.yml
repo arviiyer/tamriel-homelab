@@ -1,0 +1,9 @@
+---
+- name: Apply SSH hardening with reconnect validation
+  hosts: all
+  become: true
+  gather_facts: true
+  serial: 1
+  any_errors_fatal: true
+  roles:
+    - role: ssh_hardening

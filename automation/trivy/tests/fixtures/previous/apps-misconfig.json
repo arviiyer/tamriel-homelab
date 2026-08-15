@@ -1,0 +1,22 @@
+{
+  "SchemaVersion": 2,
+  "ArtifactName": "apps",
+  "ArtifactType": "filesystem",
+  "ReportID": "previous-apps-misconfig",
+  "Results": [
+    {
+      "Target": "compose.yaml",
+      "Misconfigurations": [
+        {
+          "ID": "DS-001",
+          "Title": "Container should use a read-only root filesystem",
+          "Severity": "MEDIUM",
+          "CauseMetadata": {
+            "Resource": "api",
+            "StartLine": 4
+          }
+        }
+      ]
+    }
+  ]
+}

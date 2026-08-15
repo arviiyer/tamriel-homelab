@@ -1,0 +1,99 @@
+---
+- name: Apply full package upgrades one host at a time
+  hosts: all
+  become: true
+  gather_facts: true
+  serial: 1
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  tasks:
+    - name: Require a Debian-family target
+      ansible.builtin.assert:
+        that:
+          - ansible_os_family == "Debian"
+        fail_msg: The controlled upgrade playbook supports Debian-family hosts only.
+
+    - name: Initialize the host upgrade outcome
+      ansible.builtin.set_fact:
+        controlled_upgrade_phase: starting
+
+    - name: Apply and verify the host package upgrade
+      block:
+        - name: Refresh the apt package index
+          ansible.builtin.apt:
+            update_cache: true
+            cache_valid_time: "{{ controlled_upgrade_cache_valid_time }}"
+
+        - name: Record package-index completion
+          ansible.builtin.set_fact:
+            controlled_upgrade_phase: package-index-refreshed
+
+        - name: Apply the full package upgrade
+          ansible.builtin.apt:
+            upgrade: full
+            force_apt_get: true
+
+        - name: Record package-upgrade completion
+          ansible.builtin.set_fact:
+            controlled_upgrade_phase: packages-upgraded
+
+        - name: Remove packages that are no longer required
+          ansible.builtin.apt:
+            autoremove: true
+            force_apt_get: true
+
+        - name: Record package-cleanup completion
+          ansible.builtin.set_fact:
+            controlled_upgrade_phase: unused-packages-removed
+
+        - name: Clean obsolete package archives
+          ansible.builtin.apt:
+            autoclean: true
+            force_apt_get: true
+
+        - name: Record archive-cleanup completion
+          ansible.builtin.set_fact:
+            controlled_upgrade_phase: package-archives-cleaned
+
+        - name: Check whether a reboot is required
+          ansible.builtin.stat:
+            path: /var/run/reboot-required
+          register: controlled_upgrade_reboot_required
+
+        - name: Record the successful host upgrade outcome
+          ansible.builtin.set_fact:
+            controlled_upgrade_result:
+              host: "{{ inventory_hostname }}"
+              success: true
+              phase: complete
+              reboot_required: "{{ controlled_upgrade_reboot_required.stat.exists }}"
+
+        - name: Report the successful host upgrade outcome
+          ansible.builtin.debug:
+            var: controlled_upgrade_result
+
+      rescue:
+        - name: Check reboot state after package failure
+          ansible.builtin.stat:
+            path: /var/run/reboot-required
+          register: controlled_upgrade_failed_reboot_required
+
+        - name: Record the failed host upgrade outcome
+          ansible.builtin.set_fact:
+            controlled_upgrade_result:
+              host: "{{ inventory_hostname }}"
+              success: false
+              phase: "{{ controlled_upgrade_phase }}"
+              failed_task: "{{ ansible_failed_task.name | default('unknown') }}"
+              error: "{{ ansible_failed_result.msg | default('unknown package failure') }}"
+              reboot_required: "{{ controlled_upgrade_failed_reboot_required.stat.exists }}"
+
+        - name: Report the failed host upgrade outcome
+          ansible.builtin.debug:
+            var: controlled_upgrade_result
+
+        - name: Stop the rollout after a host package failure
+          ansible.builtin.fail:
+            msg: >-
+              Package upgrade failed on {{ inventory_hostname }} during
+              {{ controlled_upgrade_phase }}. No later host was started.

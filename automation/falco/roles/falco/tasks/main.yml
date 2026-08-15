@@ -1,0 +1,265 @@
+---
+- name: Validate Falco deployment inputs
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.os_family == "Debian"
+      - ansible_facts.kernel is version('5.8', '>=')
+      - falco_sidekick_url | length > 0
+      - falco_sidekick_url is match('^https?://[A-Za-z0-9.-]+(:[0-9]{1,5})?(/[^\s]*)?$')
+      - falco_sidekick_url is not search('://[^/]+@')
+      - falco_minimum_priority in ['emergency', 'alert', 'critical', 'error', 'warning', 'notice', 'info', 'debug']
+      - falco_cpus_for_each_buffer | int >= 1
+      - falco_output_queue_capacity | int >= 1
+    fail_msg: >-
+      Falco requires a Debian-family host with a modern kernel and an explicit,
+      credential-free Falcosidekick URL.
+
+- name: Install Falco repository and BPF prerequisites
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - gnupg
+      - procps
+      - python3-debian
+    state: present
+    update_cache: true
+
+- name: Read the BPF JIT state
+  ansible.builtin.command:
+    argv:
+      - sysctl
+      - -n
+      - net.core.bpf_jit_enable
+  register: falco_bpf_jit
+  changed_when: false
+
+- name: Require the BPF JIT for the modern eBPF engine
+  ansible.builtin.assert:
+    that:
+      - falco_bpf_jit.stdout | trim in ["1", "2"]
+    fail_msg: Enable net.core.bpf_jit_enable before deploying Falco.
+
+- name: Download the pinned Falco package-signing key
+  ansible.builtin.get_url:
+    url: "{{ falco_package_key_url }}"
+    dest: /usr/share/keyrings/falco-archive-keyring.asc
+    checksum: "{{ falco_package_key_checksum }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: falco_signing_key
+
+- name: Inspect the dearmored Falco package-signing key
+  ansible.builtin.stat:
+    path: /usr/share/keyrings/falco-archive-keyring.gpg
+  register: falco_dearmored_key
+
+- name: Dearmor the Falco package-signing key
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --batch
+      - --yes
+      - --dearmor
+      - --output
+      - /usr/share/keyrings/falco-archive-keyring.gpg
+      - /usr/share/keyrings/falco-archive-keyring.asc
+  when: falco_signing_key.changed or not falco_dearmored_key.stat.exists
+
+- name: Protect the dearmored Falco package-signing key
+  ansible.builtin.file:
+    path: /usr/share/keyrings/falco-archive-keyring.gpg
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Configure the Falco package repository
+  ansible.builtin.deb822_repository:
+    name: falcosecurity
+    types:
+      - deb
+    uris:
+      - "{{ falco_package_repository_url }}"
+    suites:
+      - stable
+    components:
+      - main
+    signed_by: /usr/share/keyrings/falco-archive-keyring.gpg
+    state: present
+
+- name: Refresh package metadata with the Falco repository
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Install the exact Falco package version
+  ansible.builtin.apt:
+    name: "falco={{ falco_package_version }}"
+    state: present
+    allow_downgrade: false
+  environment:
+    FALCO_FRONTEND: noninteractive
+    FALCO_DRIVER_CHOICE: none
+    FALCOCTL_ENABLED: "no"
+  register: falco_package
+
+- name: Calculate the immutable local-rules identity
+  ansible.builtin.set_fact:
+    falco_rules_digest: >-
+      {{ lookup('ansible.builtin.file', role_path + '/files/falco_rules.local.yaml')
+         | hash('sha256') }}
+
+- name: Create the immutable local-rules directory
+  ansible.builtin.file:
+    path: /etc/falco/ansible-rules
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+
+- name: Stage the immutable local-rules release
+  ansible.builtin.copy:
+    src: falco_rules.local.yaml
+    dest: "/etc/falco/ansible-rules/{{ falco_rules_digest }}.yaml"
+    owner: root
+    group: root
+    mode: "0640"
+  register: falco_rules_release
+
+- name: Create Falco validation workspace
+  ansible.builtin.file:
+    path: /etc/falco/.ansible-candidate
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+  changed_when: false
+
+- name: Render the candidate Falco configuration
+  ansible.builtin.template:
+    src: falco.yaml.j2
+    dest: /etc/falco/.ansible-candidate/falco.yaml
+    owner: root
+    group: root
+    mode: "0600"
+  changed_when: false
+
+- name: Validate candidate configuration and rules together
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/falco
+      - --dry-run
+      - -c
+      - /etc/falco/.ansible-candidate/falco.yaml
+      - -r
+      - /etc/falco/falco_rules.yaml
+      - -r
+      - "/etc/falco/ansible-rules/{{ falco_rules_digest }}.yaml"
+  changed_when: false
+
+- name: Create Falco rollback workspace
+  ansible.builtin.file:
+    path: /etc/falco/.ansible-rollback
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+  changed_when: false
+
+- name: Preserve the active Falco configuration
+  ansible.builtin.copy:
+    src: /etc/falco/falco.yaml
+    dest: /etc/falco/.ansible-rollback/falco.yaml
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0600"
+  changed_when: false
+
+- name: Commit validated Falco policy
+  block:
+    - name: Install the validated Falco configuration
+      ansible.builtin.copy:
+        src: /etc/falco/.ansible-candidate/falco.yaml
+        dest: /etc/falco/falco.yaml
+        remote_src: true
+        owner: root
+        group: root
+        mode: "0640"
+      register: falco_config
+
+    - name: Stop the unused kernel-module service
+      ansible.builtin.systemd_service:
+        name: falco-kmod.service
+        state: stopped
+        enabled: false
+
+    - name: Disable automatic ruleset mutation
+      ansible.builtin.systemd_service:
+        name: falcoctl-artifact-follow.service
+        state: stopped
+        masked: true
+
+    - name: Start or restart the modern eBPF service
+      ansible.builtin.systemd_service:
+        name: "{{ falco_service_name }}"
+        state: >-
+          {{ 'restarted' if falco_package.changed or falco_config.changed or
+             falco_rules_release.changed else 'started' }}
+        enabled: true
+        daemon_reload: true
+
+    - name: Wait for the Falco process health endpoint
+      ansible.builtin.uri:
+        url: http://127.0.0.1:8765/healthz
+        method: GET
+        status_code: 200
+        return_content: false
+      register: falco_health
+      retries: 12
+      delay: 2
+      until: falco_health.status == 200
+
+    - name: Hold the service through a stability interval
+      ansible.builtin.pause:
+        seconds: 5
+
+    - name: Verify the Falco webserver remains healthy
+      ansible.builtin.uri:
+        url: http://127.0.0.1:8765/healthz
+        method: GET
+        status_code: 200
+        return_content: false
+
+  rescue:
+    - name: Restore the previous Falco configuration
+      ansible.builtin.copy:
+        src: /etc/falco/.ansible-rollback/falco.yaml
+        dest: /etc/falco/falco.yaml
+        remote_src: true
+        owner: root
+        group: root
+        mode: "0640"
+
+    - name: Restart Falco with the previous policy
+      ansible.builtin.systemd_service:
+        name: "{{ falco_service_name }}"
+        state: restarted
+        enabled: true
+        daemon_reload: true
+
+    - name: Stop after restoring the previous Falco policy
+      ansible.builtin.fail:
+        msg: >-
+          Falco failed after policy installation; the previous managed
+          configuration was restored. Package and service selection require
+          operator review.
+
+  always:
+    - name: Remove Falco transaction workspaces
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/falco/.ansible-candidate
+        - /etc/falco/.ansible-rollback
+      changed_when: false

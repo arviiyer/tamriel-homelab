@@ -1,0 +1,6 @@
+---
+unattended_upgrades_origin_patterns:
+  - "origin=Debian,codename=${distro_codename}-security,label=Debian-Security"
+unattended_upgrades_remove_unused_dependencies: true
+unattended_upgrades_automatic_reboot: false
+unattended_upgrades_mail: ""
