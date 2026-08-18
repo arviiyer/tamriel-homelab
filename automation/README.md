@@ -22,6 +22,9 @@ Available now:
   rollback-protected key-only SSH with per-user effective validation, automatic
   security updates without unattended reboot, and serial fail-stop full
   upgrades.
+- [Fail-closed exact-revision delivery](ci/README.md), including separate
+  validation and promotion jobs, a forced-command target boundary, transactional
+  state, health-gated promotion, and synthetic rollback tests.
 - [Falco runtime detection](falco/README.md), including a modern eBPF deployment
   transaction, narrow synthetic tuning examples, structured event routing, and
   offline policy tests.

@@ -1,0 +1,8 @@
+Match User deploy-request
+    AuthenticationMethods publickey
+    PasswordAuthentication no
+    KbdInteractiveAuthentication no
+    PermitTTY no
+    DisableForwarding yes
+    X11Forwarding no
+    ForceCommand sudo -n /usr/local/sbin/restricted-deploy

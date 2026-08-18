@@ -22,8 +22,8 @@ No claim should appear as a finalized resume bullet until its status is
 | Automated host hardening and controlled patching | [Sanitized Ansible roles](../automation/ansible/README.md), example inventory, 18 static policy tests, and syntax/effective-inventory validation; live transaction evidence still required | Drafted |
 | Built vulnerability scanning with delta-based alerting | [Scanner and delta engine](../automation/trivy/README.md), synthetic fixtures, 27 tests, validated alert rules; operated screenshot still required | Executable evidence |
 | Deployed runtime detection and event routing | [Sanitized Falco role](../automation/falco/README.md), 15 policy tests, validated rules and routing structure, and event-flow diagram; disposable-host transaction and operated alert still required | Drafted |
-| Enforced protected infrastructure changes across private repositories | Sanitized CI workflow, repository-control narrative, redacted PR evidence | Planned |
-| Implemented exact-revision controlled deployment and rollback | Sequence diagram, restricted helper example, dated rollback exercise | Planned |
+| Enforced protected infrastructure changes across private repositories | [Sanitized validation and promotion workflows](../automation/ci/README.md) and repository-control narrative; redacted PR and private repository-setting evidence still required | Drafted |
+| Implemented exact-revision controlled deployment and rollback | [Restricted target helper](../automation/ci/target/restricted_deploy.py), [delivery case study and sequence](../docs/case-studies/fail-closed-infrastructure-delivery.md), 30 policy and transaction tests, and effective SSH/sudo validation; dated operated rollback exercise still required | Executable evidence |
 | Automated dependency-update workflows | Sanitized Renovate policy and redacted update pull request | Planned |
 | Implemented layered VM and selected off-host backups | Sanitized retention model, backup architecture, redacted job evidence | Planned |
 | Validated recoverability through an isolated restore or rollback | Dated sanitized drill report with entry and exit criteria | Planned |

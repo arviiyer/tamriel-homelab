@@ -1,0 +1,126 @@
+name: Validate and promote an exact revision
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Deploy the SHA or use it as the current-state rollback guard
+        required: true
+        type: choice
+        options:
+          - deploy
+          - rollback
+      revision:
+        description: Full protected-main commit SHA to validate and promote
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: example-api-production
+  cancel-in-progress: false
+
+jobs:
+  validate-revision:
+    if: github.ref == 'refs/heads/main'
+    runs-on: validation
+    timeout-minutes: 10
+    outputs:
+      revision: ${{ steps.validate.outputs.revision }}
+    env:
+      OPERATION: ${{ inputs.operation }}
+      REPOSITORY: ${{ github.repository }}
+      REQUESTED_REVISION: ${{ inputs.revision }}
+    steps:
+      - name: Fetch and validate the requested protected-main revision
+        id: validate
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          [[ "$OPERATION" == "deploy" || "$OPERATION" == "rollback" ]]
+          [[ "$REQUESTED_REVISION" =~ ^[0-9a-f]{40}$ ]]
+          test -n "$TOKEN"
+          repository="${RUNNER_TEMP:?}/requested-revision"
+          rm -rf -- "$repository"
+          auth="$(printf 'x-access-token:%s' "$TOKEN" | base64 -w0)"
+          git init "$repository"
+          git -C "$repository" remote add origin \
+            "https://git.example.com/${REPOSITORY}"
+          git -C "$repository" \
+            -c "http.https://git.example.com/.extraheader=AUTHORIZATION: basic ${auth}" \
+            fetch --no-tags origin \
+            '+refs/heads/main:refs/remotes/origin/main'
+          git -C "$repository" cat-file -e "${REQUESTED_REVISION}^{commit}"
+          git -C "$repository" merge-base --is-ancestor \
+            "$REQUESTED_REVISION" refs/remotes/origin/main
+          git -C "$repository" checkout --detach "$REQUESTED_REVISION"
+          test "$(git -C "$repository" rev-parse HEAD)" = "$REQUESTED_REVISION"
+          unset TOKEN auth
+          docker compose \
+            --file "$repository/services/example-api/compose.yml" \
+            config \
+            --no-env-resolution \
+            --no-interpolate \
+            --no-path-resolution \
+            --quiet
+          printf 'revision=%s\n' "$REQUESTED_REVISION" >> "$GITHUB_OUTPUT"
+          rm -rf -- "$repository"
+
+  promote:
+    needs: validate-revision
+    if: github.ref == 'refs/heads/main'
+    runs-on: promotion
+    timeout-minutes: 10
+    env:
+      OPERATION: ${{ inputs.operation }}
+      REPOSITORY: ${{ github.repository }}
+      REQUESTED_REVISION: ${{ inputs.revision }}
+      VALIDATED_REVISION: ${{ needs.validate-revision.outputs.revision }}
+      DEPLOY_HOST_KEY: ${{ vars.DEPLOY_HOST_KEY }}
+    steps:
+      - name: Recheck the validated revision without executing repository code
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          [[ "$OPERATION" == "deploy" || "$OPERATION" == "rollback" ]]
+          [[ "$REQUESTED_REVISION" =~ ^[0-9a-f]{40}$ ]]
+          test "$VALIDATED_REVISION" = "$REQUESTED_REVISION"
+          test -n "$TOKEN"
+          metadata="$(mktemp -d "${RUNNER_TEMP:?}/revision-metadata.XXXXXX")"
+          trap 'rm -rf -- "$metadata"' EXIT HUP INT TERM
+          auth="$(printf 'x-access-token:%s' "$TOKEN" | base64 -w0)"
+          git init "$metadata"
+          git -C "$metadata" remote add origin \
+            "https://git.example.com/${REPOSITORY}"
+          git -C "$metadata" \
+            -c "http.https://git.example.com/.extraheader=AUTHORIZATION: basic ${auth}" \
+            fetch --no-tags origin \
+            '+refs/heads/main:refs/remotes/origin/main'
+          git -C "$metadata" cat-file -e "${VALIDATED_REVISION}^{commit}"
+          git -C "$metadata" merge-base --is-ancestor \
+            "$VALIDATED_REVISION" refs/remotes/origin/main
+      - name: Request the restricted target-side transaction
+        env:
+          DEPLOY_KEY: ${{ secrets.RESTRICTED_DEPLOY_KEY }}
+        run: |
+          set -Eeuo pipefail
+          umask 077
+          test -n "$DEPLOY_KEY"
+          test -n "$DEPLOY_HOST_KEY"
+          ssh_dir="$(mktemp -d "${RUNNER_TEMP:?}/restricted-ssh.XXXXXX")"
+          trap 'rm -rf -- "$ssh_dir"' EXIT HUP INT TERM
+          printf '%s\n' "$DEPLOY_KEY" > "$ssh_dir/deploy-key"
+          printf '%s %s\n' \
+            'apps-01.example.com' "$DEPLOY_HOST_KEY" > "$ssh_dir/known_hosts"
+          chmod 0600 "$ssh_dir/deploy-key" "$ssh_dir/known_hosts"
+          ssh -i "$ssh_dir/deploy-key" \
+            -o BatchMode=yes \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$ssh_dir/known_hosts" \
+            deploy-request@apps-01.example.com \
+            "${OPERATION} example-api ${VALIDATED_REVISION}"

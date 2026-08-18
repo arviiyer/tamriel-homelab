@@ -75,7 +75,7 @@ operator can act on?
 **Evidence target:** scanner, delta engine, synthetic fixtures, unit tests,
 Prometheus rules, dashboard, and redacted alert.
 
-### Fail-Closed Infrastructure Delivery
+### [Fail-Closed Infrastructure Delivery](case-studies/fail-closed-infrastructure-delivery.md)
 
 **Question answered:** How can a self-hosted CI system promote reviewed changes
 without giving a general runner unrestricted production access?

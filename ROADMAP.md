@@ -87,7 +87,7 @@ identifier or raw configuration.
 - [x] Publish sanitized Grafana dashboard provisioning.
 - [x] Publish selected Ansible hardening roles with example inventory.
 - [x] Publish generic Falco deployment and narrow tuning examples.
-- [ ] Publish a sanitized exact-revision CI/CD example.
+- [x] Publish a sanitized exact-revision CI/CD example.
 - [x] Add component-level usage and verification documentation for Trivy.
 - [x] Add component-level usage and verification documentation for Ansible.
 
@@ -96,10 +96,10 @@ clean checkout without production access.
 
 ## Phase 4: Engineering Case Studies
 
-**Status:** Planned
+**Status:** In progress
 
 - [x] Actionable vulnerability management and alert-noise reduction
-- [ ] Fail-closed infrastructure delivery and rollback
+- [x] Fail-closed infrastructure delivery and rollback
 - [ ] Network migration failure, blast-radius analysis, and redesign
 - [ ] Backup, isolated restore, and storage dependency management
 

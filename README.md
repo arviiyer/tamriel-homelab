@@ -62,7 +62,7 @@ addresses, domains, host identities, and management paths.
 | Platform and storage | Clustered virtualization, workload separation, local database state, shared bulk storage, and GPU-backed workloads | Documentation drafted; runtime evidence planned |
 | Network and identity | Segmented trust zones, private ingress, centralized authentication, DNS controls, and restricted management paths | Threat model drafted; case study planned |
 | Detection and observability | Centralized metrics and logs, vulnerability deltas, runtime detections, malware scanning, and alert routing | Trivy executable evidence; Falco and Grafana static evidence; runtime screenshots planned |
-| Automation and delivery | Idempotent hardening, dependency updates, protected changes, exact-revision validation, controlled promotion, and rollback | Ansible static evidence; delivery case study planned |
+| Automation and delivery | Idempotent hardening, dependency updates, protected changes, exact-revision validation, controlled promotion, and rollback | Ansible static evidence; delivery executable evidence; operated rollback pending |
 | Reliability and recovery | VM snapshots, off-host copies, isolated restores, health checks, and storage dependency controls | Dated drill evidence planned |
 
 ## Evidence
@@ -77,10 +77,15 @@ The repository links claims to one or more of these evidence types:
   deployment, narrow tuning controls, and structured event routing;
 - [security observability dashboard](automation/monitoring/README.md) with
   file-owned Grafana provisioning and tested telemetry references;
-- public CI validation and secret scanning;
+- [fail-closed exact-revision delivery](automation/ci/README.md) with separate
+  validation and promotion jobs, a forced-command target helper, and 30 synthetic
+  policy and transaction tests;
+- a [public CI definition](.github/workflows/validate.yml) for validation and
+  secret scanning, with a public run still pending;
 - sanitized architecture and threat-model documents;
-- redacted screenshots from the operated environment;
-- failure, rollback, and recovery case studies; and
+- planned redacted screenshots from the operated environment;
+- evidence-backed delivery and vulnerability case studies, with recovery still
+  planned; and
 - a [claim-to-evidence matrix](evidence/validation-matrix.md).
 
 ## Initial Case Studies
@@ -88,9 +93,9 @@ The repository links claims to one or more of these evidence types:
 1. **[Actionable vulnerability management](docs/case-studies/actionable-vulnerability-management.md):**
    converting recurring container, configuration, and secret scans into new,
    fixed, and stale-control signals.
-2. **Fail-closed infrastructure delivery:** validating exact revisions and
-   promoting them through a restricted deployment boundary with health checks
-   and rollback.
+2. **[Fail-closed infrastructure delivery](docs/case-studies/fail-closed-infrastructure-delivery.md):**
+   validating exact revisions and promoting them through a restricted deployment
+   boundary with health checks and rollback.
 3. **Network change blast radius:** redesigning a high-risk migration around
    staged changes, validation gates, and explicit rollback points.
 4. **Recovery and storage dependencies:** protecting stateful services and
@@ -118,9 +123,9 @@ and evidence standard.
 
 ## Current Status
 
-The repository foundation and publication controls are in place. The Trivy
-slice is complete as executable evidence. The Ansible, Falco, and Grafana
-slices are complete as reviewed static evidence and await live transactions or
-runtime screenshots before stronger claims are made. See the [current
-handoff](docs/handoff.md) and [roadmap](ROADMAP.md) for the exact restart point
-and remaining publication gates.
+The repository foundation and publication controls are in place. The Trivy and
+fail-closed delivery slices are complete as executable evidence. The Ansible,
+Falco, and Grafana slices are complete as reviewed static evidence and await
+live transactions or runtime screenshots before stronger claims are made. See
+the [current handoff](docs/handoff.md) and [roadmap](ROADMAP.md) for the exact
+restart point and remaining publication gates.

@@ -1,0 +1,49 @@
+name: Validate application revision
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: validation
+    timeout-minutes: 10
+    env:
+      REPOSITORY: ${{ github.repository }}
+      REVISION: ${{ github.sha }}
+    steps:
+      - name: Check out the event revision without persisting credentials
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          [[ "$REVISION" =~ ^[0-9a-f]{40}$ ]]
+          test -n "$TOKEN"
+          repository="${RUNNER_TEMP:?}/event-revision"
+          rm -rf -- "$repository"
+          auth="$(printf 'x-access-token:%s' "$TOKEN" | base64 -w0)"
+          git init "$repository"
+          git -C "$repository" remote add origin \
+            "https://git.example.com/${REPOSITORY}"
+          git -C "$repository" \
+            -c "http.https://git.example.com/.extraheader=AUTHORIZATION: basic ${auth}" \
+            fetch --no-tags origin "$REVISION"
+          git -C "$repository" checkout --detach FETCH_HEAD
+          test "$(git -C "$repository" rev-parse HEAD)" = "$REVISION"
+      - name: Validate the synthetic service definition
+        run: |
+          set -Eeuo pipefail
+          repository="${RUNNER_TEMP:?}/event-revision"
+          trap 'rm -rf -- "$repository"' EXIT
+          docker compose \
+            --file "$repository/services/example-api/compose.yml" \
+            config \
+            --no-env-resolution \
+            --no-interpolate \
+            --no-path-resolution \
+            --quiet

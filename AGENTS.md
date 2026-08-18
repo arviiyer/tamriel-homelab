@@ -61,8 +61,10 @@ Run before every commit:
 bash scripts/check-public-safety.sh
 python3 -m unittest discover -s automation/trivy/tests -p 'test_*.py' -v
 python3 -m unittest discover -s automation/ansible/tests -p 'test_*.py' -v
+python3 -m unittest discover -s automation/ci/tests -p 'test_*.py' -v
 python3 -m unittest discover -s automation/falco/tests -p 'test_*.py' -v
 python3 -m unittest discover -s automation/monitoring/tests -p 'test_*.py' -v
+bash automation/ci/tests/validate_target.sh
 (cd automation/ansible && ansible-playbook --syntax-check playbooks/site.yml)
 (cd automation/ansible && ansible-playbook --syntax-check playbooks/controlled-upgrade.yml)
 (cd automation/falco && ansible-playbook --syntax-check playbooks/falco.yml)

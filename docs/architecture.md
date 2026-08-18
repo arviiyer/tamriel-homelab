@@ -56,7 +56,10 @@ vulnerability, runtime-detection, firewall, and malware-scanning signals.
 Private Forgejo repositories use protected branches and pull-request validation.
 The delivery model separates validation from production promotion and uses
 restricted target-side controls for the workloads that support automated
-deployment.
+deployment. The public
+[fail-closed delivery example](../automation/ci/README.md) binds validation and
+promotion to one full commit SHA while keeping deployment credentials out of
+repository-controlled validation.
 
 ### Recovery
 

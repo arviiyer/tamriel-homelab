@@ -1,0 +1,4 @@
+Defaults:deploy-request env_reset
+Defaults:deploy-request secure_path="/usr/sbin:/usr/bin:/sbin:/bin"
+Defaults:deploy-request env_keep += "SSH_ORIGINAL_COMMAND"
+deploy-request ALL=(root) NOPASSWD: /usr/local/sbin/restricted-deploy
