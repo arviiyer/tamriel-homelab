@@ -111,14 +111,14 @@ code or reviewed runtime evidence.
 
 ## Phase 5: Runtime Evidence
 
-**Status:** Planned
+**Status:** In progress
 
 - [ ] Capture a Grafana security dashboard.
 - [ ] Capture a successful Forgejo pull-request validation run.
 - [ ] Capture a reviewed security alert or scan result.
 - [ ] Capture a Proxmox cluster summary.
 - [ ] Capture a dependency-update pull request.
-- [ ] Perform and document a safe restore or rollback drill.
+- [x] Perform and document an isolated synthetic restore or rollback drill.
 - [ ] Redact, strip metadata from, and OCR-review selected screenshots.
 
 The initial release should use four high-quality screenshots rather than a large
@@ -180,7 +180,7 @@ claims and terminology.
 - Selected executable automation with tests
 - At least three engineering case studies
 - Four reviewed runtime screenshots
-- One dated recovery or rollback drill
+- One dated [recovery or rollback drill](evidence/drills/2026-08-24-fail-closed-delivery-rollback.md)
 - Claim-to-evidence matrix
 - Green public CI and secret scanning
 

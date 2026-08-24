@@ -1,9 +1,9 @@
 # Automation Evidence
 
-This directory will contain selected, sanitized automation that demonstrates a
+This directory contains selected, sanitized automation that demonstrates a
 specific engineering claim and runs without production access.
 
-Planned components:
+Components:
 
 ```text
 ansible/       host hardening and controlled patching examples
@@ -24,7 +24,8 @@ Available now:
   upgrades.
 - [Fail-closed exact-revision delivery](ci/README.md), including separate
   validation and promotion jobs, a forced-command target boundary, transactional
-  state, health-gated promotion, and synthetic rollback tests.
+  state, health-gated promotion, synthetic rollback tests, and a disposable
+  real-Compose recovery and rollback drill.
 - [Falco runtime detection](falco/README.md), including a modern eBPF deployment
   transaction, narrow synthetic tuning examples, structured event routing, and
   offline policy tests.

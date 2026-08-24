@@ -62,7 +62,7 @@ addresses, domains, host identities, and management paths.
 | Platform and storage | Clustered virtualization, workload separation, local database state, shared bulk storage, and GPU-backed workloads | Documentation drafted; runtime evidence planned |
 | Network and identity | Segmented trust zones, private ingress, centralized authentication, DNS controls, and restricted management paths | Threat model drafted; case study planned |
 | Detection and observability | Centralized metrics and logs, vulnerability deltas, runtime detections, malware scanning, and alert routing | Trivy executable evidence; Falco and Grafana static evidence; runtime screenshots planned |
-| Automation and delivery | Idempotent hardening, dependency updates, protected changes, exact-revision validation, controlled promotion, and rollback | Ansible static evidence; delivery executable evidence; operated rollback pending |
+| Automation and delivery | Idempotent hardening, dependency updates, protected changes, exact-revision validation, controlled promotion, and rollback | Ansible static evidence; delivery recovery and rollback validated on a disposable target; operated workflow evidence pending |
 | Reliability and recovery | VM snapshots, off-host copies, isolated restores, health checks, and storage dependency controls | Dated drill evidence planned |
 
 ## Evidence
@@ -79,7 +79,9 @@ The repository links claims to one or more of these evidence types:
   file-owned Grafana provisioning and tested telemetry references;
 - [fail-closed exact-revision delivery](automation/ci/README.md) with separate
   validation and promotion jobs, a forced-command target helper, and 30 synthetic
-  policy and transaction tests;
+  policy and transaction tests, plus a
+  [dated disposable-target drill](evidence/drills/2026-08-24-fail-closed-delivery-rollback.md)
+  for real Compose recovery and rollback;
 - a [public CI definition](.github/workflows/validate.yml) for validation and
   secret scanning, with a public run still pending;
 - sanitized architecture and threat-model documents;
@@ -123,9 +125,10 @@ and evidence standard.
 
 ## Current Status
 
-The repository foundation and publication controls are in place. The Trivy and
-fail-closed delivery slices are complete as executable evidence. The Ansible,
-Falco, and Grafana slices are complete as reviewed static evidence and await
-live transactions or runtime screenshots before stronger claims are made. See
-the [current handoff](docs/handoff.md) and [roadmap](ROADMAP.md) for the exact
-restart point and remaining publication gates.
+The repository foundation and publication-control framework are in place. The
+Trivy slice is executable evidence, and fail-closed delivery now has a dated
+synthetic validation of its real recovery and rollback path. The Ansible, Falco,
+and Grafana slices are complete as reviewed static evidence and await live
+transactions or runtime screenshots before stronger claims are made. See the
+[current handoff](docs/handoff.md) and [roadmap](ROADMAP.md) for the exact restart
+point and remaining publication gates.

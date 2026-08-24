@@ -1,9 +1,10 @@
 # Fail-Closed Delivery Evidence
 
-Status: **Executable evidence**. The public workflow and target transaction are
-tested with synthetic revisions. A dated operated rollback exercise and reviewed
-pull-request evidence are still required before this can support an `Operated`
-claim.
+Status: **Publicly evidenced as a validated implementation**. The public workflow
+and target transaction are covered by offline tests and a
+[dated disposable-target drill](../../evidence/drills/2026-08-24-fail-closed-delivery-rollback.md).
+Reviewed operated-workflow evidence is still required before this can support an
+`Operated` claim.
 
 This directory demonstrates how a reviewed source revision crosses from
 deployment-secret-free validation into a narrowly privileged deployment
@@ -109,6 +110,30 @@ OpenSSH forced command for both the allowed source and a nonmatching source,
 checks the narrow sudo rule with `visudo`, and confirms the separate per-key
 source restriction. It removes the generated key on exit.
 
+Run the opt-in integration drill only on a dedicated disposable Docker host or
+isolated daemon where a reviewed harness may receive privileged container
+access:
+
+```bash
+bash automation/ci/tests/run_disposable_host_drill.sh
+```
+
+The launcher stages only the helper, policy examples, drill script, and
+Dockerfile into a temporary build context. It builds a target from a
+digest-pinned base and pinned direct package versions without mounting the
+repository, then removes the target's default network route. Inside that target,
+the drill creates a synthetic Git history, nested Docker daemon, loopback TLS
+registry, root-owned deployment state, and isolated OpenSSH endpoint. It
+validates a healthy promotion, shell rejection, non-image policy rejection,
+failed-health recovery, guarded rollback, and cleanup using the unmodified
+target helper. Normal CI builds the target image but does not run the full drill,
+which requires privileged nested Docker and about one minute for the intentional
+health failure.
+
+`--privileged` is not a host security boundary. Review the harness before use and
+do not run the full drill on a production, shared, or credential-bearing Docker
+host.
+
 ## Limitations
 
 - The example proves public policy and state-transition behavior, not that a
@@ -118,8 +143,13 @@ source restriction. It removes the generated key on exit.
   rollback boundary.
 - The example restores the tracked runtime definition after failure; application
   data recovery remains a separate backup and restore concern.
-- Root ownership, OpenSSH effective policy, real container behavior, and the
-  health endpoint still require a disposable-host exercise.
+- Root ownership, the forced-command request path, real Compose behavior, the
+  health endpoint, automatic recovery, and explicit rollback have been validated
+  on an isolated disposable synthetic target. A production-equivalent
+  disposable VM exercise remains stronger future evidence.
+- The disposable drill uses a synthetic local Git origin and registry. It does
+  not validate target Git authentication, private Forgejo settings, registry
+  authentication, or operation over time.
 - The promotion label must select a dedicated ephemeral runner. Traps and unique
   temporary directories limit normal cleanup risk, but cannot make a persistent
   runner safe after abrupt host loss.

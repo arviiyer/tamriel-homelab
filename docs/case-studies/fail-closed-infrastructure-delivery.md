@@ -113,15 +113,26 @@ The public evidence includes:
 - a narrow sudo rule and sanitized subprocess environment;
 - a purpose-written target transaction with durable pending and revision state;
 - 30 offline Python tests for workflow policy, real Git ancestry, deployment,
-  recovery, and rollback behavior; and
+  recovery, and rollback behavior;
 - an effective OpenSSH and `visudo` validation script that checks both matching
-  and nonmatching source addresses.
+  and nonmatching source addresses; and
+- a [dated disposable-target drill](../../evidence/drills/2026-08-24-fail-closed-delivery-rollback.md)
+  using real forced-command SSH, sudo, Git, Compose, service health, automatic
+  recovery, and guarded rollback.
 
 The real-Git tests create temporary protected and unreviewed branches, fetch them
 through the same `SystemAdapter` used by the helper, and prove an unreviewed
 commit is not reachable from protected `main`. Transaction tests inject pull,
 health, recovery, pre-replacement state-write, and post-replacement directory
 synchronization failures.
+
+The disposable exercise creates four synthetic revisions and three locally
+published digest-pinned service images. It proves a healthy A-to-B promotion,
+rejects a revision that changes more than the image, observes unhealthy revision
+C with durable pending metadata, confirms automatic restoration of B, and rolls
+back from B to the target-recorded revision A. The target has no default network
+route, receives only the selected public artifacts rather than a repository
+mount, and is destroyed after exact-ID cleanup.
 
 See [`automation/ci`](../../automation/ci) for the implementation and commands.
 
@@ -137,15 +148,24 @@ only on branch protection or a previous CI result. This is stronger evidence of
 the control decision while remaining independent of private runner names,
 addresses, accounts, paths, and repository history.
 
+The dated drill advances the target transaction from modeled state transitions
+to a repeatable `Validated` claim. It does not advance the workflow to an
+`Operated` claim because private repository controls and operation over time are
+not shown.
+
 ## Limitations
 
 - The evidence proves public workflow and transaction behavior, not the current
   protection settings of a private Forgejo repository.
-- The Python tests use a real Git graph but a fake service adapter for container
-  apply and health transitions.
-- Root ownership, target Git authentication, real Compose behavior, service
-  health, and rollback still require a disposable-host exercise.
+- The offline Python tests use a fake service adapter for container apply and
+  health transitions; the separate disposable drill covers the real adapter and
+  service path.
+- The drill uses a synthetic Git origin and loopback registry. Target Git and
+  registry authentication, private Forgejo controls, and runner permissions
+  remain unverified publicly.
+- The disposable target is a nested-Docker container rather than a
+  production-equivalent virtual machine.
 - The rollback boundary covers a tracked Compose definition and one image digest;
   database migrations and application-data restore are separate controls.
-- A dated operated rollback record and reviewed pull-request screenshot are
-  required before this can support an `Operated` claim.
+- Reviewed workflow evidence showing the control running over time is required
+  before this can support an `Operated` claim.
