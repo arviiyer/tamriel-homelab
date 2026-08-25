@@ -68,6 +68,12 @@ state. Selected high-value data also receives an off-host copy. Recovery is
 designed around restoration into an isolated identity before any production
 replacement decision.
 
+The public
+[recovery example](../automation/recovery/README.md) models VM-local and shared
+bulk-data authority separately, validates a bounded isolated synthetic restore,
+and provides a static storage-readiness policy. It does not prove private backup
+jobs, retention execution, off-host transfer, or operated restore outcomes.
+
 ## Architecture Principles
 
 ### Private by Default

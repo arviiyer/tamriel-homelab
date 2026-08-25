@@ -10,7 +10,7 @@
 I designed and operate a three-node Proxmox homelab as a private cloud and
 security engineering environment. The platform combines segmented networking,
 centralized identity, security telemetry, infrastructure automation, controlled
-software delivery, and layered recovery.
+software delivery, and a documented layered-recovery design.
 
 This project is presented as an engineering case study, not a list of hosted
 applications. It focuses on the decisions, controls, failures, and validation
@@ -63,7 +63,7 @@ addresses, domains, host identities, and management paths.
 | Network and identity | Segmented trust zones, private ingress, centralized authentication, DNS controls, and restricted management paths | Threat model drafted; case study planned |
 | Detection and observability | Centralized metrics and logs, vulnerability deltas, runtime detections, malware scanning, and alert routing | Trivy executable evidence; Falco and Grafana static evidence; runtime screenshots planned |
 | Automation and delivery | Idempotent hardening, dependency updates, protected changes, exact-revision validation, controlled promotion, and rollback | Ansible static evidence; delivery recovery and rollback validated on a disposable target; operated workflow evidence pending |
-| Reliability and recovery | VM snapshots, off-host copies, isolated restores, health checks, and storage dependency controls | Dated drill evidence planned |
+| Reliability and recovery | VM snapshots, off-host copies, isolated restores, health checks, and storage dependency controls | Synthetic isolated restore publicly evidenced; storage-startup policy executable; private backup-job evidence pending |
 
 ## Evidence
 
@@ -82,12 +82,15 @@ The repository links claims to one or more of these evidence types:
   policy and transaction tests, plus a
   [dated disposable-target drill](evidence/drills/2026-08-24-fail-closed-delivery-rollback.md)
   for real Compose recovery and rollback;
+- [isolated synthetic recovery](automation/recovery/README.md) with strict state
+  boundaries, 27 tests, a dated restore drill, and a statically validated
+  storage-readiness service policy;
 - a [public CI definition](.github/workflows/validate.yml) for validation and
   secret scanning, with a public run still pending;
 - sanitized architecture and threat-model documents;
 - planned redacted screenshots from the operated environment;
-- evidence-backed delivery and vulnerability case studies, with recovery still
-  planned; and
+- three evidence-backed engineering case studies covering vulnerability
+  management, fail-closed delivery, and isolated recovery; and
 - a [claim-to-evidence matrix](evidence/validation-matrix.md).
 
 ## Initial Case Studies
@@ -98,10 +101,11 @@ The repository links claims to one or more of these evidence types:
 2. **[Fail-closed infrastructure delivery](docs/case-studies/fail-closed-infrastructure-delivery.md):**
    validating exact revisions and promoting them through a restricted deployment
    boundary with health checks and rollback.
-3. **Network change blast radius:** redesigning a high-risk migration around
-   staged changes, validation gates, and explicit rollback points.
-4. **Recovery and storage dependencies:** protecting stateful services and
-   preventing workloads from starting against unavailable shared storage.
+3. **[Recovery and storage dependencies](docs/case-studies/recovery-and-storage-dependencies.md):**
+   validating an isolated synthetic restore and implementing startup policy for
+   an unavailable or incorrect shared-storage boundary.
+4. **Network change blast radius (planned):** redesigning a high-risk migration
+   around staged changes, validation gates, and explicit rollback points.
 
 ## Documentation
 
@@ -127,8 +131,9 @@ and evidence standard.
 
 The repository foundation and publication-control framework are in place. The
 Trivy slice is executable evidence, and fail-closed delivery now has a dated
-synthetic validation of its real recovery and rollback path. The Ansible, Falco,
-and Grafana slices are complete as reviewed static evidence and await live
+synthetic validation of its real Compose recovery and rollback path. Isolated
+synthetic restore is publicly evidenced, while the storage-startup policy is
+executable static evidence. The Ansible, Falco, and Grafana slices await live
 transactions or runtime screenshots before stronger claims are made. See the
 [current handoff](docs/handoff.md) and [roadmap](ROADMAP.md) for the exact restart
 point and remaining publication gates.

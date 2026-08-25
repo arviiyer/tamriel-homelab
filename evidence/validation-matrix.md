@@ -25,9 +25,10 @@ No claim should appear as a finalized resume bullet until its status is
 | Enforced protected infrastructure changes across private repositories | [Sanitized validation and promotion workflows](../automation/ci/README.md) and repository-control narrative; redacted PR and private repository-setting evidence still required | Drafted |
 | Implemented exact-revision controlled deployment and rollback | [Restricted target helper](../automation/ci/target/restricted_deploy.py), [delivery case study and sequence](../docs/case-studies/fail-closed-infrastructure-delivery.md), 30 policy and transaction tests, effective SSH/sudo validation, and a [dated disposable-target recovery and rollback drill](drills/2026-08-24-fail-closed-delivery-rollback.md); operated workflow evidence still required | Publicly evidenced |
 | Automated dependency-update workflows | Sanitized Renovate policy and redacted update pull request | Planned |
-| Implemented layered VM and selected off-host backups | Sanitized retention model, backup architecture, redacted job evidence | Planned |
+| Implemented layered VM and selected off-host backups | [Synthetic recovery-boundary model](../automation/recovery/recovery-model.json), [recovery case study](../docs/case-studies/recovery-and-storage-dependencies.md), backup architecture, and redacted job evidence; private job and operated evidence remain pending | Drafted |
 | Validated delivery recovery and rollback on an isolated disposable target | [Dated sanitized drill report](drills/2026-08-24-fail-closed-delivery-rollback.md) with entry and exit criteria, expected and actual transitions, limitations, and cleanup confirmation | Publicly evidenced |
-| Prevented storage-dependent workload boot races | Sanitized systemd dependency examples and validation record | Planned |
+| Validated an isolated synthetic state restore and unsafe-input rejection | [Restore implementation](../automation/recovery/restore.py), 27 policy and transaction tests, and a [dated sanitized restore drill](drills/2026-08-24-isolated-synthetic-restore.md) | Publicly evidenced |
+| Implemented a public storage-readiness startup policy | [Sanitized systemd service](../automation/recovery/systemd/example-storage-dependent.service), policy tests, and `systemd-analyze verify`; live mount and boot-failure evidence remain pending | Executable evidence |
 
 ## Candidate Resume Bullets
 

@@ -91,7 +91,7 @@ future network changes?
 **Evidence target:** threat-to-control table, generic zone policy, failure
 analysis, staged rollout, and rollback gates.
 
-### Recovery and Storage Dependencies
+### [Recovery and Storage Dependencies](case-studies/recovery-and-storage-dependencies.md)
 
 **Question answered:** How are stateful services protected and prevented from
 starting against unavailable storage?

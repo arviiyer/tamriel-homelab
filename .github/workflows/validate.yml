@@ -60,6 +60,11 @@ jobs:
           automation/falco/tests/test_policy.py
           automation/monitoring/tests/test_dashboard.py
           automation/monitoring/tests/validate_grafana.py
+          automation/recovery/restore.py
+          automation/recovery/tests/archive_factory.py
+          automation/recovery/tests/test_restore.py
+          automation/recovery/tests/test_systemd_policy.py
+          automation/recovery/tests/run_isolated_restore_drill.py
 
       - name: Run Trivy pipeline tests
         run: >-
@@ -106,6 +111,21 @@ jobs:
           -s automation/monitoring/tests
           -p 'test_*.py'
           -v
+
+      - name: Run recovery policy and restore tests
+        run: >-
+          python3 -m unittest discover
+          -s automation/recovery/tests
+          -p 'test_*.py'
+          -v
+
+      - name: Run isolated synthetic restore drill
+        run: python3 automation/recovery/tests/run_isolated_restore_drill.py
+
+      - name: Check storage-readiness service policy
+        run: >-
+          systemd-analyze verify --recursive-errors=no
+          automation/recovery/systemd/example-storage-dependent.service
 
       - name: Check Ansible inventory and playbooks
         working-directory: automation/ansible

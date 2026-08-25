@@ -1,0 +1,60 @@
+{
+  "boundaries": {
+    "service-local-state": {
+      "authority": "Application-owned local state is authoritative inside this synthetic boundary.",
+      "copy": {
+        "archive_root": "service-local-state",
+        "format": "uncompressed-tar",
+        "integrity": "external-sha256"
+      },
+      "excluded": [
+        "credentials",
+        "runtime-cache",
+        "shared-data"
+      ],
+      "illustrative_retention": {
+        "classification": "illustrative-only",
+        "generations": [
+          "current-example",
+          "prior-example",
+          "archive-example"
+        ]
+      },
+      "included": [
+        "config",
+        "state"
+      ],
+      "manual_replacement_gate": "An operator must validate the isolated restore before replacing authoritative service state.",
+      "restore_target": "new-empty-isolated-directory"
+    },
+    "shared-bulk-data": {
+      "authority": "Shared content storage is authoritative inside this synthetic boundary.",
+      "copy": {
+        "archive_root": "shared-bulk-data",
+        "format": "uncompressed-tar",
+        "integrity": "external-sha256"
+      },
+      "excluded": [
+        "credentials",
+        "service-local-state",
+        "temporary-data"
+      ],
+      "illustrative_retention": {
+        "classification": "illustrative-only",
+        "generations": [
+          "current-example",
+          "prior-example",
+          "archive-example"
+        ]
+      },
+      "included": [
+        "catalog",
+        "objects"
+      ],
+      "manual_replacement_gate": "An operator must validate the isolated restore before replacing authoritative shared data.",
+      "restore_target": "new-empty-isolated-directory"
+    }
+  },
+  "classification": "synthetic-public-example",
+  "schema_version": 1
+}

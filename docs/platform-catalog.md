@@ -51,8 +51,13 @@ quality.
 |---|---|---|
 | VM backups | Proxmox Backup Server | Snapshot consistency, tiered retention, isolated restore procedure |
 | Selected off-host copies | Restic | Encrypted copies, retention, and repository integrity checks |
-| Storage readiness | systemd dependencies | Preventing NAS-backed workloads from starting without required mounts |
+| Storage readiness | systemd dependencies | Mount assertions, boundary identity, and startup gating with a [static public example](../automation/recovery/README.md) |
 | Service health | Prometheus and application checks | Detecting unhealthy services and stale controls |
+
+The public recovery implementation validates generic authority boundaries,
+isolated restore behavior, and the storage-readiness policy. It does not evidence
+the private PBS or Restic jobs, schedules, retention execution, or operation over
+time.
 
 ## Application Workloads
 

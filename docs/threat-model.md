@@ -83,6 +83,10 @@ storage can damage or hide important state.
 off-host copies for selected data, integrity checks, isolated restores, and
 dependency-aware service startup.
 
+The public [recovery case study](case-studies/recovery-and-storage-dependencies.md)
+validates a synthetic restore and static startup policy. It does not establish
+that private backup jobs or restore outcomes are publicly evidenced.
+
 ### Monitoring Blindness
 
 A failed scanner, log shipper, or scrape target can create false confidence.
@@ -112,6 +116,6 @@ timestamps, centralized service logs, and routine operational review.
 
 The platform remains a single-operator environment with finite hardware,
 maintenance time, and failure domains. Some services are intentionally manually
-promoted, not every data set has equivalent off-site protection, and detection
+promoted, not every data set has equivalent off-host protection, and detection
 coverage is constrained by available telemetry. Case studies will state these
 limitations rather than presenting the homelab as risk-free.

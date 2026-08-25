@@ -10,6 +10,7 @@ ansible/       host hardening and controlled patching examples
 ci/            exact-revision validation and restricted delivery examples
 falco/         runtime-sensor deployment and narrow tuning examples
 monitoring/    Prometheus rules and Grafana provisioning
+recovery/      isolated restore and storage-readiness evidence
 trivy/         vulnerability scan and delta-processing pipeline
 ```
 
@@ -32,6 +33,9 @@ Available now:
 - [Security observability dashboard](monitoring/README.md), including
   file-owned Grafana provisioning, current Trivy and Falco query references,
   structural tests, and a container-backed loading check.
+- [Synthetic recovery evidence](recovery/README.md), including strict state
+  boundaries, fail-closed archive verification, atomic isolated restore, and a
+  storage-readiness systemd policy.
 
 Artifacts are re-created here through the process in
 [`docs/publication-policy.md`](../docs/publication-policy.md). Production

@@ -64,6 +64,10 @@ python3 -m unittest discover -s automation/ansible/tests -p 'test_*.py' -v
 python3 -m unittest discover -s automation/ci/tests -p 'test_*.py' -v
 python3 -m unittest discover -s automation/falco/tests -p 'test_*.py' -v
 python3 -m unittest discover -s automation/monitoring/tests -p 'test_*.py' -v
+python3 -m unittest discover -s automation/recovery/tests -p 'test_*.py' -v
+python3 automation/recovery/tests/run_isolated_restore_drill.py
+systemd-analyze verify --recursive-errors=no \
+  automation/recovery/systemd/example-storage-dependent.service
 bash automation/ci/tests/validate_target.sh
 (cd automation/ansible && ansible-playbook --syntax-check playbooks/site.yml)
 (cd automation/ansible && ansible-playbook --syntax-check playbooks/controlled-upgrade.yml)

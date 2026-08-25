@@ -70,7 +70,7 @@ plan without relying on private documentation.
 - [x] Document the threat model and control rationale.
 - [x] Create a capability-oriented platform catalog.
 - [ ] Document network and identity design.
-- [ ] Document delivery and recovery design.
+- [x] Document delivery and recovery design.
 - [ ] Record key architecture decisions as short ADRs.
 
 **Exit gate:** A reader can understand the platform without seeing any production
@@ -88,6 +88,8 @@ identifier or raw configuration.
 - [x] Publish selected Ansible hardening roles with example inventory.
 - [x] Publish generic Falco deployment and narrow tuning examples.
 - [x] Publish a sanitized exact-revision CI/CD example.
+- [x] Publish an isolated synthetic restore implementation and drill.
+- [x] Publish a storage-readiness systemd policy with static validation.
 - [x] Add component-level usage and verification documentation for Trivy.
 - [x] Add component-level usage and verification documentation for Ansible.
 
@@ -96,12 +98,12 @@ clean checkout without production access.
 
 ## Phase 4: Engineering Case Studies
 
-**Status:** In progress
+**Status:** Exit gate met; optional network case study remains
 
 - [x] Actionable vulnerability management and alert-noise reduction
 - [x] Fail-closed infrastructure delivery and rollback
 - [ ] Network migration failure, blast-radius analysis, and redesign
-- [ ] Backup, isolated restore, and storage dependency management
+- [x] Backup boundaries, isolated restore, and storage dependency management
 
 Each case study must include the problem, constraints, decision, implementation,
 validation, result, and limitations.
@@ -118,7 +120,8 @@ code or reviewed runtime evidence.
 - [ ] Capture a reviewed security alert or scan result.
 - [ ] Capture a Proxmox cluster summary.
 - [ ] Capture a dependency-update pull request.
-- [x] Perform and document an isolated synthetic restore or rollback drill.
+- [x] Perform and document an isolated synthetic delivery rollback drill.
+- [x] Perform and document an isolated synthetic state-restore drill.
 - [ ] Redact, strip metadata from, and OCR-review selected screenshots.
 
 The initial release should use four high-quality screenshots rather than a large
@@ -138,6 +141,7 @@ and corresponding public claim.
 - [x] Add Prometheus rule validation.
 - [x] Add Grafana JSON validation.
 - [x] Add Markdown link validation.
+- [x] Add isolated restore and systemd policy validation.
 - [ ] Add Trivy repository scanning.
 - [x] Confirm all current actions are pinned to immutable commit SHAs.
 
@@ -180,7 +184,8 @@ claims and terminology.
 - Selected executable automation with tests
 - At least three engineering case studies
 - Four reviewed runtime screenshots
-- One dated [recovery or rollback drill](evidence/drills/2026-08-24-fail-closed-delivery-rollback.md)
+- Dated recovery exercises for [delivery rollback](evidence/drills/2026-08-24-fail-closed-delivery-rollback.md)
+  and [isolated synthetic restore](evidence/drills/2026-08-24-isolated-synthetic-restore.md)
 - Claim-to-evidence matrix
 - Green public CI and secret scanning
 
