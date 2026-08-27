@@ -10,6 +10,24 @@ change, and recoverable state.
 The public model uses role-based aliases and omits production addressing and
 identifiers.
 
+## Trust-Boundary and Data-Flow Model
+
+The primary [platform diagram](../README.md#architecture) presents the logical
+trust boundaries that connect access, segmented network policy, role-separated
+workloads, telemetry, controlled delivery, state ownership, and isolated
+recovery. It is intentionally not a physical topology: placement details,
+addresses, management routes, and production identities are omitted.
+
+The model distinguishes three decisions that are easy to lose in a conventional
+infrastructure diagram:
+
+- untrusted and externally controlled endpoints do not inherit reachability to
+  private zones;
+- validation makes one exact revision eligible for a separately authorized,
+  target-constrained promotion; and
+- backup copies flow into an isolated restore identity and stop at a manual
+  replacement decision rather than overwriting authoritative state.
+
 ## Logical Layers
 
 ### Edge and Access
@@ -25,6 +43,10 @@ A dedicated gateway separates infrastructure, trusted clients, managed work
 devices, untrusted devices, guest clients, media workloads, and sandbox
 workloads. Policy is based on required flows rather than broad inter-zone
 reachability.
+
+The [network and identity design](network-and-identity.md) documents the public
+zone model, access paths, identity boundaries, generic flow policy, and evidence
+gaps without reproducing private firewall or identity-provider configuration.
 
 ### Compute
 
@@ -50,6 +72,11 @@ Host and application metrics flow to Prometheus. System and application logs
 flow to Loki. Grafana provides shared analysis views, while Alertmanager routes
 actionable infrastructure and security events. Security automation adds
 vulnerability, runtime-detection, firewall, and malware-scanning signals.
+
+The public evidence includes the
+[Trivy scan and delta pipeline](../automation/trivy/README.md), the
+[Falco runtime-event flow](../automation/falco/event-flow.md), and
+[file-provisioned security dashboards](../automation/monitoring/README.md).
 
 ### Delivery
 
@@ -106,12 +133,13 @@ manual approval boundary.
 Changes to keys, stateful platforms, and deployment mechanisms require a viable
 rollback or isolated recovery path before production mutation.
 
+These cross-cutting choices are recorded in the public
+[architecture decision index](adr/README.md).
+
 ## Public Evidence Plan
 
-This document currently describes the sanitized logical architecture. The first
-public release will add:
-
-- a polished trust-boundary and data-flow diagram;
-- public architecture decision records;
-- links from each layer to reviewed implementation examples; and
-- redacted runtime evidence for the operated platform.
+The sanitized logical architecture, primary trust-boundary diagram, focused
+network and identity design, and key architecture decisions are documented.
+Redacted runtime evidence is still required before the operated platform claims
+can advance beyond the boundaries in the
+[claim-to-evidence matrix](../evidence/validation-matrix.md).

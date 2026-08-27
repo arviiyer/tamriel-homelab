@@ -16,8 +16,8 @@ No claim should appear as a finalized resume bullet until its status is
 | Claim | Required public proof | Status |
 |---|---|---|
 | Designed and operate a three-node Proxmox private cloud | Sanitized architecture, platform catalog, redacted cluster evidence | Drafted |
-| Segmented workloads by trust and function | Threat model, zone-policy case study, sanitized network diagram | Drafted |
-| Centralized private application access and identity | Architecture document, identity flow, redacted authentication evidence | Drafted |
+| Segmented workloads by trust and function | [Threat model](../docs/threat-model.md), [network and identity design](../docs/network-and-identity.md), and [primary trust-boundary diagram](../README.md#architecture); zone-policy validation and operated evidence still required | Drafted |
+| Centralized private application access and identity | [Architecture](../docs/architecture.md) and [identity-boundary design](../docs/network-and-identity.md#identity-boundaries); reviewed authentication evidence still required | Drafted |
 | Centralized infrastructure and security telemetry | [Sanitized Grafana dashboard](../automation/monitoring/README.md), file provisioning, 11 structural and query-reference tests, and Grafana loading validation; query execution, scrape configuration, and operated screenshot still required | Drafted |
 | Automated host hardening and controlled patching | [Sanitized Ansible roles](../automation/ansible/README.md), example inventory, 18 static policy tests, and syntax/effective-inventory validation; live transaction evidence still required | Drafted |
 | Built vulnerability scanning with delta-based alerting | [Scanner and delta engine](../automation/trivy/README.md), synthetic fixtures, 27 tests, validated alert rules; operated screenshot still required | Executable evidence |

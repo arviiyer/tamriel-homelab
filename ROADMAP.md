@@ -63,15 +63,15 @@ plan without relying on private documentation.
 
 ## Phase 2: Architecture Narrative
 
-**Status:** In progress
+**Status:** Exit gate met
 
-- [ ] Produce the primary trust-boundary and data-flow diagram.
+- [x] Produce the primary trust-boundary and data-flow diagram.
 - [x] Document the sanitized platform architecture.
 - [x] Document the threat model and control rationale.
 - [x] Create a capability-oriented platform catalog.
-- [ ] Document network and identity design.
+- [x] Document network and identity design.
 - [x] Document delivery and recovery design.
-- [ ] Record key architecture decisions as short ADRs.
+- [x] Record key architecture decisions as short ADRs.
 
 **Exit gate:** A reader can understand the platform without seeing any production
 identifier or raw configuration.
