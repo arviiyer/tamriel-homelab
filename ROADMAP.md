@@ -143,6 +143,8 @@ and corresponding public claim.
 
 - [x] Add a local publication-safety check.
 - [x] Add baseline GitHub validation and secret scanning.
+- [x] Create a private GitHub staging repository and validate default-branch
+  workflows.
 - [x] Add ShellCheck for published shell automation.
 - [x] Add Ansible syntax validation.
 - [x] Add Prometheus rule validation.
