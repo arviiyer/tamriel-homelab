@@ -187,6 +187,10 @@ The offline tests render both SSH policy variants, inspect unattended-upgrades
 output, verify example inventory semantics, and assert the serial/no-reboot
 upgrade controls.
 
+The rendered daily update and seven-day cleanup values are illustrative public
+defaults used by these tests. They do not disclose the private environment's
+maintenance schedule.
+
 ## Production Differences
 
 The private environment contains additional inventory groups, deployment

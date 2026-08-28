@@ -39,9 +39,14 @@ tools.
 - [x] Use a deny-by-default `.gitignore` for new top-level content.
 - [x] Document the public/private source boundary.
 - [ ] Complete remediation of credentials identified in private source audits.
-- [ ] Confirm raw infrastructure exports are excluded from every public path.
-- [ ] Establish a temporary evidence-redaction workspace outside this repo.
-- [ ] Complete a history-wide secret scan before the first public push.
+- [x] Confirm raw infrastructure exports are excluded from every public path.
+- [x] Establish a temporary evidence-redaction workspace outside this repo.
+- [x] Complete a history-wide secret scan before the first public push.
+
+The local public history, commit identity metadata, tracked-path inventory, and
+known-identifier denylist were reviewed on August 28, 2026. The remaining Phase
+0 gate is confirmation that any credential findings from private source audits
+were remediated and documented privately.
 
 **Exit gate:** No known production credential, raw export, or private history is
 present in the repository, and all known source-repository credential issues

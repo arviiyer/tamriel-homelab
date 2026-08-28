@@ -81,7 +81,7 @@
     },
     {
       "datasource": {"type": "prometheus", "uid": "security-prometheus"},
-      "description": "Elapsed time since any scan attempt reported health. Warning begins at seven days; critical begins at eight days.",
+      "description": "Elapsed time since any scan attempt reported health. Illustrative public thresholds warn at seven days and become critical at eight days; they do not disclose the private scan schedule.",
       "fieldConfig": {
         "defaults": {
           "color": {"mode": "thresholds"},

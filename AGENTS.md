@@ -36,7 +36,8 @@ The repository has two goals:
 - Do not publish real IP addresses, domains, VM IDs, MAC addresses, host keys,
   fingerprints, account names, paths, schedules, or emergency procedures.
 - Do not publish raw firewall exports, encrypted secret blobs, private keys,
-  environment files, state files, logs, malware, PCAPs, or captured evidence.
+  secret-bearing environment files, state files, logs, malware, PCAPs, or
+  captured evidence.
 - Do not publish the complete production detection-suppression set.
 - Real screenshots must pass the checklist in
   `evidence/screenshots/README.md` and be force-added after review.
@@ -59,6 +60,7 @@ Run before every commit:
 
 ```bash
 bash scripts/check-public-safety.sh
+python3 -m unittest discover -s tests -p 'test_*.py' -v
 python3 -m unittest discover -s automation/trivy/tests -p 'test_*.py' -v
 python3 -m unittest discover -s automation/ansible/tests -p 'test_*.py' -v
 python3 -m unittest discover -s automation/ci/tests -p 'test_*.py' -v

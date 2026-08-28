@@ -112,6 +112,7 @@ groups:
             At least one configured scanner failed for this repository. Its
             results were not promoted into the baseline.
 
+      # Illustrative public window; this is not the private scan schedule.
       - alert: TrivyScanAttemptStale
         expr: time() - trivy_scan_attempt_timestamp_seconds > 8 * 24 * 60 * 60
         for: 1h

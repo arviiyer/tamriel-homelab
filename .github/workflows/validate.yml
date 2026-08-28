@@ -38,6 +38,13 @@ jobs:
       - name: Check public content boundary
         run: bash scripts/check-public-safety.sh
 
+      - name: Run publication-safety tests
+        run: >-
+          python3 -m unittest discover
+          -s tests
+          -p 'test_*.py'
+          -v
+
       - name: Check Markdown links
         run: python3 scripts/check-markdown-links.py
 
@@ -45,6 +52,7 @@ jobs:
         run: >-
           python3 -m py_compile
           scripts/check-markdown-links.py
+          tests/test_public_safety.py
           automation/trivy/delta.py
           automation/trivy/extract_images.py
           automation/trivy/tests/test_delta.py

@@ -18,15 +18,18 @@ operational repositories.
 - Redacted runtime screenshots that pass the review checklist
 - Sanitized validation and recovery-drill records
 - Generalized lessons learned and architecture decisions
+- A public Git author name and GitHub no-reply commit identity
+- Credential-free example environment files using public placeholders
 
 ## Prohibited Material
 
 - Production Git histories, bundles, reflogs, or repository mirrors
 - Raw firewall, router, hypervisor, identity-provider, or controller exports
 - Plaintext or encrypted credentials, private keys, recovery codes, or tokens
-- Environment files, Terraform state, vault files, or secret-bearing examples
+- Secret-bearing environment files, Terraform state, vault files, or
+  secret-bearing examples
 - Real IP addresses, domains, MAC addresses, VM IDs, host keys, fingerprints,
-  usernames, local paths, or emergency access procedures
+  production usernames, local paths, or emergency access procedures
 - Complete production detection suppressions or allowlists
 - Malware, PCAPs, log exports, database dumps, or captured evidence
 - Screenshots that retain browser URLs, user identities, unique IDs, or hidden
@@ -48,6 +51,26 @@ operational repositories.
 
 Bulk copying a directory and attempting to redact it afterward is not an
 approved import method.
+
+## Known-Identifier Audit
+
+Known production domains, hostnames, account names, and other environment
+identifiers must be maintained in a fixed-string denylist outside this
+repository. The file contains one identifier per non-empty line and must never
+be copied into the public workspace.
+
+Run the local current-tree and retained-history audit with:
+
+```bash
+PUBLIC_SAFETY_DENYLIST_FILE=/path/outside/repository/private-identifiers.txt \
+  bash scripts/check-public-safety.sh
+```
+
+The checker rejects a denylist stored inside the repository and does not print
+matching private values. Public CI runs generic current-tree and retained-history
+checks without this private file and supplements them with a complete-history
+secret scan. A private denylist audit remains a required local release gate
+because CI must not receive the private identifier set.
 
 ## Public Aliases
 
