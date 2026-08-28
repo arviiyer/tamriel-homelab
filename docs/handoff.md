@@ -16,14 +16,14 @@ repositories.
 
 - Workspace: separate local public-portfolio checkout
 - Branch: `main`
-- Git history: purpose-built public commits sanitized and rewritten; nothing has
-  been pushed
-- Remotes: none
-- GitHub repository: not created
-- Publication status: private local work in progress
+- Git history: purpose-built public commits sanitized, rewritten, and pushed
+  only to the private GitHub staging repository
+- Remotes: `origin` points to the private GitHub staging repository
+- GitHub repository: private; not yet published
+- Publication status: private remote work in progress
 
-Do not create a public remote until the v1 publication gate in `ROADMAP.md` is
-met. When remote CI is needed, create a private GitHub repository first.
+Do not make the repository public until the v1 publication gate in `ROADMAP.md`
+is met.
 
 ## Completed Work
 
@@ -51,6 +51,8 @@ met. When remote CI is needed, create a private GitHub repository first.
   refs; the historical credential issue was corrected in current source,
   rotated, validated through a fresh login, and documented privately
 - Phase 0 publication-safety exit gate met
+- Private GitHub staging repository created; default-branch validation and the
+  checksum-pinned complete-history secret scan passed
 - Tracked paths reviewed with no raw exports or prohibited file types found
 - Markdown-link checks
 - GitHub workflow with immutable action references
@@ -87,7 +89,7 @@ Validation completed:
 Remaining proof:
 
 - Redacted Grafana or alert screenshot from the operated environment
-- Public GitHub Actions result after a private remote is created
+- Publicly visible GitHub Actions result after publication
 
 ### Fail-Closed Delivery Evidence Slice
 
@@ -207,7 +209,7 @@ Remaining proof:
   Debian guest
 - Capture a reviewed operated alert or dashboard screenshot
 - Confirm the event reaches both the log and alerting paths
-- Record a public GitHub Actions result after a private remote is created
+- Record a publicly visible GitHub Actions result after publication
 
 ### Security Dashboard Evidence Slice
 
@@ -330,7 +332,6 @@ bash automation/ci/tests/run_disposable_host_drill.sh
 - Never publish raw OPNsense XML exports.
 - Never copy private `.git` directories or histories.
 - Add four reviewed runtime screenshots.
-- Create a private GitHub repository and prove public workflow compatibility.
 - Repeat the tracked-file and complete-history review immediately before the
   repository becomes public.
 
@@ -382,4 +383,4 @@ separate evidence tasks.
 
 1. Network segmentation and migration postmortem
 2. Disposable-host Ansible and Falco exercises
-3. Private GitHub CI, publication review, profile, and resume alignment
+3. Publication review, profile, and resume alignment

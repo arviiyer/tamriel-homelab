@@ -176,7 +176,7 @@ claims and terminology.
 - [ ] Review every tracked file manually.
 - [ ] Run local validation and secret scanning.
 - [ ] Review the complete public Git history.
-- [ ] Create the GitHub repository only after the review passes.
+- [ ] Make the private GitHub repository public only after the review passes.
 - [ ] Push and confirm public CI.
 - [ ] Test every README link while signed out of GitHub.
 - [ ] Tag `v1.0.0` after the public page is verified.
