@@ -32,21 +32,23 @@ tools.
 
 ## Phase 0: Publication Safety
 
-**Status:** In progress
+**Status:** Exit gate met
 
 - [x] Create a separate repository outside all production repositories.
 - [x] Start a fresh Git history with no production commits or reflogs.
 - [x] Use a deny-by-default `.gitignore` for new top-level content.
 - [x] Document the public/private source boundary.
-- [ ] Complete remediation of credentials identified in private source audits.
+- [x] Complete remediation of credentials identified in private source audits.
 - [x] Confirm raw infrastructure exports are excluded from every public path.
 - [x] Establish a temporary evidence-redaction workspace outside this repo.
 - [x] Complete a history-wide secret scan before the first public push.
 
 The local public history, commit identity metadata, tracked-path inventory, and
-known-identifier denylist were reviewed on August 28, 2026. The remaining Phase
-0 gate is confirmation that any credential findings from private source audits
-were remediated and documented privately.
+known-identifier denylist were reviewed on August 28, 2026. Private source
+audits covered 14 repositories after their remote refs were refreshed. Thirteen
+histories had no findings; one repository's historical OAuth credential issue
+was removed from the current source, rotated in the operated environment,
+validated through a fresh login, and documented privately.
 
 **Exit gate:** No known production credential, raw export, or private history is
 present in the repository, and all known source-repository credential issues

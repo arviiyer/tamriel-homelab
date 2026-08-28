@@ -47,6 +47,10 @@ met. When remote CI is needed, create a private GitHub repository first.
 - Public Git metadata rewritten to a GitHub no-reply identity
 - External evidence-redaction workspace established with restrictive permissions
 - Local Gitleaks current-tree and complete-history scans passed
+- Private source audit completed across 14 repositories with refreshed remote
+  refs; the historical credential issue was corrected in current source,
+  rotated, validated through a fresh login, and documented privately
+- Phase 0 publication-safety exit gate met
 - Tracked paths reviewed with no raw exports or prohibited file types found
 - Markdown-link checks
 - GitHub workflow with immutable action references
@@ -323,8 +327,6 @@ bash automation/ci/tests/run_disposable_host_drill.sh
 
 ## Known Publication Gates
 
-- Remediate and privately document credentials discovered in source-repository
-  audits before public release.
 - Never publish raw OPNsense XML exports.
 - Never copy private `.git` directories or histories.
 - Add four reviewed runtime screenshots.
@@ -359,21 +361,18 @@ rows in `evidence/validation-matrix.md`.
 
 ## Next Restart Point
 
-Resolve the remaining Phase 0 credential-remediation gate, then prepare the four
-initial runtime screenshots in the established external review workspace.
+Prepare the four initial runtime screenshots in the established external review
+workspace.
 
 Recommended order:
 
 1. Re-read `AGENTS.md`, this handoff, and the publication policy.
-2. Confirm whether private source audits found real credentials; if so, revoke or
-   rotate them and record the outcome privately.
-3. Mark Phase 0 complete only after that private confirmation exists.
-4. Map each screenshot to one claim in the validation matrix before capture.
-5. Prioritize the Grafana security dashboard, Forgejo validation result, security
+2. Map each screenshot to one claim in the validation matrix before capture.
+3. Prioritize the Grafana security dashboard, Forgejo validation result, security
    alert or scan result, and Proxmox cluster summary.
-6. Crop, apply opaque redaction, strip metadata, run OCR, and obtain the required
+4. Crop, apply opaque redaction, strip metadata, run OCR, and obtain the required
    second review.
-7. Add only final reviewed images with matching `.review.md` records.
+5. Add only final reviewed images with matching `.review.md` records.
 
 Do not use the public repository as a deployment checkout or connect any exercise
 to a production target. The disposable-host Ansible and Falco exercises remain
