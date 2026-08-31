@@ -60,6 +60,8 @@ is met.
 - Digest-pinned whole-repository Trivy vulnerability, misconfiguration, and
   secret scanning, with one documented path-scoped exception for the
   root-required disposable delivery target
+- Private staging default-branch validation passed with the repository scan
+  enabled
 
 ### Trivy Evidence Slice
 
@@ -338,7 +340,6 @@ bash automation/ci/tests/run_disposable_host_drill.sh
 
 - Never publish raw OPNsense XML exports.
 - Never copy private `.git` directories or histories.
-- Revalidate the whole-repository Trivy scan in private staging CI.
 - Add four reviewed runtime screenshots.
 - Repeat the tracked-file and complete-history review immediately before the
   repository becomes public.

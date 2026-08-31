@@ -139,7 +139,7 @@ and corresponding public claim.
 
 ## Phase 6: Public Validation
 
-**Status:** Implementation complete; private staging revalidation pending
+**Status:** Exit gate met in private staging
 
 - [x] Add a local publication-safety check.
 - [x] Add baseline GitHub validation and secret scanning.
