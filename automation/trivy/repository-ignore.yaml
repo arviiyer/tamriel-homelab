@@ -1,0 +1,8 @@
+misconfigurations:
+  - id: AVD-DS-0002
+    paths:
+      - "automation/ci/tests/disposable-host/Dockerfile"
+    statement: >-
+      This network-isolated integration target must start dockerd, sshd, sudo,
+      and root-owned deployment state. It is never an application image or a
+      production security boundary.

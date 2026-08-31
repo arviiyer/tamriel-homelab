@@ -85,7 +85,7 @@ identifier or raw configuration.
 
 ## Phase 3: Executable Automation Evidence
 
-**Status:** In progress
+**Status:** Exit gate met in private staging
 
 - [x] Extract and harden the Trivy scan pipeline.
 - [x] Correct and test vulnerability delta identity behavior.
@@ -139,7 +139,7 @@ and corresponding public claim.
 
 ## Phase 6: Public Validation
 
-**Status:** Started
+**Status:** Implementation complete; private staging revalidation pending
 
 - [x] Add a local publication-safety check.
 - [x] Add baseline GitHub validation and secret scanning.
@@ -151,7 +151,7 @@ and corresponding public claim.
 - [x] Add Grafana JSON validation.
 - [x] Add Markdown link validation.
 - [x] Add isolated restore and systemd policy validation.
-- [ ] Add Trivy repository scanning.
+- [x] Add Trivy repository scanning.
 - [x] Confirm all current actions are pinned to immutable commit SHAs.
 
 **Exit gate:** Default-branch CI is green and validates every executable artifact

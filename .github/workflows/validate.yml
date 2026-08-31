@@ -219,6 +219,20 @@ jobs:
           check rules
           /workspace/automation/trivy/prometheus-rules.yml
 
+      - name: Scan repository with Trivy
+        run: >-
+          docker run --rm
+          -v "$PWD:/workspace:ro"
+          aquasec/trivy@sha256:7cced7cae583819fc7806d4cbc0dbbc7cad18b99f7d3e235192e6da8c091045c
+          fs
+          --scanners vuln,misconfig,secret
+          --severity HIGH,CRITICAL
+          --exit-code 1
+          --ignorefile /workspace/automation/trivy/repository-ignore.yaml
+          --no-progress
+          --skip-version-check
+          /workspace
+
       - name: Check Trivy CLI compatibility
         run: |
           image="aquasec/trivy@sha256:7cced7cae583819fc7806d4cbc0dbbc7cad18b99f7d3e235192e6da8c091045c"

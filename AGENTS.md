@@ -77,6 +77,11 @@ bash automation/ci/tests/validate_target.sh
 docker run --rm -v "$PWD:/workspace:ro" --entrypoint promtool \
   prom/prometheus@sha256:508729e0e2d18e11fd742a5a5ca70e557b940a93948c3c95fd0123a6fd538b69 \
   check rules /workspace/automation/trivy/prometheus-rules.yml
+docker run --rm -v "$PWD:/workspace:ro" \
+  aquasec/trivy@sha256:7cced7cae583819fc7806d4cbc0dbbc7cad18b99f7d3e235192e6da8c091045c \
+  fs --scanners vuln,misconfig,secret --severity HIGH,CRITICAL --exit-code 1 \
+  --ignorefile /workspace/automation/trivy/repository-ignore.yaml \
+  --no-progress --skip-version-check /workspace
 python3 automation/falco/tests/render_config.py /tmp/tamriel-falco.yaml
 docker run --rm \
   -v /tmp/tamriel-falco.yaml:/tmp/falco.yaml:ro \

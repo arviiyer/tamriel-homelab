@@ -1,6 +1,6 @@
 # Project Handoff
 
-**Updated:** August 28, 2026
+**Updated:** August 31, 2026
 
 ## Current Objective
 
@@ -57,6 +57,9 @@ is met.
 - Markdown-link checks
 - GitHub workflow with immutable action references
 - Gitleaks history-scanning workflow
+- Digest-pinned whole-repository Trivy vulnerability, misconfiguration, and
+  secret scanning, with one documented path-scoped exception for the
+  root-required disposable delivery target
 
 ### Trivy Evidence Slice
 
@@ -200,7 +203,6 @@ Validation completed:
 - 15 offline policy tests passed
 - Falco 0.44.1 accepted the rendered configuration and both rulesets
 - Falcosidekick 2.34.1 Compose rendering passed
-- Hardened Falcosidekick container process-health smoke test passed
 - Falco deployment playbook passed Ansible syntax validation
 
 Remaining proof:
@@ -299,6 +301,11 @@ systemd-analyze verify --recursive-errors=no \
 bash automation/ci/tests/validate_target.sh
 bash scripts/check-public-safety.sh
 python3 scripts/check-markdown-links.py
+docker run --rm -v "$PWD:/workspace:ro" \
+  aquasec/trivy@sha256:7cced7cae583819fc7806d4cbc0dbbc7cad18b99f7d3e235192e6da8c091045c \
+  fs --scanners vuln,misconfig,secret --severity HIGH,CRITICAL --exit-code 1 \
+  --ignorefile /workspace/automation/trivy/repository-ignore.yaml \
+  --no-progress --skip-version-check /workspace
 git diff --check
 ```
 
@@ -331,6 +338,7 @@ bash automation/ci/tests/run_disposable_host_drill.sh
 
 - Never publish raw OPNsense XML exports.
 - Never copy private `.git` directories or histories.
+- Revalidate the whole-repository Trivy scan in private staging CI.
 - Add four reviewed runtime screenshots.
 - Repeat the tracked-file and complete-history review immediately before the
   repository becomes public.
