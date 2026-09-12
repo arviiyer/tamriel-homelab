@@ -134,6 +134,13 @@ back from B to the target-recorded revision A. The target has no default network
 route, receives only the selected public artifacts rather than a repository
 mount, and is destroyed after exact-ID cleanup.
 
+Separately, the reviewed [Forgejo validation capture](../../evidence/screenshots/README.md#forgejo-validation)
+shows a successful Compose job with successful `Checkout workflow revision` and
+`Validate Compose files` steps. The
+[review record](../../evidence/screenshots/forgejo-validation-run.review.md)
+associates this run with a dependency-update pull request, not a demonstrated
+promotion or rollback.
+
 See [`automation/ci`](../../automation/ci) for the implementation and commands.
 
 ## Result
@@ -157,6 +164,8 @@ not shown.
 
 - The evidence proves public workflow and transaction behavior, not the current
   protection settings of a private Forgejo repository.
+- The Forgejo capture does not prove trigger type, branch protections,
+  required-check enforcement, reviewed-SHA semantics, promotion, or rollback.
 - The offline Python tests use a fake service adapter for container apply and
   health transitions; the separate disposable drill covers the real adapter and
   service path.
@@ -167,5 +176,5 @@ not shown.
   production-equivalent virtual machine.
 - The rollback boundary covers a tracked Compose definition and one image digest;
   database migrations and application-data restore are separate controls.
-- Reviewed workflow evidence showing the control running over time is required
-  before this can support an `Operated` claim.
+- Operated promotion/rollback and reviewed workflow evidence showing the control
+  running over time remain pending before this can support an `Operated` claim.

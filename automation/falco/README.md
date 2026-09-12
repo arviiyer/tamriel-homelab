@@ -193,4 +193,5 @@ on observed workloads. None of those values or raw events are included here.
   Falcosidekick receiver because network policy is environment-specific.
 - Falcosidekick does not provide durable queuing. Downstream delivery health
   needs separate monitoring.
-- No reviewed runtime alert or dashboard screenshot has been published yet.
+- No reviewed Falco runtime alert or dashboard screenshot has been included yet;
+  the Trivy captures do not close this evidence gap.

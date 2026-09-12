@@ -5,8 +5,10 @@ the Trivy and Falco contracts published in this repository. It demonstrates how
 scanner health, actionable finding deltas, and runtime events are separated for
 operator review.
 
-Status: **Drafted static evidence**. Grafana accepts the dashboard and
-provisioning files, but no operated-environment screenshot is included yet.
+Status: **Drafted static evidence for the public provisioning example**. Grafana
+accepts the dashboard and provisioning files. A reviewed
+[operated Trivy summary](../../evidence/screenshots/README.md#vulnerability-management)
+is available separately; it is not this exact purpose-written dashboard.
 
 ## Review Path
 
@@ -80,7 +82,10 @@ expected UID. This catches errors that JSON parsing alone cannot detect.
 
 The operated environment uses private datasource locations, additional
 infrastructure dashboards, and environment-specific labels. Those identifiers,
-raw exports, screenshots, and unrelated panels are deliberately excluded.
+raw exports, and unrelated panels are deliberately excluded. The reviewed Trivy
+summary shows HIGH/CRITICAL totals, new CRITICAL and fixable HIGH findings, and a
+Last Scan timestamp retained with explicit owner approval in the
+[review record](../../evidence/screenshots/grafana-security-dashboard.review.md).
 
 ## Limitations
 
@@ -90,5 +95,6 @@ raw exports, screenshots, and unrelated panels are deliberately excluded.
   `hostname`, and `rule` as Loki stream labels.
 - The dashboard shows detection and scanner telemetry, not complete SIEM
   coverage.
-- A reviewed runtime screenshot and query walkthrough are still required before
-  this becomes operated evidence.
+- Synthetic PromQL execution, scrape configuration, and Falco query/live proof
+  remain pending. The operated Trivy summary does not validate this public
+  provisioning example or establish operation over time.

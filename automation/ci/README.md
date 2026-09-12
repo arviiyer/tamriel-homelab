@@ -3,8 +3,9 @@
 Status: **Publicly evidenced as a validated implementation**. The public workflow
 and target transaction are covered by offline tests and a
 [dated disposable-target drill](../../evidence/drills/2026-08-24-fail-closed-delivery-rollback.md).
-Reviewed operated-workflow evidence is still required before this can support an
-`Operated` claim.
+A reviewed [Forgejo validation capture](../../evidence/screenshots/README.md#forgejo-validation)
+adds evidence of a successful Compose job. Operated promotion/rollback and
+evidence over time remain pending before this can support an `Operated` claim.
 
 This directory demonstrates how a reviewed source revision crosses from
 deployment-secret-free validation into a narrowly privileged deployment
@@ -93,6 +94,12 @@ general target access.
 
 ## Verification
 
+The Forgejo capture shows successful `Checkout workflow revision` and
+`Validate Compose files` steps. The
+[review record](../../evidence/screenshots/forgejo-validation-run.review.md)
+associates the run with a dependency-update pull request; this is narrower
+evidence than the synthetic exact-revision deployment and rollback drill.
+
 Run the offline policy and transaction tests from the repository root:
 
 ```bash
@@ -138,6 +145,8 @@ host.
 
 - The example proves public policy and state-transition behavior, not that a
   private repository has branch protection enabled.
+- The Forgejo capture does not prove trigger type, branch protections,
+  required-check enforcement, reviewed-SHA semantics, promotion, or rollback.
 - The target transaction changes only a Compose image digest. Database schemas,
   destructive migrations, and multi-service orchestration are outside its
   rollback boundary.

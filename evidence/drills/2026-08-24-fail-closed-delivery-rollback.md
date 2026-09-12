@@ -91,4 +91,6 @@ complete exercise was then rerun from a new target and passed.
 - Rollback covers one Compose definition and image digest. Database migrations,
   persistent application data, backup restore, and power-loss durability remain
   separate evidence tasks.
-- Public CI execution and reviewed operated-workflow screenshots remain pending.
+- Public CI execution and reviewed operated promotion/rollback evidence remain
+  pending. The later [Forgejo validation capture](../screenshots/forgejo-validation-run.review.md)
+  does not demonstrate those transactions.

@@ -120,19 +120,21 @@ code or reviewed runtime evidence.
 
 ## Phase 5: Runtime Evidence
 
-**Status:** In progress
+**Status:** Initial four-image set reviewed and included; public release pending
 
-- [ ] Capture a Grafana security dashboard.
-- [ ] Capture a successful Forgejo pull-request validation run.
-- [ ] Capture a reviewed security alert or scan result.
-- [ ] Capture a Proxmox cluster summary.
-- [ ] Capture a dependency-update pull request.
+- [x] Capture a Grafana security dashboard.
+- [x] Capture a successful Forgejo validation run associated with a pull request.
+- [x] Capture a reviewed security alert or scan result.
+- [x] Capture a Proxmox cluster summary.
+- [ ] Review and include a standalone dependency-update pull request (later target).
 - [x] Perform and document an isolated synthetic delivery rollback drill.
 - [x] Perform and document an isolated synthetic state-restore drill.
-- [ ] Redact, strip metadata from, and OCR-review selected screenshots.
+- [x] Redact, strip metadata from, and OCR-review selected screenshots.
 
-The initial release should use four high-quality screenshots rather than a large
-gallery.
+The [four-image gallery](evidence/screenshots/README.md) has completed image and
+caption review. Capture months, approved retained values, redactions, and scope
+limitations are recorded beside each image. These observations do not establish
+required-check enforcement, successful remediation, sustained uptime, or failover.
 
 **Exit gate:** Every published screenshot has a date, purpose, redaction record,
 and corresponding public claim.

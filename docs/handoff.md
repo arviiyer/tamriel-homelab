@@ -1,6 +1,6 @@
 # Project Handoff
 
-**Updated:** August 31, 2026
+**Updated:** September 12, 2026
 
 ## Current Objective
 
@@ -63,9 +63,34 @@ is met.
 - Private staging default-branch validation passed with the repository scan
   enabled
 
+### Reviewed Runtime Captures
+
+- Four owner-reviewed images in the [runtime gallery](../evidence/screenshots/README.md):
+  Trivy finding summary, Forgejo Compose validation, a delivered Discord alert,
+  and three-node Proxmox cluster health
+- Matching review records retain capture month, source classification, redactions,
+  checks, reviewer, and evidence boundaries; visible captions are short and date-free
+- Original scan-result timestamp and project-aligned cluster display name retained
+  with explicit owner approval; other identifying context cropped or masked
+- Originals, intermediate crops, and OCR output remain outside the repository
+- Initial Phase 5 capture/review work complete; public release still pending
+
+These are point-in-time observations, not proof of sustained uptime, automatic
+failover, completed remediation, or enforced repository protections. The repository
+remains private, and no deployment is part of this portfolio change.
+
+Pre-commit verification passed: all 145 Python tests, publication safety including
+the existing external private-identifier denylist, checksum-pinned Gitleaks scans
+of the working tree and retained history, Markdown links, and whitespace checks.
+The full required container/tool checks also passed: Ansible syntax, isolated
+restore, systemd policy, restricted SSH/sudo policy, Prometheus rules, Trivy
+repository scanning, Falco configuration/rules/routing, Grafana provisioning, and
+ShellCheck. The four PNGs match the reviewed drafts byte-for-byte; metadata and OCR
+were rechecked after import. Public visibility and public CI remain release gates.
+
 ### Trivy Evidence Slice
 
-Status: **Executable evidence**
+Status: **Publicly evidenced implementation and observed finding/alert presentation**
 
 Implemented under `automation/trivy/`:
 
@@ -90,11 +115,14 @@ Validation completed:
 - Real digest-pinned Trivy 0.73 output passed through `delta.py`
 - ShellCheck passed
 - Twelve Prometheus rules passed `promtool`
+- Reviewed [operated dashboard](../evidence/screenshots/README.md#vulnerability-management)
+  and [one delivered fix-aware alert](../evidence/screenshots/README.md#actionable-security-alert)
 
 Remaining proof:
 
-- Redacted Grafana or alert screenshot from the operated environment
 - Publicly visible GitHub Actions result after publication
+- Ongoing scan completeness and notification reliability if stronger operational
+  claims are made; the two captures are not proven to represent the same scan
 
 ### Fail-Closed Delivery Evidence Slice
 
@@ -131,10 +159,12 @@ Validation completed:
   cleanup
 - Reviewed validation record:
   `evidence/drills/2026-08-24-fail-closed-delivery-rollback.md`
+- Reviewed [Forgejo Compose validation](../evidence/screenshots/README.md#forgejo-validation)
+  associated with a dependency-update PR; this is not promotion or protection evidence
 
 Remaining proof:
 
-- Capture a reviewed Forgejo validation and promotion result
+- Capture a reviewed operated promotion and rollback result
 - Confirm the private repository's required checks and permission boundary
 - Confirm the promotion label maps only to a dedicated ephemeral runner
 - Repeat on a production-equivalent disposable VM if stronger filesystem and init
@@ -238,13 +268,15 @@ Validation completed:
 - Grafana 12.4.1 loaded both datasources and the dashboard from read-only
   provisioning mounts
 - The Grafana API returned the expected dashboard and folder UIDs
+- Reviewed [operated Trivy dashboard capture](../evidence/screenshots/README.md#vulnerability-management)
+  linked to Trivy evidence; not a capture of this public provisioning example
 
 Remaining proof:
 
 - Validate the queries against synthetic Prometheus and Loki data
 - Publish selected sanitized central scrape and log configuration
-- Capture and review an operated dashboard screenshot
-- Link the screenshot to the Trivy and Falco evidence claims
+- Validate the public dashboard's behavior independently of the operated Trivy view
+- Capture separate Falco runtime evidence before strengthening that claim
 
 ### Recovery and Storage Evidence Slice
 
@@ -340,25 +372,30 @@ bash automation/ci/tests/run_disposable_host_drill.sh
 
 - Never publish raw OPNsense XML exports.
 - Never copy private `.git` directories or histories.
-- Add four reviewed runtime screenshots.
+- Preserve screenshot review records and the distinction between observed results
+  and unverified operational claims.
 - Repeat the tracked-file and complete-history review immediately before the
   repository becomes public.
 
 ## Resume Evidence Status
 
-- Trivy delta-based vulnerability scanning: executable evidence; runtime
-  screenshot pending.
+- Trivy delta-based vulnerability scanning: publicly evidenced implementation,
+  reviewed finding presentation, and one observed delivered notification.
 - Exact-revision fail-closed delivery: publicly evidenced as validated on an
-  isolated disposable synthetic target; operated workflow evidence pending.
+  isolated disposable synthetic target; operated promotion/rollback evidence pending.
+- Forgejo Compose validation: one successful run associated with a dependency-update
+  PR is publicly evidenced; enforced merge checks and permissions remain unverified.
 - Ansible hardening and patching: drafted static evidence; live transaction
   pending.
 - Architecture and threat model: Phase 2 narrative complete with a primary
-  trust-boundary diagram, network and identity design, and four ADRs; runtime
-  evidence pending.
+  trust-boundary diagram, network and identity design, and four ADRs; reviewed
+  three-node cluster health now supports point-in-time platform evidence, not
+  sustained availability or broader network/storage claims.
 - Falco runtime detection: drafted static evidence; live transaction and runtime
   alert pending.
 - Security observability dashboard: drafted static evidence; synthetic query
-  execution and operated screenshot pending.
+  execution and central configuration pending. The reviewed operated Trivy view
+  does not validate the public dashboard's queries or Falco panels.
 - Isolated synthetic restore: publicly evidenced; private backup implementation
   and operated recovery evidence pending.
 - Storage-readiness startup policy: executable static evidence; live mount and
@@ -371,18 +408,22 @@ rows in `evidence/validation-matrix.md`.
 
 ## Next Restart Point
 
-Prepare the four initial runtime screenshots in the established external review
-workspace.
+The four initial runtime captures and their short captions have been reviewed and
+included in the repository. Do not repeat capture work or import the external workspace.
+Move to the remaining evidence and release-readiness gaps.
 
 Recommended order:
 
 1. Re-read `AGENTS.md`, this handoff, and the publication policy.
-2. Map each screenshot to one claim in the validation matrix before capture.
-3. Prioritize the Grafana security dashboard, Forgejo validation result, security
-   alert or scan result, and Proxmox cluster summary.
-4. Crop, apply opaque redaction, strip metadata, run OCR, and obtain the required
-   second review.
-5. Add only final reviewed images with matching `.review.md` records.
+2. Check GitHub validation for the latest revision and run the required pre-commit
+   checks before later changes are committed. Re-review image/review pairs whenever
+   their content changes; new pairs must be force-added for the admission checker.
+3. Prioritize synthetic Prometheus/Loki query validation for the public dashboard,
+   then disposable-host Ansible and Falco transactions as separate evidence tasks.
+4. Finalize resume wording only against the current claim-to-evidence matrix; do
+   not turn a validation screenshot into a protected-delivery claim.
+5. Choose the release date and complete file/history/private-identifier review,
+   profile alignment, and public CI/link checks before tagging or publication.
 
 Do not use the public repository as a deployment checkout or connect any exercise
 to a production target. The disposable-host Ansible and Falco exercises remain

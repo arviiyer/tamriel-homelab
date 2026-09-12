@@ -103,7 +103,16 @@ Required review:
 5. Strip EXIF and ancillary metadata.
 6. Run OCR and inspect the extracted text.
 7. Have a second review compare the image with this policy.
-8. Add a caption that states capture month, purpose, and redactions performed.
+8. Add a short purpose caption and a linked review record containing capture month,
+   redactions, reviewer, and claim limitations. Capture dates need not appear in
+   the visible gallery caption.
+
+The initial reviewed set has two specific owner-approved retained values: the
+[past scan-result timestamp](../evidence/screenshots/grafana-security-dashboard.review.md)
+and the [cluster display name matching the public project](../evidence/screenshots/proxmox-cluster-summary.review.md).
+These approvals do not extend to recurring schedules, node names, account details,
+or other identifying values. Do not replace real labels with fabricated aliases
+inside an image.
 
 Original screenshots remain outside the public repository.
 

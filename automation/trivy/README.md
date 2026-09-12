@@ -5,6 +5,11 @@ configuration, compares complete scans, and exports actionable Prometheus
 metrics. It is a sanitized and hardened derivative of the pipeline operated in
 the private homelab.
 
+Reviewed runtime evidence shows [finding presentation](../../evidence/screenshots/README.md#vulnerability-management)
+and [one fix-aware notification delivered to Discord](../../evidence/screenshots/README.md#actionable-security-alert).
+The captures complement the synthetic tests; they do not prove successful
+remediation, latest-scan completeness, or continued notification delivery.
+
 ## Problem
 
 A recurring scanner that repeatedly reports the same findings creates noise. A

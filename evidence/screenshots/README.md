@@ -1,10 +1,51 @@
 # Screenshot Evidence
 
+## Runtime Gallery
+
+Four reviewed captures from the operated environment. Click an image to open it
+at full resolution. Capture months, redactions, and claim boundaries are recorded
+in the linked review records; these are point-in-time observations, not uptime or
+recovery tests.
+
+### Vulnerability Management
+
+[![Trivy vulnerability summary](grafana-security-dashboard.png)](grafana-security-dashboard.png)
+
+*Trivy dashboard showing vulnerability totals and new critical and fixable HIGH findings.*
+
+[Redaction and review details](grafana-security-dashboard.review.md)
+
+### Forgejo Validation
+
+[![Successful Forgejo Compose validation](forgejo-validation-run.png)](forgejo-validation-run.png)
+
+*Successful Forgejo Compose validation associated with a dependency-update pull request.*
+
+[Redaction and review details](forgejo-validation-run.review.md)
+
+### Actionable Security Alert
+
+[![Trivy alert delivered to Discord](security-scan-alert.png)](security-scan-alert.png)
+
+*Trivy alert delivered to Discord for eight new high-severity findings with available fixes.*
+
+[Redaction and review details](security-scan-alert.review.md)
+
+### Proxmox Cluster Health
+
+[![Proxmox cluster showing three online nodes and quorum](proxmox-cluster-summary.png)](proxmox-cluster-summary.png)
+
+*Proxmox cluster health showing three nodes online and quorum established.*
+
+[Redaction and review details](proxmox-cluster-summary.review.md)
+
+## Publication Rules
+
 This directory accepts only final, reviewed screenshots. Original captures and
 working redaction files stay outside the repository.
 
-The deny-by-default `.gitignore` requires each image to be force-added after
-review. Every image must also have a same-name `.review.md` record. For example:
+The deny-by-default `.gitignore` requires each image and its same-name `.review.md`
+record to be force-added after review. For example:
 
 ```text
 grafana-security-dashboard.png
@@ -25,13 +66,14 @@ grafana-security-dashboard.review.md
 - Hostnames and addresses removed: Yes
 - Usernames, emails, and IDs removed: Yes
 - Hashes, tokens, and fingerprints removed: Yes
+- Owner-approved retained values: None / <specific values and rationale>
 - Metadata stripped: Yes
 - OCR output reviewed: Yes
 - Second reviewer: <name or handle>
 - Notes: <what remains visible and why it is safe>
 ```
 
-## Initial V1 Capture Briefs
+## Capture Boundaries
 
 Capture only the minimum region described below. Browser chrome, navigation,
 sidebars, notifications, and unrelated rows should remain outside the capture
@@ -39,10 +81,10 @@ rather than being redacted afterward.
 
 | Filename | Evidence to retain | Content to remove or redact |
 |---|---|---|
-| `grafana-security-dashboard.png` | Dashboard title and the smallest set of panels showing scan health, actionable findings, and runtime-detection activity | URL, exact time range, datasource or host names, repository names, user identity, and notification details |
-| `forgejo-validation-run.png` | Pull-request validation heading, required check names, and their successful conclusions | Repository and organization names, actor identity, commit hash, pull-request number, branch names, runner labels, URL, and exact timestamps |
-| `security-scan-alert.png` | One reviewed scan or alert showing severity, actionable transition, and healthy scan context | Repository, image, host, destination, rule-instance IDs, hashes, URLs, notification recipient, and exact timestamps |
-| `proxmox-cluster-summary.png` | Cluster health or quorum state and three visible node rows | Cluster and node names, addresses, VM or storage IDs, guest names, subscription keys, task history, exact versions, and exact resource totals |
+| `grafana-security-dashboard.png` | Severity totals and new critical/fixable HIGH findings; original Last Scan timestamp retained with owner approval | Surrounding tables, navigation, repository/image references, and user identity |
+| `forgejo-validation-run.png` | Workflow and job names, successful checkout and Compose-validation steps; not proof of required-check enforcement | Repository and organization names, actor identity, commit hash, pull-request number, image/version details, and surrounding navigation |
+| `security-scan-alert.png` | One delivered notification showing severity, new fixable findings, firing status, and an update instruction; not proof of scan completeness or remediation | Repository, image reference/version/digest, sender header, and message timestamp |
+| `proxmox-cluster-summary.png` | Cluster health, quorum state, and aggregate online/offline node counts; project-aligned cluster name retained with owner approval | Node tree, addresses, VM or storage IDs, guest names, account header, task history, exact versions, and resource totals |
 
 Public CVE identifiers and generic product labels may remain visible. Opaque
 redaction must fully cover each private value; do not replace real labels with
