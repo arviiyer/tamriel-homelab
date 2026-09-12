@@ -3,7 +3,7 @@ FROM docker:29.1.3-dind@sha256:173f284a4299164772a90f52b373e73e087583c0963f1334c
 RUN apk add --no-cache \
         bash=5.3.3-r1 \
         busybox-extras=1.37.0-r30 \
-        curl=8.20.0-r0 \
+        curl=8.22.0-r0 \
         docker-registry=2.8.3-r23 \
         openssh-server=10.2_p1-r0 \
         python3=3.12.14-r0 \

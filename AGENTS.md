@@ -71,6 +71,7 @@ python3 automation/recovery/tests/run_isolated_restore_drill.py
 systemd-analyze verify --recursive-errors=no \
   automation/recovery/systemd/example-storage-dependent.service
 bash automation/ci/tests/validate_target.sh
+bash automation/ci/tests/run_disposable_host_drill.sh --build-only
 (cd automation/ansible && ansible-playbook --syntax-check playbooks/site.yml)
 (cd automation/ansible && ansible-playbook --syntax-check playbooks/controlled-upgrade.yml)
 (cd automation/falco && ansible-playbook --syntax-check playbooks/falco.yml)

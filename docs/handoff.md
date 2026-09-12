@@ -85,7 +85,11 @@ of the working tree and retained history, Markdown links, and whitespace checks.
 The full required container/tool checks also passed: Ansible syntax, isolated
 restore, systemd policy, restricted SSH/sudo policy, Prometheus rules, Trivy
 repository scanning, Falco configuration/rules/routing, Grafana provisioning, and
-ShellCheck. The four PNGs match the reviewed drafts byte-for-byte; metadata and OCR
+ShellCheck. CI additionally exposed a stale Alpine curl pin in the disposable
+delivery-image build. The pin was refreshed and a fresh build passed. The existing
+build-only check is now part of the local pre-commit list as well as CI; it does
+not execute the privileged drill. The four PNGs match the reviewed drafts
+byte-for-byte; metadata and OCR
 were rechecked after import. Public visibility and public CI remain release gates.
 
 ### Trivy Evidence Slice
@@ -333,6 +337,7 @@ python3 automation/recovery/tests/run_isolated_restore_drill.py
 systemd-analyze verify --recursive-errors=no \
   automation/recovery/systemd/example-storage-dependent.service
 bash automation/ci/tests/validate_target.sh
+bash automation/ci/tests/run_disposable_host_drill.sh --build-only
 bash scripts/check-public-safety.sh
 python3 scripts/check-markdown-links.py
 docker run --rm -v "$PWD:/workspace:ro" \
