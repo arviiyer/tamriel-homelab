@@ -13,6 +13,10 @@ recovery tests.
 
 *Trivy dashboard showing vulnerability totals and new critical and fixable HIGH findings.*
 
+The displayed "Secrets in Git History" / "CLEAN" label is not evidence of a
+complete-history audit. The [public Trivy pipeline](../../automation/trivy/README.md#secret-scanning-boundary)
+scans the current tree; this portfolio's Git-history audit is a separate control.
+
 [Redaction and review details](grafana-security-dashboard.review.md)
 
 ### Forgejo Validation

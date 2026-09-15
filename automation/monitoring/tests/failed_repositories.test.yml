@@ -1,0 +1,72 @@
+# validate_promql.py injects the actual dashboard expression into every case.
+evaluation_interval: 1m
+tests:
+  - name: healthy repositories
+    input_series:
+      - series: trivy_scan_repository_success{repository="apps"}
+        values: '1'
+      - series: trivy_scan_repository_success{repository="security"}
+        values: '1'
+      - series: trivy_scan_attempt_timestamp_seconds
+        values: '0'
+    promql_expr_test:
+      - eval_time: 0m
+        exp_samples:
+          - labels: '{}'
+            value: 0
+
+  - name: all repositories failed
+    input_series:
+      - series: trivy_scan_repository_success{repository="apps"}
+        values: '0'
+      - series: trivy_scan_repository_success{repository="security"}
+        values: '0'
+      - series: trivy_scan_attempt_timestamp_seconds
+        values: '0'
+    promql_expr_test:
+      - eval_time: 0m
+        exp_samples:
+          - labels: '{}'
+            value: 2
+
+  - name: mixed repositories count only failures
+    input_series:
+      - series: trivy_scan_repository_success{repository="apps"}
+        values: '0'
+      - series: trivy_scan_repository_success{repository="security"}
+        values: '1'
+      - series: trivy_scan_repository_success{repository="monitoring"}
+        values: '0'
+      - series: trivy_scan_attempt_timestamp_seconds
+        values: '0'
+    promql_expr_test:
+      - eval_time: 0m
+        exp_samples:
+          - labels: '{}'
+            value: 2
+
+  - name: attempt telemetry alone permits zero fallback
+    input_series:
+      - series: trivy_scan_attempt_timestamp_seconds
+        values: '0'
+    promql_expr_test:
+      - eval_time: 0m
+        exp_samples:
+          - labels: '{}'
+            value: 0
+
+  - name: absent telemetry stays no data
+    input_series: []
+    promql_expr_test:
+      - eval_time: 0m
+        exp_samples: []
+
+  - name: healthy repositories without attempt telemetry stay no data
+    input_series:
+      - series: trivy_scan_repository_success{repository="apps"}
+        values: '1'
+      - series: trivy_scan_repository_success{repository="security"}
+        values: '1'
+    promql_expr_test:
+      - eval_time: 0m
+        exp_samples: []

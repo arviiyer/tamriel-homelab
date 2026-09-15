@@ -200,7 +200,7 @@
         {
           "datasource": {"type": "prometheus", "uid": "security-prometheus"},
           "editorMode": "code",
-          "expr": "sum(trivy_scan_repository_success == 0) or on() (0 * max(trivy_scan_attempt_timestamp_seconds))",
+          "expr": "count(trivy_scan_repository_success == 0) or on() (0 * max(trivy_scan_attempt_timestamp_seconds))",
           "instant": true,
           "legendFormat": "Failed repositories",
           "range": false,

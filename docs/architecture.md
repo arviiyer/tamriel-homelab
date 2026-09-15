@@ -10,6 +10,10 @@ change, and recoverable state.
 The public model uses role-based aliases and omits production addressing and
 identifiers.
 
+This document describes the represented architecture, not independent validation
+of every operated control. The [claim-to-evidence matrix](../evidence/validation-matrix.md)
+separates design, executable examples, and reviewed runtime evidence.
+
 ## Trust-Boundary and Data-Flow Model
 
 The primary [platform diagram](../README.md#architecture) presents the logical

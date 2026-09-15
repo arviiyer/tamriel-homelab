@@ -119,6 +119,7 @@ Four reviewed captures, with full-resolution images and review records one link 
 - [Architecture decision records](docs/adr/README.md)
 - [Platform catalog](docs/platform-catalog.md)
 - [Current handoff](docs/handoff.md)
+- [v1 release readiness](docs/release-readiness.md)
 - [Content plan](docs/content-plan.md)
 - [Publication policy](docs/publication-policy.md)
 - [Publication roadmap](ROADMAP.md)
@@ -143,7 +144,8 @@ runtime captures now show Trivy findings and one delivered alert, Forgejo valida
 and point-in-time cluster health. Fail-closed delivery and isolated restore retain
 their dated synthetic drill evidence; the storage-startup policy is executable
 static evidence. Network and identity claims remain drafted. Ansible and Falco
-live transactions, the public Grafana example's query validation, and operated
-promotion/rollback remain pending. See the [current handoff](docs/handoff.md) and
+live transactions, the public Grafana example's remaining query validation, and
+operated promotion/rollback remain pending. The failed-repository counter now has
+six synthetic PromQL regression cases. See the [current handoff](docs/handoff.md) and
 [roadmap](ROADMAP.md) for the exact restart point and remaining publication
 gates.

@@ -1,6 +1,6 @@
 # Project Handoff
 
-**Updated:** September 12, 2026
+**Updated:** September 15, 2026
 
 ## Current Objective
 
@@ -24,6 +24,93 @@ repositories.
 
 Do not make the repository public until the v1 publication gate in `ROADMAP.md`
 is met.
+
+## September 15 Release-Readiness Review
+
+**Decision:** Hold publication. The minimum-v1 content and bounded resume/GitHub
+wording are prepared in the [release checklist](release-readiness.md), but the
+owner's public-release decision remains open. The metadata review permits an
+ordinary private-staging push; the owner authorized one commit and branch-only
+push of this reviewed change set after final checks. Public visibility, profile
+edits, tags, and later unrelated commits are not part of that approval.
+
+Changes prepared:
+
+- Fixed the public Grafana failed-repository counter: summing zero-valued failed
+  samples always returned zero; counting them reports the failures correctly.
+- Added six pinned-promtool cases against the actual dashboard expression,
+  covering healthy, failed, mixed, attempt-only, and missing-telemetry behavior;
+  integrated the check into CI and local verification.
+- Qualified the operated screenshot's secret-history label beside the image,
+  documented Trivy finding-identity continuity limits, and corrected the SSH
+  role's unsupported `Match`-policy implication.
+- Added architecture/catalog evidence boundaries and replaced overbroad resume
+  drafts with two evidence-backed bullets and prepared GitHub presentation.
+- Separated optional evidence improvements from minimum-v1 release gates.
+
+Validation completed locally:
+
+- All 145 Python tests passed, with no failures, errors, or skips.
+- Six dashboard PromQL regression cases passed; the old expression failed both
+  the all-failed and mixed-repository cases before the fix.
+- All 12 Prometheus alert rules, Grafana provisioning/loading, Falco dry-run
+  configuration/rules, and Falcosidekick Compose rendering passed.
+- Ansible playbook syntax, effective inventory, Debian apt-policy compatibility,
+  restricted SSH/sudo validation, systemd policy, and the isolated restore drill
+  passed.
+- The disposable delivery image built successfully. This was build-only, not a
+  new privileged delivery or rollback drill; the full drill remains dated August 24.
+- ShellCheck and all 23 workflow-listed Python compilation checks passed.
+- The pinned Trivy repository scan passed its HIGH/CRITICAL vulnerability,
+  misconfiguration, and secret policy with the existing scoped exception.
+  CLI/schema compatibility and baseline initialization also passed; the pinned
+  Alpine fixture is end-of-life and is not a recommended deployment image.
+- Checksum-verified Gitleaks 8.30.1 found no secrets in the working tree or all 16
+  local commits, including reflog-only history. This is not an identity audit.
+- Generic publication-safety checks, local Markdown links, working-tree
+  whitespace, and ref-reachable history whitespace checks passed.
+- The private-identifier audit also passed after locating the existing input in
+  the external evidence workspace's audit directory. The earlier filename search
+  had missed the hidden workspace. The checker used the file in place without
+  displaying or importing its values, checking current files, the staged index,
+  ref-reachable history, and metadata and paths. This covers the existing list;
+  it does not establish that the list contains every possible private identifier.
+
+Local Python was 3.14.7 with Ansible Core 2.21.3; hosted CI uses Python 3.13. The
+September 12 GitHub run passed for the starting baseline, not the changes in this
+review. After the approved commit and push, verify private staging CI for the
+exact new revision; the local results do not substitute for that run.
+
+Manual review covered all 126 tracked files at the starting revision, including
+86 non-Markdown text artifacts, 36 Markdown files, and four screenshot/review
+pairs. All ref-reachable historical changes were inspected, plus the two
+reflog-only commits and two excluded dangling Markdown drafts. Image structure
+and visible content were checked; no images changed, and OCR was not repeated.
+Generic review found no new source-boundary disclosure in the current/ref-reachable
+publication content. It cannot replace the private-identifier audit.
+
+Final review also covered all 17 changed or new publication candidates, including
+the PromQL regression and release checklist, with no additional findings.
+
+Remaining safety and release gates:
+
+- Repeat the now-passed private-identifier audit against the final publication
+  snapshot. The existing input remains outside the repository in the evidence
+  workspace's audit directory; its exact path and values stay private.
+- The [commit metadata review](release-readiness.md#commit-metadata-review)
+  confirmed that current refs and the effective new-commit identity use no-reply
+  emails. Two superseded commits are reachable only through local reflogs, and
+  an ordinary branch-only push will not send them. Fresh GitHub commit-object
+  requests returned not found; only `main` and no pull requests were visible.
+  No rewrite or local pruning is needed for private staging. Remote-retention
+  uncertainty remains part of the owner's public-release decision; do not restore
+  those commits or publish the local `.git` directory.
+- Private vulnerability-reporting availability could not be confirmed during
+  private staging. Verify it as part of publication, before relying on the
+  reporting channel in `SECURITY.md`.
+- Verify private staging CI for the approved commit. The release date, public
+  visibility, signed-out links, profile application, and tag still require the
+  release sequence and separate owner approvals.
 
 ## Completed Work
 
@@ -79,8 +166,8 @@ These are point-in-time observations, not proof of sustained uptime, automatic
 failover, completed remediation, or enforced repository protections. The repository
 remains private, and no deployment is part of this portfolio change.
 
-Pre-commit verification passed: all 145 Python tests, publication safety including
-the existing external private-identifier denylist, checksum-pinned Gitleaks scans
+September 12 pre-commit verification passed: all 145 Python tests, publication
+safety including the existing external private-identifier denylist, checksum-pinned Gitleaks scans
 of the working tree and retained history, Markdown links, and whitespace checks.
 The full required container/tool checks also passed: Ansible syntax, isolated
 restore, systemd policy, restricted SSH/sudo policy, Prometheus rules, Trivy
@@ -277,7 +364,8 @@ Validation completed:
 
 Remaining proof:
 
-- Validate the queries against synthetic Prometheus and Loki data
+- Validate the remaining queries against synthetic Prometheus and Loki data;
+  the failed-repository counter now has six executable PromQL cases
 - Publish selected sanitized central scrape and log configuration
 - Validate the public dashboard's behavior independently of the operated Trivy view
 - Capture separate Falco runtime evidence before strengthening that claim
@@ -332,6 +420,7 @@ python3 -m unittest discover -s automation/ansible/tests -p 'test_*.py' -v
 python3 -m unittest discover -s automation/ci/tests -p 'test_*.py' -v
 python3 -m unittest discover -s automation/falco/tests -p 'test_*.py' -v
 python3 -m unittest discover -s automation/monitoring/tests -p 'test_*.py' -v
+python3 automation/monitoring/tests/validate_promql.py
 python3 -m unittest discover -s automation/recovery/tests -p 'test_*.py' -v
 python3 automation/recovery/tests/run_isolated_restore_drill.py
 systemd-analyze verify --recursive-errors=no \
@@ -398,8 +487,9 @@ bash automation/ci/tests/run_disposable_host_drill.sh
   sustained availability or broader network/storage claims.
 - Falco runtime detection: drafted static evidence; live transaction and runtime
   alert pending.
-- Security observability dashboard: drafted static evidence; synthetic query
-  execution and central configuration pending. The reviewed operated Trivy view
+- Security observability dashboard: drafted evidence; six synthetic PromQL cases
+  cover the failed-repository counter, while other query execution and central
+  configuration remain pending. The reviewed operated Trivy view
   does not validate the public dashboard's queries or Falco panels.
 - Isolated synthetic restore: publicly evidenced; private backup implementation
   and operated recovery evidence pending.
@@ -408,34 +498,40 @@ bash automation/ci/tests/run_disposable_host_drill.sh
 - Networking: drafted design; zone-policy validation and operated evidence
   pending.
 
-Do not finalize the resume bullets until all clauses map to `Publicly evidenced`
-rows in `evidence/validation-matrix.md`.
+The [finalized bounded resume wording](release-readiness.md#resume-wording) maps
+only to `Publicly evidenced` rows in `evidence/validation-matrix.md`. Apply it to
+the actual resume after public access and signed-out links are verified.
 
 ## Next Restart Point
 
-The four initial runtime captures and their short captions have been reviewed and
-included in the repository. Do not repeat capture work or import the external workspace.
-Move to the remaining evidence and release-readiness gaps.
+The minimum-v1 content is prepared. Do not repeat capture work, import the external
+redaction workspace, or expand the evidence scope before closing the release gates.
 
 Recommended order:
 
 1. Re-read `AGENTS.md`, this handoff, and the publication policy.
-2. Check GitHub validation for the latest revision and run the required pre-commit
-   checks before later changes are committed. Re-review image/review pairs whenever
-   their content changes; new pairs must be force-added for the admission checker.
-3. Prioritize synthetic Prometheus/Loki query validation for the public dashboard,
-   then disposable-host Ansible and Falco transactions as separate evidence tasks.
-4. Finalize resume wording only against the current claim-to-evidence matrix; do
-   not turn a validation screenshot into a protected-delivery claim.
-5. Choose the release date and complete file/history/private-identifier review,
-   profile alignment, and public CI/link checks before tagging or publication.
+2. Review the prepared diff and [release checklist](release-readiness.md), and
+   check private staging CI for the exact candidate revision. The private audit
+   input has been located and the current audit passed; do not recreate or import it.
+3. Any further changes require their own review, checks, and commit/push approval.
+   Repeat required checks and file/history/private-identifier review against the
+   final publication snapshot.
+4. Agree the release date and obtain explicit visibility-change approval,
+   including the bounded metadata-review outcome. Confirm public CI, private
+   vulnerability reporting, and signed-out links after release.
+5. Apply the prepared resume/profile presentation and tag only after the relevant
+   owner approvals and public verification pass.
 
 Do not use the public repository as a deployment checkout or connect any exercise
 to a production target. The disposable-host Ansible and Falco exercises remain
 separate evidence tasks.
 
-## Later Order
+## Optional Follow-Up Evidence
 
-1. Network segmentation and migration postmortem
-2. Disposable-host Ansible and Falco exercises
-3. Publication review, profile, and resume alignment
+1. Remaining Prometheus/Loki query execution and central telemetry configuration
+2. Disposable-host Ansible and Falco transactions
+3. Network segmentation and migration postmortem
+4. Dependency-update, operated promotion/rollback, and private backup/recovery evidence
+
+These are not additional minimum-v1 gates. Keep their claims limited until the
+corresponding evidence exists.

@@ -90,10 +90,13 @@ Vulnerabilities are identified by:
 repository + image + target + package + package path + vulnerability ID
 ```
 
-Installed version, severity, and fixed version are attached metadata. Package
-updates do not produce false fixed/new churn while the same package and
-vulnerability remain present. Security-relevant metadata changes are reported
-separately when severity increases or a fix becomes available.
+Installed version, severity, and fixed version are attached metadata. Changes to
+these fields do not create absent/new findings while the complete identity above
+remains unchanged. The image field includes the full reference: changing an image
+tag or digest, target, or package path can produce absent/new findings even when
+the same package and vulnerability persist. Security-relevant metadata changes
+within an unchanged identity are reported separately when severity increases or
+a fix becomes available.
 
 Misconfigurations are identified by:
 

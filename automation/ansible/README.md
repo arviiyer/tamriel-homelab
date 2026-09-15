@@ -71,8 +71,9 @@ active, and rechecks the live policy checksum before transaction data is removed
 The inventory must attest that key access and an out-of-band console recovery
 path were tested. Password connection variables are rejected, and the active
 Ansible user must be present in `ssh_allowed_users`. It must also provide the
-management client's source address so `sshd -T -C` evaluates any `Match Address`
-policy in the real administrative context.
+management client's source address so `sshd -T -C` checks effective policy in the
+administrative context. Existing `Match` policies require reconciliation before
+using this role; the supported configuration shape rejects those blocks.
 
 The playbook uses `serial: 1` and `any_errors_fatal: true`; one failed reconnect
 stops the rollout before another host is changed.

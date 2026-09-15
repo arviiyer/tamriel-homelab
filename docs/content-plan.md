@@ -101,19 +101,12 @@ dependency examples, and dated exercise result.
 
 ## Resume Alignment
 
-Draft project entry:
-
-> Designed and operate a three-node Proxmox private cloud with segmented
-> networks, centralized identity, private ingress, security observability, and
-> automated VM backups.
-
-> Implemented security and delivery automation across infrastructure
-> repositories using Ansible, Trivy, Falco, Renovate, and protected self-hosted
-> CI, including delta-based vulnerability alerts, exact-revision deployment,
-> and rollback controls.
-
-These remain draft claims until their rows in
-`evidence/validation-matrix.md` are marked `Publicly evidenced`.
+Use the two [evidence-backed resume bullets](release-readiness.md#resume-wording)
+and matching GitHub presentation in the v1 release checklist. Each clause maps
+to a `Publicly evidenced` row in the [claim-to-evidence matrix](../evidence/validation-matrix.md).
+The wording deliberately excludes stronger operational claims that remain
+drafted or planned. Profile and resume publication wait for public repository
+access and signed-out link verification.
 
 ## Explicit Exclusions
 

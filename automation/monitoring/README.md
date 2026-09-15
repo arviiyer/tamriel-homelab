@@ -5,7 +5,7 @@ the Trivy and Falco contracts published in this repository. It demonstrates how
 scanner health, actionable finding deltas, and runtime events are separated for
 operator review.
 
-Status: **Drafted static evidence for the public provisioning example**. Grafana
+Status: **Drafted evidence for the public provisioning example**. Grafana
 accepts the dashboard and provisioning files. A reviewed
 [operated Trivy summary](../../evidence/screenshots/README.md#vulnerability-management)
 is available separately; it is not this exact purpose-written dashboard.
@@ -33,7 +33,11 @@ automation/monitoring/
 |   `-- provisioning/
 |       |-- dashboards/security.yml
 |       `-- datasources/security.yml
-|-- tests/test_dashboard.py
+|-- tests/
+|   |-- failed_repositories.test.yml
+|   |-- test_dashboard.py
+|   |-- validate_grafana.py
+|   `-- validate_promql.py
 `-- requirements.txt
 ```
 
@@ -78,6 +82,22 @@ Public CI also starts Grafana 12.4.1 from an immutable image digest, mounts the
 provisioning files read-only, and requires the dashboard API to return the
 expected UID. This catches errors that JSON parsing alone cannot detect.
 
+Run the focused PromQL regression (requires Docker and the existing
+`requirements.txt` dependency):
+
+```bash
+python3 automation/monitoring/tests/validate_promql.py
+```
+
+This command also runs in public CI. It injects the actual **Failed Repositories**
+dashboard expression into six synthetic cases and executes `promtool test rules`
+using the same pinned Prometheus image as CI's rule validation. Healthy, failed,
+and mixed repositories exercise the failure count: `count` counts zero-valued
+failures rather than summing their zeros. Attempt-only telemetry permits the
+existing zero fallback; absent telemetry and healthy repositories without an
+attempt timestamp remain no data. No Prometheus server or live datasource is
+started, and the fixture contains no separate copy of the query that could drift.
+
 ## Production Differences
 
 The operated environment uses private datasource locations, additional
@@ -95,6 +115,7 @@ Last Scan timestamp retained with explicit owner approval in the
   `hostname`, and `rule` as Loki stream labels.
 - The dashboard shows detection and scanner telemetry, not complete SIEM
   coverage.
-- Synthetic PromQL execution, scrape configuration, and Falco query/live proof
-  remain pending. The operated Trivy summary does not validate this public
-  provisioning example or establish operation over time.
+- Synthetic PromQL execution covers only the Failed Repositories expression.
+  Other queries, scrape configuration, and Falco query/live proof remain pending.
+  The operated Trivy summary does not validate this public provisioning example
+  or establish operation over time.

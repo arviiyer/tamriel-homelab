@@ -68,6 +68,7 @@ jobs:
           automation/falco/tests/test_policy.py
           automation/monitoring/tests/test_dashboard.py
           automation/monitoring/tests/validate_grafana.py
+          automation/monitoring/tests/validate_promql.py
           automation/recovery/restore.py
           automation/recovery/tests/archive_factory.py
           automation/recovery/tests/test_restore.py
@@ -119,6 +120,9 @@ jobs:
           -s automation/monitoring/tests
           -p 'test_*.py'
           -v
+
+      - name: Check dashboard failure-count PromQL
+        run: python3 automation/monitoring/tests/validate_promql.py
 
       - name: Run recovery policy and restore tests
         run: >-

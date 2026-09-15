@@ -4,6 +4,10 @@ This catalog describes capabilities rather than production placement, addresses,
 or exact versions. Application count is not used as a measure of engineering
 quality.
 
+Catalog inclusion is not proof that a capability has been publicly validated.
+Use the [claim-to-evidence matrix](../evidence/validation-matrix.md) for the
+implementation and operational boundaries supported by this portfolio.
+
 ## Foundation
 
 | Capability | Technology | Engineering focus |

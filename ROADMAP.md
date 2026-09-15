@@ -161,9 +161,9 @@ published in the repository.
 
 ## Phase 7: Resume and GitHub Alignment
 
-**Status:** Planned
+**Status:** In progress; evidence-backed wording and GitHub presentation prepared
 
-- [ ] Finalize two evidence-backed resume bullets.
+- [x] Finalize two evidence-backed resume bullets.
 - [ ] Link the project title directly to the public repository.
 - [ ] Add the project to the GitHub profile README.
 - [ ] Pin it as the first recruiter-facing repository.
@@ -173,17 +173,33 @@ published in the repository.
 **Exit gate:** Resume, GitHub profile, and repository use the same defensible
 claims and terminology.
 
+The [release checklist](docs/release-readiness.md) contains the two bounded
+bullets, clause-to-evidence mapping, description, topics, and profile entry.
+Applying them externally remains gated on publication and signed-out access.
+
 ## Phase 8: Public v1 Release
 
-**Status:** Planned
+**Status:** In progress; local audits passed, public release pending
 
-- [ ] Review every tracked file manually.
-- [ ] Run local validation and secret scanning.
-- [ ] Review the complete public Git history.
+- [x] Review every tracked file manually.
+- [x] Run local validation and secret scanning.
+- [x] Review the complete public Git history.
 - [ ] Make the private GitHub repository public only after the review passes.
 - [ ] Push and confirm public CI.
 - [ ] Test every README link while signed out of GitHub.
 - [ ] Tag `v1.0.0` after the public page is verified.
+
+The September 15 review covered the tracked-file baseline and all ref-reachable
+history, with separate inspection of reflog-only commits and excluded drafts.
+Local tests, generic secret scans, and the external private-identifier audit
+passed. The existing audit input was located and used without publishing its
+contents. The metadata review permits an ordinary private-staging push without
+rewriting history; remote-retention uncertainty remains part of the owner's
+public-release decision. The reviewed changes are authorized for private staging,
+not publication. These reviews must be repeated against the final publication snapshot;
+the checked items do not authorize a visibility change. See the
+[release checklist](docs/release-readiness.md#remaining-gates) and
+[validation record](docs/handoff.md#september-15-release-readiness-review).
 
 ## Version 1 Scope
 

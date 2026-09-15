@@ -6,7 +6,8 @@
 - **Drafted:** Public explanatory documentation exists, but executable or runtime
   proof is still pending.
 - **Publicly evidenced:** Reviewed code, CI, validation records, or runtime
-  evidence support the claim.
+  evidence support the claim. This describes evidence strength, not repository
+  visibility; public access remains a release gate while staging is private.
 - **Executable evidence:** Reviewed code and tests support the implementation,
   but operated-environment evidence is still pending.
 
@@ -18,7 +19,7 @@ No claim should appear as a finalized resume bullet until its status is
 | Designed a three-node Proxmox private cloud with reviewed cluster-health evidence | [Architecture](../docs/architecture.md), [platform catalog](../docs/platform-catalog.md), and [reviewed cluster summary](screenshots/README.md#proxmox-cluster-health) showing three online nodes and quorum; point-in-time evidence, not sustained uptime or failover validation | Publicly evidenced |
 | Segmented workloads by trust and function | [Threat model](../docs/threat-model.md), [network and identity design](../docs/network-and-identity.md), and [primary trust-boundary diagram](../README.md#architecture); zone-policy validation and operated evidence still required | Drafted |
 | Centralized private application access and identity | [Architecture](../docs/architecture.md) and [identity-boundary design](../docs/network-and-identity.md#identity-boundaries); reviewed authentication evidence still required | Drafted |
-| Centralized infrastructure and security telemetry | [Sanitized Grafana dashboard](../automation/monitoring/README.md), file provisioning, 11 structural and query-reference tests, Grafana loading validation, and an [operated Trivy dashboard capture](screenshots/README.md#vulnerability-management); the capture does not validate the public provisioning example, its queries, or central scrape/log configuration | Drafted |
+| Centralized infrastructure and security telemetry | [Sanitized Grafana dashboard](../automation/monitoring/README.md), file provisioning, 11 structural and query-reference tests, six synthetic PromQL cases for the failed-repository counter, Grafana loading validation, and an [operated Trivy dashboard capture](screenshots/README.md#vulnerability-management); remaining query execution and central scrape/log validation are pending, and the capture does not validate the public example | Drafted |
 | Automated host hardening and controlled patching | [Sanitized Ansible roles](../automation/ansible/README.md), example inventory, 18 static policy tests, and syntax/effective-inventory validation; live transaction evidence still required | Drafted |
 | Built vulnerability scanning with delta-based alerting | [Scanner and delta engine](../automation/trivy/README.md), synthetic fixtures, 27 tests, validated alert rules, [operated finding presentation](screenshots/README.md#vulnerability-management), and [one delivered fix-aware alert](screenshots/README.md#actionable-security-alert); not a remediation or delivery-reliability claim | Publicly evidenced |
 | Deployed runtime detection and event routing | [Sanitized Falco role](../automation/falco/README.md), 15 policy tests, validated rules and routing structure, and event-flow diagram; disposable-host transaction and operated alert still required | Drafted |
@@ -31,18 +32,14 @@ No claim should appear as a finalized resume bullet until its status is
 | Validated an isolated synthetic state restore and unsafe-input rejection | [Restore implementation](../automation/recovery/restore.py), 27 policy and transaction tests, and a [dated sanitized restore drill](drills/2026-08-24-isolated-synthetic-restore.md) | Publicly evidenced |
 | Implemented a public storage-readiness startup policy | [Sanitized systemd service](../automation/recovery/systemd/example-storage-dependent.service), policy tests, and `systemd-analyze verify`; live mount and boot-failure evidence remain pending | Executable evidence |
 
-## Candidate Resume Bullets
+## Evidence-Backed Resume Wording
 
-These are drafts, not approved claims:
+The two bounded bullets and their clause-to-evidence mapping are maintained in
+the [v1 release checklist](../docs/release-readiness.md#resume-wording). They cover
+the evidenced platform design, Trivy implementation and observed notification,
+disposable-target delivery validation, and isolated synthetic restore.
 
-> Designed and operate a three-node Proxmox private cloud with segmented
-> networks, centralized identity, private ingress, security observability, and
-> automated VM backups.
-
-> Implemented security and delivery automation across infrastructure
-> repositories using Ansible, Trivy, Falco, Renovate, and protected self-hosted
-> CI, including delta-based vulnerability alerts, exact-revision deployment,
-> and rollback controls.
-
-The final wording will be approved only when all clauses map to publicly
-evidenced rows above.
+Apply them to the resume and profile only after the repository is public and its
+links work without authentication. Segmentation, identity, private backup jobs,
+Ansible/Falco operation, enforced repository protections, and Renovate automation
+must not be added without the missing evidence above.
