@@ -2,17 +2,39 @@
 
 ## Decision
 
-**Review date:** September 15, 2026
+**Review date:** September 19, 2026
 
-**Disposition:** Hold publication; implementation and presentation prepared.
+**Disposition:** Local candidate checks passed; approved for private staging.
+Public release remains pending.
 
 **Release date:** Not selected; requires owner approval after the safety gates pass.
 
-The repository remains private. The owner separately authorized one commit and a
-branch-only push of the reviewed release-readiness changes to private staging.
-That approval does not authorize public visibility, profile edits, release tags,
-or later unrelated changes. The remaining work is release review, not expansion
-of the minimum v1 feature set.
+The repository remains private. The previously authorized release-readiness
+commit and branch-only staging push are complete. The September 19 review covers
+status reconciliation, reader navigation, and renewed candidate validation.
+The owner authorized one commit and branch-only push of the five-file
+documentation candidate after checks. Public visibility, profile edits, and
+release tags remain separate owner decisions.
+
+## Verified Staging Baseline
+
+- Revision: `f66028e74001db2025bd134ae5f369d268f90135`
+- Commit: `portfolio: prepare v1 release review`
+- Branch: local `main` and `origin/main` matched at the start of this review.
+- [GitHub Actions run](https://github.com/arviiyer/tamriel-homelab/actions/runs/35025863015):
+  completed successfully on September 15; rechecked on September 19.
+- Both jobs passed: **Publication safety** and **Secret scan**.
+
+This closes the previous staging commit/push/CI task. The run requires repository
+access while staging is private and covers the named commit, not the September 19
+working-tree edits. Any new candidate commit needs its own CI result.
+
+The [September 19 local review](handoff.md#september-19-candidate-review) passed
+the complete validation set, private-identifier audit, and local rendering/link
+checks. Its five-file documentation candidate is approved for private staging.
+For later candidate revisions, verify the exact commit in the
+[validation workflow runs](https://github.com/arviiyer/tamriel-homelab/actions/workflows/validate.yml?query=branch%3Amain)
+rather than treating the historical baseline run as coverage.
 
 ## Resume Wording
 
@@ -64,11 +86,11 @@ No external profile or repository settings have been changed in this review.
 
 ## Private Identifier Audit
 
-The existing denylist was located in the external evidence workspace's audit
-directory and used in place on September 15. The checker passed for the current
-files, staged index, ref-reachable history, and checked metadata and paths. Its
-contents were neither displayed nor copied into this repository. The input is no
-longer missing; repeat this audit against the final publication snapshot.
+The existing denylist in the external evidence workspace's audit directory was
+used in place on September 15 and again on September 19. The checker passed for
+the current files, staged index, ref-reachable history, and checked metadata and
+paths. Its contents were neither displayed nor copied into this repository.
+Repeat this audit against the final publication snapshot.
 
 This result covers identifiers in the existing list, not a guarantee that every
 possible private identifier is represented. Generic secret scans and manual
@@ -76,29 +98,32 @@ review remain separate controls.
 
 ## Commit Metadata Review
 
-All 14 commits reachable from the reviewed starting refs use no-reply author and
-committer emails. The effective identity for new commits matches the reviewed
+The September 19 recheck confirmed that all 15 ref-reachable commits use no-reply
+author and committer emails, including the staging commit added after the
+September 15 audit. The effective identity for new commits matches the reviewed
 public identity. Two superseded commits retain non-no-reply committer metadata
 only in local reflog history; neither is reachable from any current ref, and their
 trees match the sanitized replacements.
 
-Fresh authenticated GitHub commit-object requests returned not found. Remote
-branch/tag and ref inventories showed only `main`; the pull-request inventory was
-empty. These checks did not demonstrate remote exposure, but do not certify
-server-cache removal or prove that the old objects were never uploaded.
+September 15 authenticated GitHub commit-object requests returned not found.
+Remote branch/tag and pull-request inventories were rechecked on September 19:
+only `main` and no pull requests were listed. These checks did not demonstrate
+remote exposure, but do not certify server-cache removal or prove that the old
+objects were never uploaded.
 
 An ordinary branch-only `main` push transfers the selected reachable history,
 not local reflogs or the whole object database. No rewrite, reflog expiration, or
-object pruning is needed for the approved private-staging push. Do not restore
+object pruning was needed for the completed private-staging push. Do not restore
 the superseded commits or distribute the local `.git` directory. The remaining
 remote-retention uncertainty belongs in the owner's separate public-release
 decision, not a claim that the current branch contains private identity metadata.
 
 ## Remaining Gates
 
-1. Complete the approved private-staging commit and push after final checks, using
-   no force or tags. Verify the new commit's identity and ancestry, then confirm
-   private staging CI for that exact revision.
+1. Verify the selected release candidate's commit identity and ancestry, and
+   require successful private-staging CI for that exact revision. The owner
+   approved the September 19 documentation commit and branch-only push without
+   force or tags; the preceding `f66028e` run is the verified historical baseline.
 2. Approve the public release date and final snapshot, including the bounded
    metadata review above. Repeat required checks and the
    file/history/private-identifier review immediately before changing visibility.
@@ -120,4 +145,4 @@ evidence tasks. They are not additional minimum-v1 requirements; stronger claims
 in those areas remain blocked until their evidence exists.
 
 Fresh validation results and review scope are recorded in the
-[handoff](handoff.md#september-15-release-readiness-review).
+[handoff](handoff.md#september-19-candidate-review).

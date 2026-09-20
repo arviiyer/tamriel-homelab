@@ -3,9 +3,9 @@
 **Security-Engineered Self-Hosted Infrastructure**
 
 > [!NOTE]
-> This public portfolio is under construction. Production configuration and
-> operational history remain in a private self-hosted Forgejo environment. This
-> repository contains only reviewed, sanitized implementations and evidence.
+> The v1 portfolio content is prepared and CI has passed in private staging.
+> Final publication review and public access remain pending. Production
+> configuration and operational history stay in private Forgejo repositories.
 
 I designed a three-node Proxmox homelab architecture for a private cloud and
 security engineering environment. The design combines segmented networking,
@@ -15,6 +15,9 @@ software delivery, and layered recovery.
 This project is presented as an engineering case study, not a list of hosted
 applications. It focuses on the decisions, controls, failures, and validation
 that make the environment operable and defensible.
+
+Start with the [three evidence paths](#three-evidence-paths) or the
+[reviewed runtime screenshots](#runtime-evidence).
 
 ## Architecture
 
@@ -136,16 +139,15 @@ and evidence standard.
 
 ## Current Status
 
-The repository foundation and publication-control framework are in place. The
-primary trust-boundary and data-flow model now links the platform narrative to
-three direct evidence paths. The architecture narrative now includes the
-sanitized network and identity design and four short decision records. Four reviewed
-runtime captures now show Trivy findings and one delivered alert, Forgejo validation,
-and point-in-time cluster health. Fail-closed delivery and isolated restore retain
-their dated synthetic drill evidence; the storage-startup policy is executable
-static evidence. Network and identity claims remain drafted. Ansible and Falco
-live transactions, the public Grafana example's remaining query validation, and
-operated promotion/rollback remain pending. The failed-repository counter now has
-six synthetic PromQL regression cases. See the [current handoff](docs/handoff.md) and
-[roadmap](ROADMAP.md) for the exact restart point and remaining publication
-gates.
+The minimum-v1 content is prepared: architecture and threat-model documentation,
+tested automation, three case studies, four reviewed runtime captures, and dated
+synthetic delivery and restore drills. Validation and secret scanning passed for
+the [recorded staging baseline](docs/release-readiness.md#verified-staging-baseline).
+Public access, signed-out link verification, and the release tag remain pending.
+
+Network and identity validation, live Ansible/Falco transactions, remaining
+dashboard query execution, operated promotion/rollback, and private backup
+recovery remain follow-up evidence tasks. Their claims stay limited in the
+[claim-to-evidence matrix](evidence/validation-matrix.md). See the
+[release checklist](docs/release-readiness.md#remaining-gates) for the publication
+sequence and the [current handoff](docs/handoff.md) for review results.

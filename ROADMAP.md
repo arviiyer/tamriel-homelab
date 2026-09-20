@@ -179,7 +179,8 @@ Applying them externally remains gated on publication and signed-out access.
 
 ## Phase 8: Public v1 Release
 
-**Status:** In progress; local audits passed, public release pending
+**Status:** In progress; staging baseline CI and local candidate checks passed,
+public release pending
 
 - [x] Review every tracked file manually.
 - [x] Run local validation and secret scanning.
@@ -200,6 +201,13 @@ not publication. These reviews must be repeated against the final publication sn
 the checked items do not authorize a visibility change. See the
 [release checklist](docs/release-readiness.md#remaining-gates) and
 [validation record](docs/handoff.md#september-15-release-readiness-review).
+
+On September 19, the release-readiness commit `f66028e` was confirmed on private
+staging with both validation and secret-scanning jobs successful. The previous
+staging push/CI task is complete. Local checks for the follow-up documentation
+candidate also passed. Its review results are tracked in the
+[current handoff](docs/handoff.md#september-19-candidate-review); a new commit will
+require its own CI result before publication.
 
 ## Version 1 Scope
 

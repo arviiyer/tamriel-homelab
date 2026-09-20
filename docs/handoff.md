@@ -1,6 +1,6 @@
 # Project Handoff
 
-**Updated:** September 15, 2026
+**Updated:** September 19, 2026
 
 ## Current Objective
 
@@ -25,7 +25,74 @@ repositories.
 Do not make the repository public until the v1 publication gate in `ROADMAP.md`
 is met.
 
+## September 19 Candidate Review
+
+The previous staging task is complete: `f66028e74001db2025bd134ae5f369d268f90135`
+is on `main`, and its
+[GitHub Actions run](https://github.com/arviiyer/tamriel-homelab/actions/runs/35025863015)
+passed both Publication safety and Secret scan on September 15. The exact
+revision and job results were rechecked on September 19. The working tree was
+clean at the start of this review; GitHub visibility remains private.
+
+The current working-tree candidate updates the status documents, adds a short
+README route to case studies and screenshots, and corrects the vulnerability
+case study's stale statement about pending PromQL validation. The two resume
+bullets retain their existing evidence boundaries.
+
+**Local result:** Candidate checks passed. The owner authorized one documentation
+commit and branch-only push to private staging after checks. The baseline CI
+result covers `f66028e`; the candidate commit must receive its own CI result.
+
+Validation completed:
+
+- All 145 Python tests passed, with no failures, errors, or skips.
+- Six dashboard PromQL cases, all 12 Prometheus alert rules, Grafana
+  provisioning/loading, Falco configuration/rules, and Falcosidekick rendering
+  passed.
+- Ansible syntax and effective inventory, Debian apt-policy compatibility,
+  restricted SSH/sudo policy, systemd validation, and the isolated synthetic
+  restore drill passed.
+- The disposable delivery image built successfully. The full privileged delivery
+  drill retains its August 24 record.
+- ShellCheck, all 23 workflow-listed Python compilation checks, Trivy repository
+  scanning, and Trivy CLI/schema/baseline compatibility passed. The repository
+  scan used the existing path-scoped exception.
+- Checksum-verified Gitleaks 8.30.1 found no secrets in the working tree or the 17
+  local commits including reflog-only history. The external private-identifier
+  audit passed using the existing input in place.
+- Local Markdown links, image references, and heading fragments across all 37
+  Markdown files passed review checks. Working-tree and retained-history
+  whitespace checks passed.
+
+Reader and publication review:
+
+- Followed the README's intended 30-second overview and 90-second evidence paths
+  through all three case studies, component documentation, and validation records.
+  Reviewed the two resume bullets against the claim matrix and supporting code.
+- Rendered all five Mermaid diagrams locally with Mermaid CLI 11.17.0. Local
+  Chromium previews of the README, gallery, and three case studies loaded their
+  images and anchors without horizontal page overflow; inspected the previews.
+  GitHub rendering and signed-out access still require post-publication review.
+- Rechecked all four images visually, with OCR, and for PNG metadata. They remain
+  byte-identical to the approved image-import commit, RGB-only with IHDR/IDAT/IEND
+  chunks, and free of OCR matches against the existing private-identifier list.
+- Inventoried all 129 tracked paths and 15 ref-reachable commits. All reachable
+  author/committer identities and the effective new-commit identity use no-reply
+  emails. The two reflog-only commits still match sanitized reachable trees.
+  Remote heads/tags showed only `main`; no pull requests were listed.
+- Reviewed the five-file documentation diff manually. The September 15
+  full-file/history audit remains the manual baseline for unchanged artifacts;
+  the final publication snapshot still requires the release-time review.
+
+Local tools used Python 3.14.7 and Ansible Core 2.21.3; hosted CI uses Python 3.13.
+Validation output, local previews, and OCR stayed outside the repository. The
+review was completed locally before the authorized staging action. Publication,
+profile edits, and tagging still require the separate release decision.
+
 ## September 15 Release-Readiness Review
+
+Historical record: the authorized staging commit, push, and exact-revision CI
+verification described below were subsequently completed, as recorded above.
 
 **Decision:** Hold publication. The minimum-v1 content and bounded resume/GitHub
 wording are prepared in the [release checklist](release-readiness.md), but the
@@ -504,18 +571,22 @@ the actual resume after public access and signed-out links are verified.
 
 ## Next Restart Point
 
-The minimum-v1 content is prepared. Do not repeat capture work, import the external
-redaction workspace, or expand the evidence scope before closing the release gates.
+The minimum-v1 content is prepared, and the previous staging revision has passed
+CI. Use the September 19 review above for the current candidate's status. Do not
+import the external redaction workspace or expand the evidence scope before
+closing the release gates.
 
 Recommended order:
 
 1. Re-read `AGENTS.md`, this handoff, and the publication policy.
-2. Review the prepared diff and [release checklist](release-readiness.md), and
-   check private staging CI for the exact candidate revision. The private audit
-   input has been located and the current audit passed; do not recreate or import it.
-3. Any further changes require their own review, checks, and commit/push approval.
-   Repeat required checks and file/history/private-identifier review against the
-   final publication snapshot.
+2. Review the [release checklist](release-readiness.md) and verify CI for the exact
+   selected candidate. The `f66028e` run is the historical baseline, and the
+   September 19 documentation candidate is approved for private staging. Later
+   changes need their own review, checks, and commit/push approval. Use the
+   existing external private-identifier audit input in place; do not recreate or
+   import it.
+3. Candidate local checks passed. Repeat required checks and
+   file/history/private-identifier review against the final publication snapshot.
 4. Agree the release date and obtain explicit visibility-change approval,
    including the bounded metadata-review outcome. Confirm public CI, private
    vulnerability reporting, and signed-out links after release.
