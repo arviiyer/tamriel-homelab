@@ -56,14 +56,14 @@ have a documented private remediation outcome.
 
 ## Phase 1: Portfolio Foundation
 
-**Status:** In progress
+**Status:** Exit gate met
 
 - [x] Define the project name and positioning.
 - [x] Draft the recruiter-facing README structure.
 - [x] Define the publication policy and screenshot review process.
 - [x] Create an initial claim-to-evidence matrix.
-- [ ] Add repository topics and final GitHub description at publication time.
-- [ ] Choose and document the public v1 release date.
+- [x] Add repository topics and final GitHub description at publication time.
+- [x] Choose and document the public v1 release date: September 19, 2026.
 
 **Exit gate:** The repository explains its purpose, scope, safety model, and work
 plan without relying on private documentation.
@@ -85,7 +85,7 @@ identifier or raw configuration.
 
 ## Phase 3: Executable Automation Evidence
 
-**Status:** Exit gate met in private staging
+**Status:** Exit gate met; code and validation are public
 
 - [x] Extract and harden the Trivy scan pipeline.
 - [x] Correct and test vulnerability delta identity behavior.
@@ -120,7 +120,7 @@ code or reviewed runtime evidence.
 
 ## Phase 5: Runtime Evidence
 
-**Status:** Initial four-image set reviewed and included; public release pending
+**Status:** Exit gate met; initial four-image set reviewed and published
 
 - [x] Capture a Grafana security dashboard.
 - [x] Capture a successful Forgejo validation run associated with a pull request.
@@ -141,7 +141,7 @@ and corresponding public claim.
 
 ## Phase 6: Public Validation
 
-**Status:** Exit gate met in private staging
+**Status:** Exit gate met; default-branch validation and secret scanning are public
 
 - [x] Add a local publication-safety check.
 - [x] Add baseline GitHub validation and secret scanning.
@@ -161,53 +161,51 @@ published in the repository.
 
 ## Phase 7: Resume and GitHub Alignment
 
-**Status:** In progress; evidence-backed wording and GitHub presentation prepared
+**Status:** Profile entry and repository presentation applied; resume wording
+copy-ready, with profile pinning and the resume-document edit remaining
 
 - [x] Finalize two evidence-backed resume bullets.
 - [ ] Link the project title directly to the public repository.
-- [ ] Add the project to the GitHub profile README.
+- [x] Add the project to the GitHub profile README.
 - [ ] Pin it as the first recruiter-facing repository.
-- [ ] Replace the profile badge wall with concise project evidence.
-- [ ] Ensure repository description and topics match resume terminology.
+- [x] Replace the profile Tools badge wall with concise project evidence and skills.
+- [x] Ensure repository description and topics match resume terminology.
 
 **Exit gate:** Resume, GitHub profile, and repository use the same defensible
 claims and terminology.
 
-The [release checklist](docs/release-readiness.md) contains the two bounded
-bullets, clause-to-evidence mapping, description, topics, and profile entry.
-Applying them externally remains gated on publication and signed-out access.
+The [release record](docs/release-readiness.md) contains the two bounded bullets,
+clause-to-evidence mapping, applied description/topics, and profile entry. Public
+access and signed-out links are verified. The owner requested copy-ready resume
+wording; the actual resume-document edit remains owner-managed.
 
 ## Phase 8: Public v1 Release
 
-**Status:** In progress; staging baseline CI and local candidate checks passed,
-public release pending
+**Status:** Public repository and evidence verified; versioned release tracked in
+[GitHub Releases](https://github.com/arviiyer/tamriel-homelab/releases)
 
 - [x] Review every tracked file manually.
 - [x] Run local validation and secret scanning.
 - [x] Review the complete public Git history.
-- [ ] Make the private GitHub repository public only after the review passes.
-- [ ] Push and confirm public CI.
-- [ ] Test every README link while signed out of GitHub.
-- [ ] Tag `v1.0.0` after the public page is verified.
+- [x] Make the private GitHub repository public only after the review passes.
+- [x] Push and confirm public CI.
+- [x] Test every README link while signed out of GitHub.
 
-The September 15 review covered the tracked-file baseline and all ref-reachable
-history, with separate inspection of reflog-only commits and excluded drafts.
-Local tests, generic secret scans, and the external private-identifier audit
-passed. The existing audit input was located and used without publishing its
-contents. The metadata review permits an ordinary private-staging push without
-rewriting history; remote-retention uncertainty remains part of the owner's
-public-release decision. The reviewed changes are authorized for private staging,
-not publication. These reviews must be repeated against the final publication snapshot;
-the checked items do not authorize a visibility change. See the
-[release checklist](docs/release-readiness.md#remaining-gates) and
-[validation record](docs/handoff.md#september-15-release-readiness-review).
+Release artifact: owner-authorized annotated `v1.0.0`, created only after the final
+release-documentation revision passes CI. The linked GitHub release records the
+tag's target and publication status.
 
-On September 19, the release-readiness commit `f66028e` was confirmed on private
-staging with both validation and secret-scanning jobs successful. The previous
-staging push/CI task is complete. Local checks for the follow-up documentation
-candidate also passed. Its review results are tracked in the
-[current handoff](docs/handoff.md#september-19-candidate-review); a new commit will
-require its own CI result before publication.
+The September 19 publication review checked the exact `c351f9c` snapshot against
+the previously reviewed baseline, repeated local validation and secret/private-
+identifier audits, rechecked image metadata and OCR, and reviewed the retained
+Actions logs. The owner accepted the documented metadata-review limitation and
+explicitly approved publication. Private vulnerability reporting is enabled.
+
+The repository, evidence, and profile links work without authentication; all five
+Mermaid diagrams and four gallery images loaded in signed-out Chromium. Review
+scope, validation, and follow-up boundaries are recorded in the
+[release record](docs/release-readiness.md#release-verification) and
+[handoff](docs/handoff.md#september-19-publication-review).
 
 ## Version 1 Scope
 

@@ -6,8 +6,8 @@
 - **Drafted:** Public explanatory documentation exists, but executable or runtime
   proof is still pending.
 - **Publicly evidenced:** Reviewed code, CI, validation records, or runtime
-  evidence support the claim. This describes evidence strength, not repository
-  visibility; public access remains a release gate while staging is private.
+  evidence support the claim. This describes evidence strength; repository
+  publication does not strengthen an unverified operational claim.
 - **Executable evidence:** Reviewed code and tests support the implementation,
   but operated-environment evidence is still pending.
 
@@ -39,7 +39,8 @@ the [v1 release checklist](../docs/release-readiness.md#resume-wording). They co
 the evidenced platform design, Trivy implementation and observed notification,
 disposable-target delivery validation, and isolated synthetic restore.
 
-Apply them to the resume and profile only after the repository is public and its
-links work without authentication. Segmentation, identity, private backup jobs,
+The repository and evidence links are public and work without authentication.
+The profile entry is applied; the resume wording is copy-ready at the owner's
+request. Segmentation, identity, private backup jobs,
 Ansible/Falco operation, enforced repository protections, and Renovate automation
 must not be added without the missing evidence above.

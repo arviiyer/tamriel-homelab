@@ -1,40 +1,41 @@
-# v1 Release Readiness
+# v1 Release Record
 
 ## Decision
 
 **Review date:** September 19, 2026
 
-**Disposition:** Local candidate checks passed; approved for private staging.
-Public release remains pending.
+**Disposition:** Public repository published and signed-out access verified.
 
-**Release date:** Not selected; requires owner approval after the safety gates pass.
+**Publication date:** September 19, 2026
 
-The repository remains private. The previously authorized release-readiness
-commit and branch-only staging push are complete. The September 19 review covers
-status reconciliation, reader navigation, and renewed candidate validation.
-The owner authorized one commit and branch-only push of the five-file
-documentation candidate after checks. Public visibility, profile edits, and
-release tags remain separate owner decisions.
+**Release version:** `v1.0.0`; the [GitHub release record](https://github.com/arviiyer/tamriel-homelab/releases)
+records the published tag and its exact target.
 
-## Verified Staging Baseline
+The owner approved publication after the final review, including the bounded
+metadata finding below. Visibility is public, the repository description and
+topics are applied, and private vulnerability reporting is enabled. The owner
+also authorized reviewed release-status commits and the annotated `v1.0.0` tag
+and GitHub release after final public CI and signed-out verification pass.
 
-- Revision: `f66028e74001db2025bd134ae5f369d268f90135`
-- Commit: `portfolio: prepare v1 release review`
-- Branch: local `main` and `origin/main` matched at the start of this review.
-- [GitHub Actions run](https://github.com/arviiyer/tamriel-homelab/actions/runs/35025863015):
-  completed successfully on September 15; rechecked on September 19.
+## Verified Publication Baseline
+
+- Revision made public: `c351f9c074d1141e4835708a34e514020230b82b`
+- Commit: `docs: reconcile v1 readiness and review results`
+- Branch: local `main` and remote `main` matched at publication.
+- [GitHub Actions run](https://github.com/arviiyer/tamriel-homelab/actions/runs/35485194349):
+  completed successfully on September 19 and is publicly accessible.
 - Both jobs passed: **Publication safety** and **Secret scan**.
 
-This closes the previous staging commit/push/CI task. The run requires repository
-access while staging is private and covers the named commit, not the September 19
-working-tree edits. Any new candidate commit needs its own CI result.
+The final publication checks repeated the full local validation set, current-tree
+and retained-history secret scans, the external private-identifier audit, and
+screenshot metadata/OCR checks. All three retained Actions logs also passed secret
+and private-identifier scans before visibility changed. Review scope and evidence
+boundaries are recorded in the [handoff](handoff.md#september-19-publication-review).
 
-The [September 19 local review](handoff.md#september-19-candidate-review) passed
-the complete validation set, private-identifier audit, and local rendering/link
-checks. Its five-file documentation candidate is approved for private staging.
-For later candidate revisions, verify the exact commit in the
+Release-status documentation follows this baseline. Verify the exact tagged or
+default-branch commit in the
 [validation workflow runs](https://github.com/arviiyer/tamriel-homelab/actions/workflows/validate.yml?query=branch%3Amain)
-rather than treating the historical baseline run as coverage.
+rather than treating a historical run as coverage for later changes.
 
 ## Resume Wording
 
@@ -54,21 +55,22 @@ Project title: [Tamriel Homelab: Security-Engineered Self-Hosted Infrastructure]
 | Exact-revision delivery and recovery | [Restricted delivery implementation](../automation/ci/README.md) and [disposable-target drill](../evidence/drills/2026-08-24-fail-closed-delivery-rollback.md); not operated production promotion, rollback, or enforced repository protection |
 | Isolated restore and unsafe-input rejection | [Synthetic restore implementation](../automation/recovery/README.md) and [dated drill](../evidence/drills/2026-08-24-isolated-synthetic-restore.md); not VM, database, PBS, or Restic recovery |
 
-These replace the broader drafts. Apply them to the actual resume only after the
-project link is publicly accessible. Do not add unevidenced operational clauses
-from the [matrix](../evidence/validation-matrix.md).
+These replace the broader drafts. The project and evidence links are publicly
+accessible. The owner requested copy-ready wording rather than an edit to the
+resume document. Do not add unevidenced operational clauses from the
+[matrix](../evidence/validation-matrix.md).
 
 ## GitHub Presentation
 
-Prepared description:
+Applied repository description:
 
 > Security-engineered homelab portfolio: Proxmox architecture, Trivy alerts,
 > restricted delivery, and isolated recovery with tests and reviewed evidence.
 
-Prepared topics: `homelab`, `security-engineering`, `devsecops`, `proxmox`,
+Applied topics: `homelab`, `security-engineering`, `devsecops`, `proxmox`,
 `trivy`, `ansible`, `docker-compose`, `prometheus`, `grafana`, `infrastructure-as-code`.
 
-Prepared profile entry:
+Applied profile entry:
 
 ```markdown
 ### [Tamriel Homelab](https://github.com/arviiyer/tamriel-homelab)
@@ -80,9 +82,11 @@ architecture, executable examples, and bounded runtime evidence.
 - [Isolated synthetic restore and storage boundaries](https://github.com/arviiyer/tamriel-homelab/blob/main/docs/case-studies/recovery-and-storage-dependencies.md)
 ```
 
-After publication, apply the description and topics, replace the profile badge
-wall with the concise project entry, and pin this as the first portfolio project.
-No external profile or repository settings have been changed in this review.
+The [profile update](https://github.com/arviiyer/arviiyer/commit/b8e4543ce1ab56a558c41c41c6608d649ba3218d)
+places Tamriel first, replaces the Tools badge wall with a concise skills line,
+and preserves the other projects and certifications. The rendered profile and
+new evidence links were verified without authentication. First-position pinning
+remains a separate GitHub UI task; it is not inferred from README ordering.
 
 ## Private Identifier Audit
 
@@ -90,7 +94,8 @@ The existing denylist in the external evidence workspace's audit directory was
 used in place on September 15 and again on September 19. The checker passed for
 the current files, staged index, ref-reachable history, and checked metadata and
 paths. Its contents were neither displayed nor copied into this repository.
-Repeat this audit against the final publication snapshot.
+The audit was repeated against the exact `c351f9c` publication snapshot before
+visibility changed; later release-documentation changes require the same checks.
 
 This result covers identifiers in the existing list, not a guarantee that every
 possible private identifier is represented. Generic secret scans and manual
@@ -98,43 +103,39 @@ review remain separate controls.
 
 ## Commit Metadata Review
 
-The September 19 recheck confirmed that all 15 ref-reachable commits use no-reply
-author and committer emails, including the staging commit added after the
-September 15 audit. The effective identity for new commits matches the reviewed
-public identity. Two superseded commits retain non-no-reply committer metadata
+The final September 19 review confirmed that all 16 commits reachable from the
+publication snapshot use no-reply author and committer emails. The effective
+identity for new commits matches the reviewed public identity. Two superseded
+commits retain non-no-reply committer metadata
 only in local reflog history; neither is reachable from any current ref, and their
 trees match the sanitized replacements.
 
-September 15 authenticated GitHub commit-object requests returned not found.
-Remote branch/tag and pull-request inventories were rechecked on September 19:
-only `main` and no pull requests were listed. These checks did not demonstrate
-remote exposure, but do not certify server-cache removal or prove that the old
-objects were never uploaded.
+Authenticated GitHub commit-object requests again returned not found during the
+final September 19 review. Remote branch/tag and pull-request inventories showed
+only `main` and no pull requests before publication. These checks did not
+demonstrate remote exposure, but do not certify server-cache removal or prove
+that the old objects were never uploaded. The owner accepted this bounded
+limitation before authorizing the visibility change.
 
 An ordinary branch-only `main` push transfers the selected reachable history,
 not local reflogs or the whole object database. No rewrite, reflog expiration, or
 object pruning was needed for the completed private-staging push. Do not restore
-the superseded commits or distribute the local `.git` directory. The remaining
-remote-retention uncertainty belongs in the owner's separate public-release
-decision, not a claim that the current branch contains private identity metadata.
+the superseded commits or distribute the local `.git` directory.
 
-## Remaining Gates
+## Release Verification
 
-1. Verify the selected release candidate's commit identity and ancestry, and
-   require successful private-staging CI for that exact revision. The owner
-   approved the September 19 documentation commit and branch-only push without
-   force or tags; the preceding `f66028e` run is the verified historical baseline.
-2. Approve the public release date and final snapshot, including the bounded
-   metadata review above. Repeat required checks and the
-   file/history/private-identifier review immediately before changing visibility.
-3. With explicit owner approval, change visibility and confirm public CI. Confirm
-   GitHub private vulnerability reporting is enabled as promised by
-   [SECURITY.md](../SECURITY.md); its availability was not established by the
-   private-stage API check.
-4. Test every README, evidence, and profile link while signed out. Apply the
-   prepared resume/profile/repository presentation only after access works.
-5. Tag `v1.0.0` only after the public page and all release gates are verified and
-   the owner authorizes tagging.
+| Check | Publication result |
+|---|---|
+| Exact-revision checks | Local checks and both CI jobs passed for the publication baseline; release-documentation commits require their own CI result |
+| Visibility and security reporting | Public repository; private vulnerability reporting confirmed enabled |
+| Anonymous links | All 59 unique publication links passed without authentication at publication; new release links are checked as they are added |
+| GitHub rendering | Five Mermaid diagrams and four gallery images loaded in signed-out Chromium |
+| Repository and profile presentation | Description, ten topics, and the reviewed profile entry applied and publicly verified |
+| Resume | Copy-ready title/link and two bounded bullets supplied at the owner's request |
+| Versioned artifact | Owner-authorized annotated `v1.0.0` tag and release, gated on final public CI; verify the target in [GitHub Releases](https://github.com/arviiyer/tamriel-homelab/releases) |
+
+For follow-up changes, keep review and CI tied to the exact candidate revision.
+Do not broaden operational claims solely because the repository is now public.
 
 ## Follow-Up Scope
 
@@ -145,4 +146,4 @@ evidence tasks. They are not additional minimum-v1 requirements; stronger claims
 in those areas remain blocked until their evidence exists.
 
 Fresh validation results and review scope are recorded in the
-[handoff](handoff.md#september-19-candidate-review).
+[handoff](handoff.md#september-19-publication-review).

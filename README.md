@@ -3,9 +3,9 @@
 **Security-Engineered Self-Hosted Infrastructure**
 
 > [!NOTE]
-> The v1 portfolio content is prepared and CI has passed in private staging.
-> Final publication review and public access remain pending. Production
-> configuration and operational history stay in private Forgejo repositories.
+> Public portfolio published September 19, 2026. This repository contains
+> reviewed examples and evidence; production configuration and operational
+> history stay in private Forgejo repositories.
 
 I designed a three-node Proxmox homelab architecture for a private cloud and
 security engineering environment. The design combines segmented networking,
@@ -101,9 +101,10 @@ repeatable validation without requiring access to the private environment.
    operated recovery evidence are pending.
 
 The [claim-to-evidence matrix](evidence/validation-matrix.md) records the complete
-claim boundaries. The [public CI definition](.github/workflows/validate.yml)
-validates published automation and scans repository history, but a public run is
-still pending. A network change blast-radius case study remains optional work.
+claim boundaries. The [public validation runs](https://github.com/arviiyer/tamriel-homelab/actions/workflows/validate.yml)
+execute the [CI definition](.github/workflows/validate.yml) against published
+automation and scan repository history. A network change blast-radius case study
+remains optional work.
 
 ## Runtime Evidence
 
@@ -122,7 +123,7 @@ Four reviewed captures, with full-resolution images and review records one link 
 - [Architecture decision records](docs/adr/README.md)
 - [Platform catalog](docs/platform-catalog.md)
 - [Current handoff](docs/handoff.md)
-- [v1 release readiness](docs/release-readiness.md)
+- [v1 release record](docs/release-readiness.md)
 - [Content plan](docs/content-plan.md)
 - [Publication policy](docs/publication-policy.md)
 - [Publication roadmap](ROADMAP.md)
@@ -139,15 +140,16 @@ and evidence standard.
 
 ## Current Status
 
-The minimum-v1 content is prepared: architecture and threat-model documentation,
+The public v1 portfolio includes architecture and threat-model documentation,
 tested automation, three case studies, four reviewed runtime captures, and dated
-synthetic delivery and restore drills. Validation and secret scanning passed for
-the [recorded staging baseline](docs/release-readiness.md#verified-staging-baseline).
-Public access, signed-out link verification, and the release tag remain pending.
+synthetic delivery and restore drills. Public access, evidence links, and GitHub
+rendering have been verified without authentication. See the
+[release record](docs/release-readiness.md) for validation and the
+[GitHub releases](https://github.com/arviiyer/tamriel-homelab/releases) for versioned snapshots.
 
 Network and identity validation, live Ansible/Falco transactions, remaining
 dashboard query execution, operated promotion/rollback, and private backup
 recovery remain follow-up evidence tasks. Their claims stay limited in the
 [claim-to-evidence matrix](evidence/validation-matrix.md). See the
-[release checklist](docs/release-readiness.md#remaining-gates) for the publication
-sequence and the [current handoff](docs/handoff.md) for review results.
+[release verification](docs/release-readiness.md#release-verification) and the
+[current handoff](docs/handoff.md) for review results and follow-up work.

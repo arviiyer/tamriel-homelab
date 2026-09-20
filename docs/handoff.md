@@ -4,9 +4,9 @@
 
 ## Current Objective
 
-Build a resume-worthy public portfolio for the actively operated Tamriel
-homelab without publishing production secrets, topology, exports, or repository
-history.
+Maintain the published, evidence-backed portfolio for the actively operated
+Tamriel homelab without publishing production secrets, topology, exports, or
+private repository history.
 
 The public repository is a purpose-built case study and executable evidence
 collection. It is not a deployment source or mirror of the private Forgejo
@@ -16,16 +16,67 @@ repositories.
 
 - Workspace: separate local public-portfolio checkout
 - Branch: `main`
-- Git history: purpose-built public commits sanitized, rewritten, and pushed
-  only to the private GitHub staging repository
-- Remotes: `origin` points to the private GitHub staging repository
-- GitHub repository: private; not yet published
-- Publication status: private remote work in progress
+- Git history: purpose-built public commits reviewed before publication
+- Remotes: `origin` points to the public GitHub portfolio repository
+- GitHub repository: public as of September 19, 2026
+- Release version: `v1.0.0`; verify the annotated tag and target in
+  [GitHub Releases](https://github.com/arviiyer/tamriel-homelab/releases)
 
-Do not make the repository public until the v1 publication gate in `ROADMAP.md`
-is met.
+## September 19 Publication Review
+
+**Decision:** The owner explicitly approved public v1 publication after reviewing
+the final checks and bounded commit-metadata limitation. The approved snapshot
+`c351f9c074d1141e4835708a34e514020230b82b` was made public on September 19.
+Release-status documentation, the prepared repository presentation, the profile
+update, and an annotated `v1.0.0` tag/release after final CI were also authorized.
+
+Publication verification:
+
+- The clean local and remote `main` matched the selected publication snapshot.
+  Its [validation run](https://github.com/arviiyer/tamriel-homelab/actions/runs/35485194349)
+  passed Publication safety and Secret scan and is publicly accessible.
+- All 145 Python tests and the full component checks passed again for publication,
+  including six PromQL cases, 12 alert rules, Grafana loading, Falco validation,
+  Ansible syntax/inventory/apt policy, restricted SSH/sudo, isolated restore,
+  systemd policy, ShellCheck, Trivy scanning/compatibility, and the disposable
+  target build. The full privileged delivery drill retains its August 24 record.
+- The private-identifier audit passed against the exact snapshot, and Gitleaks
+  found no secrets in current files or all 18 local commits including reflogs.
+  All three retained Actions logs passed both scans before visibility changed.
+- Reviewed the 129-path publication inventory, snapshot changes, environment-value
+  examples, retained commit inventory, claim mappings, and prior review records.
+  The earlier full-file/history audit remains the baseline for unchanged artifacts.
+- All 16 ref-reachable commits used public no-reply identities. The two
+  superseded reflog-only commits remained outside current refs; fresh GitHub
+  commit-object requests returned not found. The owner accepted that these checks
+  cannot certify server-cache removal or prove the old objects were never uploaded.
+- All four images matched their approved import bytes and passed metadata/OCR
+  checks. No new production artifact was imported.
+- All 59 unique publication links passed anonymous HTTP checks. Signed-out
+  Chromium loaded the README, gallery, and diagram-bearing evidence pages: five
+  Mermaid diagrams and four gallery images rendered. Local heading-fragment
+  checks passed independently.
+- GitHub private vulnerability reporting was enabled and read back as enabled.
+  The prepared repository description and ten topics were applied.
+- The approved [profile update](https://github.com/arviiyer/arviiyer/commit/b8e4543ce1ab56a558c41c41c6608d649ba3218d)
+  places the Tamriel entry first, replaces the Tools badge wall with a concise
+  skills line, and preserves the other projects and certifications. Its source,
+  rendered profile, and four new links were verified without authentication.
+
+The owner requested copy-ready resume wording rather than a resume-document
+edit. First-position profile pinning remains a GitHub UI follow-up. The
+[release record](release-readiness.md) preserves these presentation boundaries.
+
+Release-documentation commits require their own public CI result. The owner
+authorized tagging only after that exact revision and the public page are
+verified; the authoritative tag target and release status are in GitHub Releases.
+Raw check output, OCR, local previews, and profile editing intermediates remain
+outside the portfolio repository.
 
 ## September 19 Candidate Review
+
+Historical pre-publication record; the staging commit/push and release decisions
+below were subsequently completed as described above.
 
 The previous staging task is complete: `f66028e74001db2025bd134ae5f369d268f90135`
 is on `main`, and its
@@ -227,11 +278,11 @@ Remaining safety and release gates:
 - Original scan-result timestamp and project-aligned cluster display name retained
   with explicit owner approval; other identifying context cropped or masked
 - Originals, intermediate crops, and OCR output remain outside the repository
-- Initial Phase 5 capture/review work complete; public release still pending
+- Initial Phase 5 capture/review work complete; all four images are public
 
 These are point-in-time observations, not proof of sustained uptime, automatic
-failover, completed remediation, or enforced repository protections. The repository
-remains private, and no deployment is part of this portfolio change.
+failover, completed remediation, or enforced repository protections. Publication
+does not strengthen those operational claims.
 
 September 12 pre-commit verification passed: all 145 Python tests, publication
 safety including the existing external private-identifier denylist, checksum-pinned Gitleaks scans
@@ -278,7 +329,6 @@ Validation completed:
 
 Remaining proof:
 
-- Publicly visible GitHub Actions result after publication
 - Ongoing scan completeness and notification reliability if stronger operational
   claims are made; the two captures are not proven to represent the same scan
 
@@ -401,7 +451,6 @@ Remaining proof:
   Debian guest
 - Capture a reviewed operated alert or dashboard screenshot
 - Confirm the event reaches both the log and alerting paths
-- Record a publicly visible GitHub Actions result after publication
 
 ### Security Dashboard Evidence Slice
 
@@ -571,27 +620,20 @@ the actual resume after public access and signed-out links are verified.
 
 ## Next Restart Point
 
-The minimum-v1 content is prepared, and the previous staging revision has passed
-CI. Use the September 19 review above for the current candidate's status. Do not
-import the external redaction workspace or expand the evidence scope before
-closing the release gates.
+The repository is public. Use the publication review and release record above,
+the exact GitHub Actions revision, and the versioned release as the current
+reference. Keep the external redaction workspace outside this checkout.
 
 Recommended order:
 
 1. Re-read `AGENTS.md`, this handoff, and the publication policy.
-2. Review the [release checklist](release-readiness.md) and verify CI for the exact
-   selected candidate. The `f66028e` run is the historical baseline, and the
-   September 19 documentation candidate is approved for private staging. Later
-   changes need their own review, checks, and commit/push approval. Use the
-   existing external private-identifier audit input in place; do not recreate or
-   import it.
-3. Candidate local checks passed. Repeat required checks and
-   file/history/private-identifier review against the final publication snapshot.
-4. Agree the release date and obtain explicit visibility-change approval,
-   including the bounded metadata-review outcome. Confirm public CI, private
-   vulnerability reporting, and signed-out links after release.
-5. Apply the prepared resume/profile presentation and tag only after the relevant
-   owner approvals and public verification pass.
+2. Verify the checked-out revision, public CI, and release tag before describing a
+   snapshot as validated. Historical runs cover only their recorded revisions.
+3. Complete any owner-managed profile pinning or resume-document follow-up.
+4. Select one optional evidence task below. Keep drafted operational claims
+   bounded until that evidence exists.
+5. Review, validate, and obtain commit/push approval for new changes. Use the
+   existing external private-identifier audit input in place; do not import it.
 
 Do not use the public repository as a deployment checkout or connect any exercise
 to a production target. The disposable-host Ansible and Falco exercises remain

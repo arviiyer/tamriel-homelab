@@ -105,8 +105,9 @@ Use the two [evidence-backed resume bullets](release-readiness.md#resume-wording
 and matching GitHub presentation in the v1 release checklist. Each clause maps
 to a `Publicly evidenced` row in the [claim-to-evidence matrix](../evidence/validation-matrix.md).
 The wording deliberately excludes stronger operational claims that remain
-drafted or planned. Profile and resume publication wait for public repository
-access and signed-out link verification.
+drafted or planned. Public repository access and signed-out links are verified,
+and the profile entry is applied. The resume wording is supplied for the owner
+to paste into the resume document.
 
 ## Explicit Exclusions
 
