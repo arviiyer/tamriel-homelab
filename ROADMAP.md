@@ -161,13 +161,13 @@ published in the repository.
 
 ## Phase 7: Resume and GitHub Alignment
 
-**Status:** Profile entry and repository presentation applied; resume wording
-copy-ready, with profile pinning and the resume-document edit remaining
+**Status:** Profile entry, first-position pin, and repository presentation complete;
+resume wording copy-ready, with the resume-document edit remaining
 
 - [x] Finalize two evidence-backed resume bullets.
 - [ ] Link the project title directly to the public repository.
 - [x] Add the project to the GitHub profile README.
-- [ ] Pin it as the first recruiter-facing repository.
+- [x] Pin it as the first recruiter-facing repository.
 - [x] Replace the profile Tools badge wall with concise project evidence and skills.
 - [x] Ensure repository description and topics match resume terminology.
 
@@ -191,9 +191,9 @@ wording; the actual resume-document edit remains owner-managed.
 - [x] Push and confirm public CI.
 - [x] Test every README link while signed out of GitHub.
 
-Release artifact: owner-authorized annotated `v1.0.0`, created only after the final
-release-documentation revision passes CI. The linked GitHub release records the
-tag's target and publication status.
+Release artifact: annotated `v1.0.0` published at `a1a1b70` after both public CI
+jobs passed for that exact revision. The linked GitHub release records the tag's
+target and publication status.
 
 The September 19 publication review checked the exact `c351f9c` snapshot against
 the previously reviewed baseline, repeated local validation and secret/private-

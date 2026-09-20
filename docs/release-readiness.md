@@ -11,6 +11,10 @@
 **Release version:** `v1.0.0`; the [GitHub release record](https://github.com/arviiyer/tamriel-homelab/releases)
 records the published tag and its exact target.
 
+The annotated tag points to `a1a1b707aa76c4bc9c74b50d40674efc14d4c37d`.
+Both jobs passed in its [public CI run](https://github.com/arviiyer/tamriel-homelab/actions/runs/35486327489)
+before the tag and release were published.
+
 The owner approved publication after the final review, including the bounded
 metadata finding below. Visibility is public, the repository description and
 topics are applied, and private vulnerability reporting is enabled. The owner
@@ -85,8 +89,10 @@ architecture, executable examples, and bounded runtime evidence.
 The [profile update](https://github.com/arviiyer/arviiyer/commit/b8e4543ce1ab56a558c41c41c6608d649ba3218d)
 places Tamriel first, replaces the Tools badge wall with a concise skills line,
 and preserves the other projects and certifications. The rendered profile and
-new evidence links were verified without authentication. First-position pinning
-remains a separate GitHub UI task; it is not inferred from README ordering.
+new evidence links were verified without authentication. The owner subsequently
+pinned Tamriel first on the [GitHub profile](https://github.com/arviiyer).
+The screenshot and GitHub pinned-items API confirmed first-position pinning
+independently of README ordering.
 
 ## Private Identifier Audit
 
@@ -130,9 +136,9 @@ the superseded commits or distribute the local `.git` directory.
 | Visibility and security reporting | Public repository; private vulnerability reporting confirmed enabled |
 | Anonymous links | All 59 unique publication links passed without authentication at publication; new release links are checked as they are added |
 | GitHub rendering | Five Mermaid diagrams and four gallery images loaded in signed-out Chromium |
-| Repository and profile presentation | Description, ten topics, and the reviewed profile entry applied and publicly verified |
+| Repository and profile presentation | Description, ten topics, and the reviewed profile entry applied and publicly verified; first-position profile pin confirmed |
 | Resume | Copy-ready title/link and two bounded bullets supplied at the owner's request |
-| Versioned artifact | Owner-authorized annotated `v1.0.0` tag and release, gated on final public CI; verify the target in [GitHub Releases](https://github.com/arviiyer/tamriel-homelab/releases) |
+| Versioned artifact | Annotated `v1.0.0` tag and release published at `a1a1b70` after its public CI passed; verify the target in [GitHub Releases](https://github.com/arviiyer/tamriel-homelab/releases) |
 
 For follow-up changes, keep review and CI tied to the exact candidate revision.
 Do not broaden operational claims solely because the repository is now public.

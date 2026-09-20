@@ -64,14 +64,20 @@ Publication verification:
   rendered profile, and four new links were verified without authentication.
 
 The owner requested copy-ready resume wording rather than a resume-document
-edit. First-position profile pinning remains a GitHub UI follow-up. The
-[release record](release-readiness.md) preserves these presentation boundaries.
+edit. The owner subsequently pinned Tamriel first on the
+[GitHub profile](https://github.com/arviiyer); the screenshot and GitHub
+pinned-items API confirmed it. The [release record](release-readiness.md)
+preserves these presentation boundaries. The resume-document edit is the only
+remaining presentation follow-up.
 
-Release-documentation commits require their own public CI result. The owner
-authorized tagging only after that exact revision and the public page are
-verified; the authoritative tag target and release status are in GitHub Releases.
-Raw check output, OCR, local previews, and profile editing intermediates remain
-outside the portfolio repository.
+The annotated `v1.0.0` tag and GitHub release were published at
+`a1a1b707aa76c4bc9c74b50d40674efc14d4c37d` after its
+[public CI run](https://github.com/arviiyer/tamriel-homelab/actions/runs/35486327489)
+passed both jobs. Final signed-out checks passed for 60 publication links, five
+diagrams, four gallery images, and ten release/profile/CI links. Later commits
+require their own CI result; GitHub Releases records the fixed v1 target.
+Raw check output, OCR, local previews, and profile editing intermediates were
+kept outside the portfolio repository.
 
 ## September 19 Candidate Review
 
@@ -629,7 +635,7 @@ Recommended order:
 1. Re-read `AGENTS.md`, this handoff, and the publication policy.
 2. Verify the checked-out revision, public CI, and release tag before describing a
    snapshot as validated. Historical runs cover only their recorded revisions.
-3. Complete any owner-managed profile pinning or resume-document follow-up.
+3. Complete the owner-managed resume-document edit if still outstanding.
 4. Select one optional evidence task below. Keep drafted operational claims
    bounded until that evidence exists.
 5. Review, validate, and obtain commit/push approval for new changes. Use the
