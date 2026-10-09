@@ -2,7 +2,7 @@
 
 - Capture month: 2026-09
 - Review status: Approved for inclusion
-- Claim demonstrated: One delivered notification for new fixable HIGH vulnerability findings
+- What it shows: One delivered alert for new high-severity vulnerabilities with fixes
 - Source: Real operated environment; Discord notification
 - Cropped to minimum evidence: Yes; alert card only
 - Opaque redactions applied: Yes; repository labels, image reference/version, and wrapped digest
@@ -21,7 +21,7 @@
 
 Trivy alert delivered to Discord for eight new high-severity findings with available fixes.
 
-## Evidence Boundary
+## What this shows
 
 The original alert name, firing status, warning alert priority, HIGH vulnerability
 severity, count of eight findings, and update recommendation are unchanged.

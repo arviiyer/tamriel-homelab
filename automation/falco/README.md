@@ -1,164 +1,51 @@
-# Falco Runtime Detection
+# Falco runtime detection
 
-This public evidence slice demonstrates host-level runtime detection for
-container workloads using Falco's modern eBPF engine and Falcosidekick event
-routing. It is a purpose-written example, not the production role, inventory,
-or complete tuning set.
+An Ansible role for Falco's modern eBPF engine, two rule-tuning examples,
+and Falcosidekick event routing.
 
-Status: **Drafted static evidence**. Configuration, rules, deployment policy,
-and routing structure are validated from a clean checkout. A disposable-host
-transaction and reviewed operated-environment evidence are still pending.
+## Setup
 
-## Security Question
+Requirements: Python dependencies from [requirements.txt](requirements.txt) (including
+`ansible-core` 2.21.3), a Debian-family guest, kernel 5.8+ with BPF JIT enabled,
+verified SSH host keys, and a reachable Falcosidekick endpoint restricted to your
+sensors. The example inventory targets only `falco_sensors` and uses documentation
+addresses.
 
-How can unexpected workload behavior be detected across service VMs without
-turning normal container activity into an unreviewable stream of alerts?
+Copy the role and playbook into your own Ansible project, supply an inventory,
+and run from its Falco directory:
 
-## Design
-
-- Install an exact Falco package version from a checksum-pinned signing key.
-- Use the CO-RE modern eBPF engine without kernel-module compilation.
-- Enrich syscall events with container identity.
-- Require JSON output before forwarding events to Falcosidekick.
-- Preserve syslog locally while routing structured events centrally.
-- Send `notice` and above to Loki, but only `warning` and above to
-  Alertmanager.
-- Validate candidate configuration and rules together before activation.
-- Activate an immutable rules release through one managed configuration file.
-- Restore the previous managed configuration if Falco does not remain healthy.
-- Change one host at a time and stop the rollout on the first failure.
-- Reject broad tuning examples through offline policy tests.
-
-See the [runtime event flow](event-flow.md) for trust boundaries and failure
-behavior.
-
-## Layout
-
-```text
-automation/falco/
-|-- ansible.cfg
-|-- inventory.example.yml
-|-- playbooks/falco.yml
-|-- roles/falco/
-|   |-- defaults/main.yml
-|   |-- files/falco_rules.local.yaml
-|   |-- tasks/main.yml
-|   `-- templates/falco.yaml.j2
-|-- falcosidekick/
-|   |-- compose.yml
-|   `-- environment.example
-|-- tests/
-|   |-- fixtures/falco-event.json
-|   |-- fixtures/falco-notice-event.json
-|   |-- render_config.py
-|   `-- test_policy.py
-`-- event-flow.md
+```bash
+ansible-playbook -i /path/to/private/inventory.yml playbooks/falco.yml
 ```
 
-## Deployment Transaction
-
-The Ansible role checks the target's kernel and BPF JIT state before installing
-Falco. It disables the unused kernel-module service and the automatic Falcoctl
-artifact follower so rules cannot change outside the reviewed deployment path.
-
-The role then:
-
-1. Stores the proposed local rules under a SHA-256-derived immutable filename.
-2. Renders a candidate configuration that references that rules release.
-3. Runs `falco --dry-run` against the packaged upstream rules, candidate
-   configuration, and immutable local rules.
-4. Preserves the active managed configuration.
-5. Installs the validated configuration and starts or restarts
-   `falco-modern-bpf.service`.
-6. Requires the loopback process-health endpoint to remain reachable across a
-   stability interval.
-7. Restores the previous managed configuration and restarts Falco if activation
-   fails.
-
-The health gate proves process and webserver liveness. It does not prove that
-the modern eBPF inspector is processing kernel events; that requires the pending
-disposable-host exercise.
-
-The package version, packaged upstream rules, and service selection are outside
-the managed-file rollback boundary. A failed package upgrade or engine migration
-therefore stops the play for operator review rather than claiming full rollback.
-
-The example inventory targets only `falco_sensors`. Hypervisors, edge systems,
-and other roles require a separate compatibility and threat-model decision.
-
-## Tuning Standard
-
-The local rules file contains synthetic examples only. Every exception:
-
-- appends to a specific upstream rule;
-- combines process and workload context;
-- uses exact comparisons;
-- contains no wildcard; and
-- retains the upstream rule condition and enabled state.
-
-The complete production-derived suppression set is intentionally not public.
-A new exception should begin with a reviewed event, be narrowed against fields
-that remain stable for the workload, pass Falco validation, and then be observed
-for unintended coverage.
-
-## Falcosidekick
-
-The Compose example uses Falcosidekick 2.34.1 at an immutable multi-architecture
-digest. It runs as the image's non-root user with a read-only root filesystem,
-all Linux capabilities dropped, and `no-new-privileges` enabled.
-
-Render the synthetic configuration:
+With Docker Compose installed, check the Falcosidekick configuration from the
+repository root:
 
 ```bash
 docker compose \
   --env-file automation/falco/falcosidekick/environment.example \
-  -f automation/falco/falcosidekick/compose.yml \
-  config
+  -f automation/falco/falcosidekick/compose.yml config
 ```
 
-The example exposes the receiver on an RFC 5737 documentation address. A real
-deployment must bind a private address and restrict port 2801 to approved Falco
-sensors. Falcosidekick's native receiver is plain HTTP in this example; use a
-protected network or a TLS-authenticated proxy when that trust assumption does
-not hold.
+Falcosidekick 2.34.1 is digest-pinned, non-root, and read-only, with capabilities
+dropped and `no-new-privileges`. See the [event routing](event-flow.md) for Loki
+and Alertmanager settings.
 
-## Run
+The example receiver uses plain HTTP on a documentation address. An adapted
+deployment needs a private address and port 2801 restricted to approved sensors;
+use an authenticated TLS proxy if the network cannot provide that protection.
+Host firewall configuration is environment-specific and is not included here.
 
-Requirements:
+## Tests
 
-- `ansible-core` 2.21.3;
-- a Debian-family Linux guest;
-- kernel 5.8 or newer with the BPF JIT enabled;
-- a reachable, network-restricted Falcosidekick endpoint; and
-- verified SSH host keys and a private inventory outside this repository.
-
-The documentation-only inventory is intentionally unreachable. After replacing
-it with a private inventory, run from `automation/falco/`:
+From the repository root:
 
 ```bash
-ansible-playbook playbooks/falco.yml
+python3 -m unittest discover -s automation/falco/tests -p 'test_*.py' -v
+(cd automation/falco && ansible-playbook --syntax-check playbooks/falco.yml)
 ```
 
-## Validate
-
-Run offline policy and rendering tests:
-
-```bash
-python3 -m unittest discover \
-  -s automation/falco/tests \
-  -p 'test_*.py' \
-  -v
-```
-
-Check Ansible syntax:
-
-```bash
-cd automation/falco
-ansible-playbook --syntax-check playbooks/falco.yml
-```
-
-Validate the rendered configuration and both rulesets with the same immutable
-Falco image used by CI:
+With Docker, check the rendered configuration and rules using CI's pinned image:
 
 ```bash
 output="$(mktemp)"
@@ -174,24 +61,33 @@ docker run --rm \
 rm -f "$output"
 ```
 
-## Production Differences
+## Deployment and rollback
 
-The private environment has a different inventory, internal addresses,
-notification destinations, deployment history, and a larger tuning set based
-on observed workloads. None of those values or raw events are included here.
+The role checks kernel/BPF prerequisites and installs an exact Falco package
+version with a checksum-pinned signing key. It disables the unused kernel-module
+service and automatic Falcoctl rule updates.
 
-## Limitations
+For each host, it:
 
-- Offline validation proves schema, rule compatibility, and policy invariants;
-  it does not prove that a target kernel permits the modern eBPF probe.
-- The managed-file rollback and service-health path require a disposable-host
-  failure exercise before this can be described as executable or operated
-  evidence.
-- Package downgrade and restoration of a prior Falco engine are intentionally
-  outside the automated rollback boundary.
-- The public example does not include the host firewall rule that restricts the
-  Falcosidekick receiver because network policy is environment-specific.
-- Falcosidekick does not provide durable queuing. Downstream delivery health
-  needs separate monitoring.
-- No reviewed Falco runtime alert or dashboard screenshot has been included yet;
-  the Trivy captures do not close this evidence gap.
+1. Saves local rules under a filename based on their SHA-256; existing rule files
+   are never edited.
+2. Renders a candidate configuration and validates it with both rulesets using
+   `falco --dry-run`.
+3. Saves the active managed configuration, installs the candidate, and starts or
+   restarts `falco-modern-bpf.service`.
+4. Checks the local health endpoint repeatedly; if startup fails, restores the
+   previous managed configuration and restarts Falco.
+
+The rollout changes one host at a time and stops at the first failure. Rollback
+covers the managed configuration, not the package, bundled rules, or engine/service
+selection. Failed upgrades or engine changes need manual review.
+
+## Tuning and event delivery
+
+Each [local exception](roles/falco/files/falco_rules.local.yaml) extends one
+upstream rule and matches an exact process and workload. Tests reject wildcards,
+broad exceptions, and disabled upstream rules. The examples contain only two
+exceptions; the lab's full set stays private.
+
+The health endpoint checks that Falco is running. Check event arrival in Loki
+separately. [Disposable-host deployment tests](../../ROADMAP.md) are still planned.

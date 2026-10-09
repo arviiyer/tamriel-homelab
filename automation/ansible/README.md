@@ -1,217 +1,100 @@
-# Host Hardening and Controlled Patching
+# SSH and updates
 
-This public Ansible slice demonstrates the host controls used across the
-homelab: key-only SSH, automatic security updates, and serial full-package
-upgrades. It uses role-based aliases and documentation-only addresses.
+Ansible examples for key-only SSH, automatic security updates, and full upgrades
+one host at a time.
 
-It is a portable example, not the production inventory or deployment source.
+## Setup
 
-## Design Goals
+Requirements: Python 3.12+, `ansible-core` 2.21.3, and Debian-family hosts with
+OpenSSH drop-in support. The [example inventory](inventory.example.yml) uses
+documentation addresses:
 
-- Apply SSH policy without rewriting the distribution-managed main file.
-- Refuse an empty or malformed SSH user allowlist.
-- Protect SSH changes with an automatic rollback watchdog.
-- Validate the candidate, complete daemon configuration, reconnect, and
-  per-user effective policy before canceling rollback.
-- Reset and re-establish the Ansible connection after reloading OpenSSH.
-- Preserve key-only root administration only where the platform requires it.
-- Apply security updates automatically without automatic reboot.
-- Apply full upgrades to one host at a time and stop on the first failure.
-- Report required reboots for an explicit maintenance decision.
+- `hypervisors` keep key-only root access for cluster operations;
+- `service_vms` and `edge` use a non-root operator and disable root login.
 
-## Layout
-
-```text
-automation/ansible/
-├── ansible.cfg
-├── inventory.example.yml
-├── group_vars/all.yml
-├── playbooks/
-│   ├── controlled-upgrade.yml
-│   ├── site.yml
-│   ├── ssh-hardening.yml
-│   └── unattended-upgrades.yml
-├── roles/
-│   ├── ssh_hardening/
-│   └── unattended_upgrades/
-└── tests/
-    └── test_policy.py
-```
-
-## SSH Hardening
-
-The role installs `/etc/ssh/sshd_config.d/00-ansible-hardening.conf` rather than taking
-ownership of `/etc/ssh/sshd_config`. Before installation, it confirms that the
-primary configuration includes the distribution drop-in directory and rejects
-additional includes, `Match` blocks, symlinked drop-ins, nested includes, and
-competing cumulative user/group access controls.
-
-The policy enforces:
-
-- public-key authentication;
-- password and keyboard-interactive authentication disabled;
-- an explicit non-empty `AllowUsers` list;
-- bounded authentication attempts;
-- idle-session keepalive limits;
-- Kerberos, GSSAPI, X11 forwarding, and empty passwords disabled; and
-- root login disabled except for explicitly modeled key-only platform nodes.
-
-The early filename is intentional because OpenSSH uses the first obtained scalar
-value. The role renders a candidate outside the live directory, saves the prior
-policy, and arms a transient systemd rollback timer. It then installs the
-candidate, runs `sshd -t`, reloads `ssh`, resets the Ansible connection, and
-waits for a new key-based connection. Effective values are checked for every
-allowed user using `sshd -T -C`; only then is rollback canceled. A failed task
-restores the previous policy immediately, while the watchdog protects against a
-lost controller connection.
-
-Commit stops both the rollback timer and service, verifies neither remains
-active, and rechecks the live policy checksum before transaction data is removed.
-
-The inventory must attest that key access and an out-of-band console recovery
-path were tested. Password connection variables are rejected, and the active
-Ansible user must be present in `ssh_allowed_users`. It must also provide the
-management client's source address so `sshd -T -C` checks effective policy in the
-administrative context. Existing `Match` policies require reconciliation before
-using this role; the supported configuration shape rejects those blocks.
-
-The playbook uses `serial: 1` and `any_errors_fatal: true`; one failed reconnect
-stops the rollout before another host is changed.
-
-## Security Updates
-
-The unattended-upgrades role:
-
-- fails if the apt package index cannot be refreshed;
-- installs `unattended-upgrades` and `apt-listchanges`;
-- limits automatic package origins to configured security channels;
-- validates generated apt configuration before replacement;
-- removes unused dependencies; and
-- sends events to syslog.
-
-The public role targets Debian and uses `Origins-Pattern` with Debian's security
-origin, codename, and label rather than the legacy archive-based origin syntax.
-After installation, it asserts the effective apt configuration contains the
-security-only pattern, contains no anonymous or named legacy origin children,
-keeps periodic upgrades enabled, and leaves automatic reboot disabled. The two
-apt files are installed as a rollback-backed pair; unresolved transaction files
-block retries until an operator inspects them.
-
-Automatic reboot is disabled in the public policy. Rebooting a virtualization,
-edge, identity, or storage host is an availability decision and remains outside
-an unattended package-update task.
-
-## Controlled Full Upgrades
-
-`playbooks/controlled-upgrade.yml` handles non-security package upgrades as a
-separate maintenance action. It uses:
-
-```yaml
-serial: 1
-any_errors_fatal: true
-max_fail_percentage: 0
-```
-
-Each host completes package-index refresh, an `apt-get` full upgrade, separate
-autoremove and autoclean tasks, and reboot requirement inspection before the
-next host starts. The rescue path reports the last completed phase and reboot
-state after a package failure, then stops the rollout. The playbook never invokes
-the reboot module.
-
-Full upgrades are intentionally excluded from `site.yml`. Applying baseline
-configuration should not implicitly perform broad package upgrades.
-
-## Example Inventory
-
-The example separates platform nodes from service and edge hosts:
-
-- `hypervisors` use key-only root access because the modeled platform requires
-  root SSH for cluster operations;
-- `service_vms` and `edge` use a non-root operator and disable root login; and
-- all addresses come from RFC 5737 documentation ranges.
-
-Use verified SSH host keys. `ansible.cfg` keeps host-key checking enabled and
-does not define a private-key or vault-password path.
+Host-key checking stays enabled. Before using the role, test key access and
+console recovery and set the corresponding inventory flags. Include the Ansible
+user in `ssh_allowed_users` and supply the admin client's source address.
+The role rejects password connection variables.
 
 ## Run
 
-Requirements:
-
-- Python 3.12+
-- `ansible-core` 2.21.3
-- Debian-family managed hosts with the OpenSSH drop-in include enabled
-
-Inspect the effective inventory:
+Inspect the example inventory:
 
 ```bash
 cd automation/ansible
 ansible-inventory --list
 ```
 
-The SSH role intentionally refuses check mode because check mode cannot execute
-the daemon validation, reconnect, or rollback transaction. Review diffs and
-stage the first deployment on one host with verified console access instead.
-
-The unattended-upgrades role also refuses check mode because it parses isolated
-candidates and verifies merged apt state after installation. Stage it on a
-disposable Debian host before broad rollout.
-
-Apply baseline policy:
+To use the roles, copy them into your own Ansible project and supply an inventory.
+Run from that project's Ansible directory:
 
 ```bash
-ansible-playbook playbooks/site.yml
+ansible-playbook -i /path/to/private/inventory.yml playbooks/site.yml
+ansible-playbook -i /path/to/private/inventory.yml playbooks/controlled-upgrade.yml
 ```
 
-Run a controlled full upgrade during a maintenance window:
+Both roles reject check mode because they need to run service checks and test
+reconnections and rollback. Full upgrades are excluded from `site.yml`.
+
+## Tests
+
+From the repository root, with the dependencies in [requirements.txt](requirements.txt):
 
 ```bash
-ansible-playbook playbooks/controlled-upgrade.yml
-```
-
-The documentation-only inventory is not expected to be reachable. Replace it
-with a private inventory outside this repository before executing a playbook.
-
-## Validate
-
-```bash
-python3 -m unittest discover \
-  -s automation/ansible/tests \
-  -p 'test_*.py' \
-  -v
-
+python3 -m unittest discover -s automation/ansible/tests -p 'test_*.py' -v
 cd automation/ansible
 ansible-playbook --syntax-check playbooks/site.yml
 ansible-playbook --syntax-check playbooks/controlled-upgrade.yml
 ```
 
-The offline tests render both SSH policy variants, inspect unattended-upgrades
-output, verify example inventory semantics, and assert the serial/no-reboot
-upgrade controls.
+Tests check the SSH variants, update configuration, inventory, and one-host-at-a-time
+upgrades without reboots. CI also checks the resolved inventory and parses apt
+configuration with Debian tools. Disposable-host testing is on the
+[roadmap](../../ROADMAP.md).
 
-The rendered daily update and seven-day cleanup values are illustrative public
-defaults used by these tests. They do not disclose the private environment's
-maintenance schedule.
+## SSH changes and rollback
 
-## Production Differences
+The role installs `00-ansible-hardening.conf` in `/etc/ssh/sshd_config.d/`.
+The early filename matters because OpenSSH uses the first value it reads for
+single-value options.
+It checks the main file's drop-in include and rejects competing access controls,
+extra/nested includes, symlinked drop-ins, and existing `Match` blocks. Those
+configurations need adjusting before using the role.
 
-The private environment contains additional inventory groups, deployment
-accounts, schedules, platform exceptions, notification destinations, and
-recovery paths. Those details are deliberately excluded.
+The policy requires public keys and a non-empty `AllowUsers` list. It disables
+password/keyboard-interactive authentication, empty passwords, Kerberos, GSSAPI,
+and X11 forwarding; it also sets authentication-attempt and keepalive limits.
+Root policy depends on the inventory group.
 
-Two older production-derived behaviors are also not reproduced here:
+Before activation, the role renders a candidate, saves the old file, and arms a
+systemd rollback timer. It installs the candidate, runs `sshd -t`, reloads SSH,
+resets the Ansible connection, and waits for a fresh key-based connection.
+`sshd -T -C` checks effective policy for each allowed user and source context.
 
-- apt repository failures are not ignored; broken package metadata stops the
-  role and must be repaired; and
-- unattended automatic reboot is disabled; reboot coordination remains an
-  explicit maintenance workflow.
+Only then does it stop the rollback timer and service, verify both are inactive,
+and check the live checksum before cleanup. Task failure restores the old
+configuration; the timer handles a lost controller connection.
+`serial: 1` and `any_errors_fatal: true` stop a failed rollout before the next host.
 
-## Limitations
+## Security updates
 
-- The roles support Debian-family systems only.
-- OpenSSH service naming and drop-in support are modeled for current Debian and
-  Proxmox installations.
-- Syntax and rendering tests do not prove a live SSH transaction. The first
-  deployment still requires a staged host and active recovery console.
-- Serial patching reduces blast radius but does not validate application-level
-  health between hosts. A future public example may add explicit service health
-  gates for selected workload roles.
+The role installs `unattended-upgrades` and `apt-listchanges` and stops if apt
+indexes cannot be refreshed. It checks both candidate apt files before installing
+them together, with rollback on failure. It then checks the effective settings:
+security-only `Origins-Pattern`, no legacy origins, periodic updates enabled,
+and automatic reboot disabled.
+
+Leftover transaction files block retries until inspected. Unused dependencies
+are removed and events go to syslog. Example defaults use daily updates and
+seven-day cleanup.
+
+## Full upgrades
+
+The upgrade playbook refreshes metadata, runs an `apt-get` full upgrade, performs
+separate autoremove/autoclean tasks, and checks whether a reboot is needed.
+Failure reports the last completed phase and reboot state, then stops. It never
+reboots automatically.
+
+The playbook runs one host at a time. Application-level health checks between
+hosts can be added for individual workloads.

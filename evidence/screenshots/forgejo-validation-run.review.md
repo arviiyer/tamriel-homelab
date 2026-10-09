@@ -2,7 +2,7 @@
 
 - Capture month: 2026-09
 - Review status: Approved for inclusion
-- Claim demonstrated: Successful Compose validation associated with a dependency-update pull request
+- What it shows: Compose checks passing on a dependency-update pull request
 - Source: Real operated environment
 - Cropped to minimum evidence: Yes; workflow heading, job, and successful steps
 - Opaque redactions applied: Yes; image/version title details and commit/actor/PR details
@@ -21,7 +21,7 @@
 
 Successful Forgejo Compose validation associated with a dependency-update pull request.
 
-## Evidence Boundary
+## What this shows
 
 The `compose` job and its checkout and Compose-validation steps report success.
 The source run's PR association was inspected before redaction. No raw job logs
@@ -29,7 +29,7 @@ are included.
 
 This does not establish the workflow trigger, required-check enforcement, branch
 protection, runner isolation, or the semantics of the checked-out revision. It is
-not an operated promotion or rollback record; those controls have separate
-[synthetic drill evidence](../drills/2026-08-24-fail-closed-delivery-rollback.md).
+not a deployment or rollback run; those have separate
+[test results](../drills/2026-08-24-fail-closed-delivery-rollback.md).
 
 Original captures and OCR output remain outside the repository.

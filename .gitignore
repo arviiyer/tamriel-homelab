@@ -1,5 +1,4 @@
-# This public portfolio is allowlist-only. New top-level paths are ignored until
-# they are intentionally added here after publication review.
+# New top-level paths are ignored until reviewed and added to this list.
 *
 
 !.gitignore
@@ -24,7 +23,7 @@
 !tests/
 !tests/**
 
-# Local validation output is never publication evidence.
+# Keep generated validation output out of the repository.
 **/__pycache__/
 *.py[cod]
 automation/trivy/repositories.tsv

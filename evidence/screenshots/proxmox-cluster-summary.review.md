@@ -2,7 +2,7 @@
 
 - Capture month: 2026-09
 - Review status: Approved for inclusion
-- Claim demonstrated: Point-in-time health and quorum of a three-node Proxmox cluster
+- What it shows: Three Proxmox nodes online with quorum at the time of capture
 - Source: Real operated environment; Proxmox Datacenter Summary
 - Cropped to minimum evidence: Yes; Health panel only
 - Opaque redactions applied: Not needed in the retained crop
@@ -21,7 +21,7 @@
 
 Proxmox cluster health showing three nodes online and quorum established.
 
-## Evidence Boundary
+## What this shows
 
 Online 3, Offline 0, Quorate: Yes, and the green status indicator are unchanged.
 Aggregate node counts are retained instead of publishing individual node rows.

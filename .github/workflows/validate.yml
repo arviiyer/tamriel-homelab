@@ -1,4 +1,4 @@
-name: Validate public portfolio
+name: Validate
 
 on:
   pull_request:

@@ -2,22 +2,16 @@
 
 ## Scope
 
-This repository is the sanitized public portfolio for the Tamriel homelab. It is
-not the production source of truth and must never become a deployment checkout.
-
-The repository has two goals:
-
-- explain the architecture and engineering decisions clearly to recruiters and
-  technical reviewers;
-- provide safe, executable evidence for selected security, automation,
-  observability, delivery, and recovery claims.
+This repository documents the Tamriel homelab and contains runnable examples.
+It is not the production source of truth and must never become a deployment
+checkout.
 
 ## Read First
 
+- `README.md`
 - `ROADMAP.md`
+- `docs/architecture.md`
 - `docs/publication-policy.md`
-- `docs/content-plan.md`
-- `evidence/validation-matrix.md`
 
 ## Source Boundary
 
@@ -41,18 +35,28 @@ The repository has two goals:
 - Do not publish the complete production detection-suppression set.
 - Real screenshots must pass the checklist in
   `evidence/screenshots/README.md` and be force-added after review.
-- Every headline claim must link to code, public CI, a sanitized validation
-  record, or reviewed runtime evidence.
+- Back descriptions of working features with links to code, tests, or screenshots.
 
 ## Editing Approach
 
 - Prefer a small, purpose-written public example over a large sanitized dump.
 - Preserve the behavior and engineering decision being demonstrated, not the
   production identifiers around it.
-- Mark planned or unverified work honestly. Do not turn design intent into a
-  completed claim.
-- Keep documentation recruiter-readable first, with implementation detail one
-  link away.
+- Describe what exists accurately. Put unfinished work in `ROADMAP.md`.
+- Use plain project documentation: what it does, how it works, and how to run it.
+- Avoid marketing language, repeated caveats, evidence-status labels, resume
+  wording, and release/version framing for the showcase.
+- Keep setup requirements beside commands and link to deeper implementation
+  details rather than repeating them.
+- Write like someone sharing their homelab: short introductions, concrete tool
+  names, useful commands, and screenshots. Lead with the lab and what runs on it.
+- Use everyday headings: "The setup", "Automation", "Screenshots", "Notes".
+  Avoid "Engineering Pillars", "Evidence Paths", and "Runtime Evidence".
+- Explain actions directly: "deploy the commit that passed CI", "keep the last
+  good scan", "restore to a new directory". Keep technical terms when they help
+  someone configure or debug the code.
+- Use first person for documented choices, without inventing experiences or
+  results. Explain each decision once and link to it from other pages.
 
 ## Verification
 

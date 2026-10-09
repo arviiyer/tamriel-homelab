@@ -2,12 +2,8 @@
 
 ## Purpose
 
-This policy defines how material from an actively operated private homelab may be
-represented in a public portfolio.
-
-The public repository is a reviewed case study and executable demonstration. It
-is not a mirror, backup, deployment source, or replacement for private
-operational repositories.
+Rules for sharing files from the private homelab. Production configuration,
+credentials, and repository histories stay outside this checkout.
 
 ## Allowed Material
 
@@ -37,17 +33,14 @@ operational repositories.
 
 ## Source Import Process
 
-1. Select one artifact because it proves a specific public claim.
-2. Record that claim in `evidence/validation-matrix.md`.
-3. Re-create the artifact in this repository without copying private history.
-4. Replace environment values with variables, public aliases, and synthetic
-   fixtures.
-5. Remove functionality that exposes operational topology without strengthening
-   the demonstrated engineering decision.
-6. Add tests or validation that run without private infrastructure.
-7. Review the diff manually for identifiers and credentials.
-8. Run `bash scripts/check-public-safety.sh` and the relevant component tests.
-9. Commit only after the artifact has a clear README and evidence link.
+1. Select one useful script, configuration example, or diagram.
+2. Re-create it in this repository without copying private history.
+3. Replace environment values with variables, public aliases, and synthetic
+    fixtures.
+4. Remove unnecessary operational details.
+5. Add tests that run without private infrastructure and document how to use it.
+6. Review the diff for identifiers and credentials.
+7. Run `bash scripts/check-public-safety.sh` and the relevant component tests.
 
 Bulk copying a directory and attempting to redact it afterward is not an
 approved import method.
@@ -69,7 +62,7 @@ PUBLIC_SAFETY_DENYLIST_FILE=/path/outside/repository/private-identifiers.txt \
 The checker rejects a denylist stored inside the repository and does not print
 matching private values. Public CI runs generic current-tree and retained-history
 checks without this private file and supplements them with a complete-history
-secret scan. A private denylist audit remains a required local release gate
+secret scan. A private denylist audit remains a required local publication check
 because CI must not receive the private identifier set.
 
 ## Public Aliases
@@ -96,15 +89,15 @@ reviewed image may be force-added to `evidence/screenshots/`.
 
 Required review:
 
-1. Crop to the minimum area needed to prove the claim.
+1. Crop to the area being shown.
 2. Apply opaque redaction rather than blur or pixelation.
 3. Remove browser chrome when it contains a production URL.
 4. Remove hostnames, addresses, usernames, emails, IDs, hashes, and schedules.
 5. Strip EXIF and ancillary metadata.
 6. Run OCR and inspect the extracted text.
 7. Have a second review compare the image with this policy.
-8. Add a short purpose caption and a linked review record containing capture month,
-   redactions, reviewer, and claim limitations. Capture dates need not appear in
+8. Add a short caption and a linked review record containing capture month,
+   redactions, reviewer, and context. Capture dates need not appear in
    the visible gallery caption.
 
 The initial reviewed set has two specific owner-approved retained values: the
@@ -116,20 +109,11 @@ inside an image.
 
 Original screenshots remain outside the public repository.
 
-## Claim Standard
+## Documentation
 
-Use the following language precisely:
-
-- **Designed:** architecture or documented implementation plan exists.
-- **Implemented:** working code or configuration exists.
-- **Validated:** a repeatable test or recorded exercise passed.
-- **Operated:** reviewed runtime evidence shows the control running over time.
-- **Automated:** the workflow executes without undocumented manual steps inside
-  the claimed boundary.
-
-Do not use terms such as `production-grade`, `zero trust`, `least privilege`, or
-`fully automated` unless the repository defines the boundary and provides
-evidence for the claim.
+Describe the code and test results accurately. Link to the relevant implementation
+or screenshot, and record unfinished work in `ROADMAP.md`. Test results from
+generated fixtures describe those tests, not private infrastructure operation.
 
 ## Pre-Publication Review
 
@@ -140,5 +124,4 @@ Before the first push to a public remote:
 - run a history-wide secret scan;
 - inspect all images with metadata and OCR tools;
 - verify public CI uses no repository secrets;
-- confirm every link works while unauthenticated; and
-- compare all resume claims with `evidence/validation-matrix.md`.
+- confirm every link works while unauthenticated.

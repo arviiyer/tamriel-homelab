@@ -1,79 +1,33 @@
-# Synthetic Recovery Evidence
+# Restore testing
 
-Status: **Publicly evidenced synthetic restore and executable storage policy**.
-This purpose-written component validates and restores bounded synthetic archives
-in an isolated local directory. It does not claim that PBS, Restic, VM backup, or
-any other private backup operation has been implemented, validated, or operated.
+A restore example that checks an archive and writes it to a new directory.
+Includes generated test archives and a systemd unit that checks storage before
+starting a service.
 
-The evidence demonstrates two decisions: recovery inputs should fail closed
-before writing data, and a storage-dependent service should not start merely
-because its expected path exists. Everything here uses synthetic content and
-public placeholder paths.
+[Design notes](../../docs/case-studies/recovery-and-storage-dependencies.md) ·
+[Restore drill](../../evidence/drills/2026-08-24-isolated-synthetic-restore.md)
 
-## Recovery Model
+## Try it
 
-[`recovery-model.json`](recovery-model.json) is a strict schema-version `1`
-example with exactly two authority boundaries:
+On Linux with Python 3, procfs, and `renameat2` support, run from the repository root:
 
-| Boundary | Authority represented by the example | Included archive roots | Deliberately separate |
-|---|---|---|---|
-| `service-local-state` | Application-owned local state | `config/`, `state/` | Shared content, credentials, and runtime cache |
-| `shared-bulk-data` | Shared content storage | `catalog/`, `objects/` | Service-local state, credentials, and temporary data |
-
-Each boundary defines its authority, included and excluded roots, copy format,
-illustrative generation labels, isolated restore target, and manual replacement
-gate. The generation labels are examples, not a schedule or an operated
-retention policy. The boundaries prevent a valid archive for one authority from
-being accepted as a restore for the other.
-
-## Archive Format
-
-The input is an uncompressed tar file. `manifest.json` and every payload member
-must be regular files; the archive contains no directory entries. Payload paths
-begin with the selected boundary's exact `archive_root`, followed by one of that
-boundary's included roots. The archive root is removed when files are installed
-under the requested destination.
-
-The manifest has exactly these top-level fields:
-
-```text
-schema_version, classification, backup_id, created_at, boundary,
-files, file_count, total_size
+```bash
+python3 automation/recovery/tests/run_isolated_restore_drill.py
 ```
 
-Each `files` entry has exactly `path`, `size`, and `sha256`. The inventory is
-sorted, unique, complete, and must exactly equal the tar member set other than
-`manifest.json`. Nonzero data after the final member is rejected. `created_at`
-uses `YYYY-MM-DDTHH:MM:SSZ`, and `backup_id` uses a matching
-`synthetic-YYYYMMDDTHHMMSSZ-label` form. The fixed classification is
-`synthetic-public-example`.
+The drill generates archives, restores them, rejects corrupt or unsafe input,
+and cleans up its temporary files.
 
-An expected SHA-256 for the complete tar file is mandatory and is supplied
-outside the archive. Internal file digests do not replace that external
-integrity check.
+## Verify and restore an archive
 
-Resource limits are part of the input policy:
-
-| Input | Limit |
-|---|---:|
-| Recovery model | 64 KiB |
-| Complete archive | 8 MiB |
-| Manifest | 64 KiB |
-| Payload files | 128 |
-| One payload file | 1 MiB |
-| All payload bytes | 4 MiB |
-
-## CLI
-
-Run from the repository root. Model validation requires no archive:
+Using the same requirements, check the dataset definitions first:
 
 ```bash
 python3 automation/recovery/restore.py validate-model \
   --model automation/recovery/recovery-model.json
 ```
 
-For a separately reviewed synthetic tar file, calculate its digest outside the
-archive and verify it without writing a destination:
+For a test tar file you have already reviewed, calculate its checksum and verify it:
 
 ```bash
 MODEL=automation/recovery/recovery-model.json
@@ -86,7 +40,10 @@ python3 automation/recovery/restore.py verify \
   --sha256 "$DIGEST"
 ```
 
-Restore that synthetic archive only to a new destination:
+For archives received from elsewhere, obtain the expected digest through an
+independently trusted channel.
+
+Restore to a new destination under a private parent directory:
 
 ```bash
 RESTORE_ROOT=$(mktemp -d /tmp/reviewed-synthetic-recovery.XXXXXX)
@@ -100,124 +57,92 @@ python3 automation/recovery/restore.py restore \
   --destination "$DESTINATION"
 ```
 
-Successful commands emit one deterministic JSON object. Usage failures emit one
-`recovery: ERROR:` line and exit `2`; rejected policy or input emits the same
-single-line prefix and exits `1`. Expected failures do not produce tracebacks.
+Success emits one JSON object. Usage errors exit `2`; rejected policy/input exits
+`1`. Both emit a single `recovery: ERROR:` line without an expected-error traceback.
 
-## Safety Behavior
+## Tests
 
-The verifier reads the archive through a no-follow file open where the platform
-provides it, bounds the complete byte snapshot in memory, and checks the external
-digest before parsing tar metadata. It uses no `extract` or `extractall` call.
-All member bytes and digests are validated before a staging path is created, so
-path replacement after validation cannot change the bytes being restored.
-
-The policy rejects malformed or duplicate-key JSON, schema extensions, a wrong
-boundary or root, noncanonical timestamps, unsafe relative paths, backslashes,
-control characters, traversal, duplicate or unlisted members, missing members,
-parent-file collisions, and declared or observed size and digest mismatches. It
-also rejects directories, symbolic links, hard links, sparse files, devices,
-and FIFOs.
-
-Restore creates a random hidden sibling staging directory with mode `0700` while
-it writes. Final directories are fixed to `0750`, files to `0640`, and every file
-is synchronized before publication. Only after complete validation and staging
-does a Linux no-replace atomic rename publish the destination. An existing or
-concurrently created destination is never overwritten. Failed transactions
-remove their staging directory.
-
-The destination parent must be owned by the restore identity and cannot be
-group- or world-writable. The restore holds an open descriptor for that trusted
-parent and creates, checks, and publishes staging entries relative to the
-descriptor. Replacement of the parent pathname cannot redirect writes. If
-publication succeeds but synchronizing the parent directory fails, the command
-reports ambiguous durability and retains the visible destination for review.
-
-## Storage Dependency Policy
-
-[`systemd/example-storage-dependent.service`](systemd/example-storage-dependent.service)
-is a static synthetic unit. It:
-
-- wants and starts after `network-online.target`;
-- uses `RequiresMountsFor=/srv/example-data`;
-- asserts that `/srv/example-data` is a mount point and is read-write;
-- requires `/srv/example-data/.storage-boundary` to exactly match the public
-  [`shared-bulk-data` marker](systemd/shared-bulk-data.marker);
-- uses an absolute no-op placeholder `ExecStart`; and
-- applies a constrained dynamic identity, empty capabilities, filesystem and
-  kernel protection, syscall filtering, and a restrictive umask.
-
-The pre-start check neither mounts storage nor runs a shell, network command, or
-sleep-based readiness loop. The mount manager and storage platform remain
-outside this static example. A deployment must install the tracked marker as
-`/usr/local/share/example-storage-boundary`; this repository does not perform
-that installation.
-
-## Threat And Failure Model
-
-The component treats an archive and its manifest as untrusted input. It is
-designed to fail closed for corruption, a stale or incorrect external digest,
-schema ambiguity, boundary confusion, unsafe tar metadata, unexpected
-inventory, resource-exhaustion attempts within the documented limits,
-destination collisions, shared-writable destination parents, and local write
-failures. Before publication, rejection must leave the requested destination and
-any traversal target absent. Post-publication synchronization failure follows
-the explicit retained-destination behavior described above.
-
-The external digest detects accidental corruption and replacement only when the
-expected value arrives through a trusted independent channel. An attacker who
-can replace both the archive and expected digest remains outside this control.
-The manual replacement gate keeps restored content isolated for application-
-specific review before any authoritative data is changed.
-
-## Verification
-
-Run all component checks from the repository root:
+Run the unit tests and check the service file with `systemd-analyze`:
 
 ```bash
-PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover \
-  -s automation/recovery/tests \
-  -p 'test_*.py' \
-  -v
-PYTHONDONTWRITEBYTECODE=1 python3 \
-  automation/recovery/tests/run_isolated_restore_drill.py
-python3 -m py_compile \
-  automation/recovery/restore.py \
-  automation/recovery/tests/archive_factory.py \
-  automation/recovery/tests/test_restore.py \
-  automation/recovery/tests/test_systemd_policy.py \
-  automation/recovery/tests/run_isolated_restore_drill.py
+python3 -m unittest discover -s automation/recovery/tests -p 'test_*.py' -v
 systemd-analyze verify --recursive-errors=no \
   automation/recovery/systemd/example-storage-dependent.service
 ```
 
-The unit tests build every tar fixture dynamically under temporary paths. The
-unprivileged, offline drill validates the model; verifies and restores exact
-synthetic bytes and modes; rejects corruption using the original external
-digest; rejects traversal, symlink, and wrong-boundary archives; checks failed
-staging cleanup, exact restored inventory, failed destinations, and the outside
-path; and confirms temporary workspace cleanup.
+Tests cover dataset definitions, archive checks, restores, command-line errors,
+cleanup, and systemd configuration.
 
-## Limitations
+## Model and archive format
 
-- The archive and manifest provide no authentication, signing, or encryption.
-- The format has no PBS or Restic compatibility and does not restore VMs or
-  application-consistent snapshots.
-- The example proves no pruning, freshness monitoring, schedules, off-host
-  transfer, media durability, or restore-time objective.
-- The illustrative retention generations are policy-shape examples only; they
-  are not evidence that copies exist.
-- The external digest must be distributed through an independently trusted
-  channel that this component does not implement.
-- Stable staging and no-replace publication require Linux procfs and `renameat2`
-  support.
-- A malicious process running as root or as the same restore identity is outside
-  the local namespace trust boundary.
-- The destination is an isolated filesystem tree. Application-specific
-  quiescing, database recovery, semantic validation, ownership changes, and the
-  manual replacement of authoritative state are outside the transaction.
-- This is not evidence of private platform, PBS, Restic, VM backup, or homelab
-  recovery operation.
-- The systemd evidence is static policy only. It does not prove a mount,
-  marker-management workflow, service start, or storage readiness in an
-  operated environment.
+[`recovery-model.json`](recovery-model.json) uses schema version `1` and separates
+two datasets:
+
+| Dataset (`--boundary`) | Archive roots | Excluded |
+|---|---|---|
+| `service-local-state` | `config/`, `state/` | Shared content, credentials, cache |
+| `shared-bulk-data` | `catalog/`, `objects/` | Service-local state, credentials, temporary data |
+
+Input is uncompressed tar containing regular files only, including
+`manifest.json`. Payload paths start with the selected boundary's `archive_root`
+and an included root. The outer archive root is stripped during restore.
+
+The manifest has exactly these fields:
+
+```text
+schema_version, classification, backup_id, created_at, boundary,
+files, file_count, total_size
+```
+
+Each sorted, unique `files` entry has `path`, `size`, and `sha256`; the inventory
+must exactly match the payload. Classification is `synthetic-public-example`.
+`created_at` uses `YYYY-MM-DDTHH:MM:SSZ`; `backup_id` uses the matching
+`synthetic-YYYYMMDDTHHMMSSZ-label`. Nonzero data after the final tar member is
+rejected. A whole-archive SHA-256 supplied outside the archive is mandatory.
+
+| Input | Limit |
+|---|---:|
+| Model / manifest | 64 KiB each |
+| Archive | 8 MiB |
+| Payload files | 128 |
+| One file | 1 MiB |
+| Total payload | 4 MiB |
+
+## Restore behavior
+
+The verifier reads the archive into memory within the size limit and checks the
+supplied digest before parsing. It avoids following links where supported and
+checks all file contents before writing. It never calls tar `extract` or
+`extractall`; replacing the source path cannot change the bytes already checked.
+
+It rejects duplicate-key/malformed JSON, schema extensions, incorrect timestamps,
+wrong datasets/roots, unsafe paths, backslashes, control characters, traversal,
+missing/extra/duplicate members, parent-file collisions, and size/digest mismatch.
+Directories, links, sparse files, devices, and FIFOs are also rejected.
+
+The parent directory must belong to the user running the restore and cannot be
+group- or world-writable. Writes use an open parent-directory descriptor so
+replacing its path cannot redirect them. Staging starts at `0700`; final
+directories use `0750` and files `0640`. Files are synced before an atomic
+no-replace rename. Existing or concurrently created destinations are never
+overwritten.
+
+Failed staging is removed. If the rename succeeds but syncing the parent fails,
+the command reports uncertain durability and keeps the destination for inspection.
+
+## Storage checks
+
+The [systemd unit](systemd/example-storage-dependent.service) orders startup after
+`network-online.target`, requires mounts for `/srv/example-data`, and asserts that
+the path is a read-write mount. Its `.storage-boundary` must exactly match the
+[`shared-bulk-data` marker](systemd/shared-bulk-data.marker), installed separately
+as `/usr/local/share/example-storage-boundary`.
+
+It uses a temporary service user, restricted capabilities/filesystem/syscalls,
+and a no-op `ExecStart` to replace with the workload command. The mount manager
+handles mounting; the service checks storage at startup.
+
+The archive stores regular files with fixed permissions. Pausing application
+writes, restoring ownership/ACLs, and replacing live data are separate steps.
+Encryption and signing belong in the backup/transfer tools. Root and processes
+running as the restore user can access the destination.

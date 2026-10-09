@@ -1,121 +1,42 @@
-# Security Observability Dashboard
+# Grafana dashboard
 
-This public evidence slice provisions a purpose-written Grafana dashboard for
-the Trivy and Falco contracts published in this repository. It demonstrates how
-scanner health, actionable finding deltas, and runtime events are separated for
-operator review.
+A Grafana dashboard loaded from files, showing Trivy scan results and Falco events.
 
-Status: **Drafted evidence for the public provisioning example**. Grafana
-accepts the dashboard and provisioning files. A reviewed
-[operated Trivy summary](../../evidence/screenshots/README.md#vulnerability-management)
-is available separately; it is not this exact purpose-written dashboard.
+## What it shows
 
-## Review Path
+Panels show scanner health, new findings, totals, and runtime events. Totals show
+zero only if a successful scan has been recorded. Missing health data stays
+“no data.”
 
-The dashboard answers four questions in order:
+## Setup
 
-1. Did the security scanner run and preserve a recent complete baseline?
-2. Which new findings or security-relevant transitions require action?
-3. Which current high-impact findings remain assigned to a workload?
-4. What runtime events are Falco sensors forwarding for investigation?
+- [Dashboard JSON](grafana/dashboards/security-control-overview.json)
+- [Dashboard provider](grafana/provisioning/dashboards/security.yml)
+- [Datasource definitions](grafana/provisioning/datasources/security.yml)
 
-This ordering prevents an empty finding panel from being mistaken for a healthy
-control. Finding statistics display zero only when the successful-baseline
-timestamp exists; missing health telemetry remains visible as no data.
+Datasources use `security-prometheus` and `security-loki` UIDs with `example.com`
+URLs. In an adapted deployment, change the URLs while retaining those UIDs.
+The provider disables UI updates and deletion and polls the files every 30 seconds.
 
-## Layout
+Prometheus panels use the [Trivy metrics](../trivy/README.md#metrics-and-alerts)
+for scan attempts, complete baselines, success, findings, and metadata changes.
+Loki panels select `{source="syscall"}` and require Falcosidekick to preserve
+`source`, `priority`, `hostname`, and `rule` stream labels.
 
-```text
-automation/monitoring/
-|-- grafana/
-|   |-- dashboards/
-|   |   `-- security-control-overview.json
-|   `-- provisioning/
-|       |-- dashboards/security.yml
-|       `-- datasources/security.yml
-|-- tests/
-|   |-- failed_repositories.test.yml
-|   |-- test_dashboard.py
-|   |-- validate_grafana.py
-|   `-- validate_promql.py
-`-- requirements.txt
-```
+## Tests
 
-## Data Contracts
-
-Prometheus panels consume only metrics emitted by the public Trivy slice:
-
-- attempt and complete-baseline timestamps;
-- overall and per-repository scan success;
-- current, new, fixed, and transitioned vulnerability findings;
-- current and new misconfiguration findings; and
-- current-tree secret findings.
-
-Loki panels use the public Falcosidekick stream contract:
-
-```logql
-{source="syscall"}
-```
-
-The dashboard does not embed a production datasource UID. The provisioning
-example creates `security-prometheus` and `security-loki` against `example.com`
-URLs. Adapt those URLs in a private deployment without changing panel identity.
-
-## File Ownership
-
-The dashboard provider disables UI updates and deletion. Reviewed files remain
-the source of truth, and Grafana polls the directory every 30 seconds. This
-avoids configuration drift from unreviewed UI edits.
-
-## Validate
-
-Run structural and query-reference tests:
+From the repository root, with Docker and the dependencies in [requirements.txt](requirements.txt):
 
 ```bash
-python3 -m unittest discover \
-  -s automation/monitoring/tests \
-  -p 'test_*.py' \
-  -v
-```
-
-Public CI also starts Grafana 12.4.1 from an immutable image digest, mounts the
-provisioning files read-only, and requires the dashboard API to return the
-expected UID. This catches errors that JSON parsing alone cannot detect.
-
-Run the focused PromQL regression (requires Docker and the existing
-`requirements.txt` dependency):
-
-```bash
+python3 -m unittest discover -s automation/monitoring/tests -p 'test_*.py' -v
 python3 automation/monitoring/tests/validate_promql.py
+python3 automation/monitoring/tests/validate_grafana.py
 ```
 
-This command also runs in public CI. It injects the actual **Failed Repositories**
-dashboard expression into six synthetic cases and executes `promtool test rules`
-using the same pinned Prometheus image as CI's rule validation. Healthy, failed,
-and mixed repositories exercise the failure count: `count` counts zero-valued
-failures rather than summing their zeros. Attempt-only telemetry permits the
-existing zero fallback; absent telemetry and healthy repositories without an
-attempt timestamp remain no data. No Prometheus server or live datasource is
-started, and the fixture contains no separate copy of the query that could drift.
+The Grafana check starts a pinned 12.4.1 container, loads the files read-only,
+and checks the dashboard and folder through the API.
 
-## Production Differences
-
-The operated environment uses private datasource locations, additional
-infrastructure dashboards, and environment-specific labels. Those identifiers,
-raw exports, and unrelated panels are deliberately excluded. The reviewed Trivy
-summary shows HIGH/CRITICAL totals, new CRITICAL and fixable HIGH findings, and a
-Last Scan timestamp retained with explicit owner approval in the
-[review record](../../evidence/screenshots/grafana-security-dashboard.review.md).
-
-## Limitations
-
-- Dashboard loading does not prove that production datasources are reachable or
-  that every query parses or returns the expected data.
-- Falco panels depend on Falcosidekick preserving `source`, `priority`,
-  `hostname`, and `rule` as Loki stream labels.
-- The dashboard shows detection and scanner telemetry, not complete SIEM
-  coverage.
-- Synthetic PromQL execution covers only the Failed Repositories expression.
-  Other queries, scrape configuration, and Falco query/live proof remain pending.
-  The operated Trivy summary does not validate this public provisioning example
-  or establish operation over time.
+The PromQL check runs the dashboard's failed-repository query with pinned
+`promtool`, covering healthy, failed, mixed, attempt-only, and missing-data cases.
+It uses `count` because summing zero-valued failure samples would always report
+zero. Testing the remaining queries is on the [roadmap](../../ROADMAP.md).

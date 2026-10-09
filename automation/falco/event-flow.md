@@ -1,20 +1,17 @@
-# Runtime Event Flow
+# Falco event routing
 
-## Purpose
-
-This flow detects unexpected host and container behavior, preserves searchable
-events, and separates the complete event stream from interruptive alerting.
+Falco events go to Loki for searching and Alertmanager for notifications.
 
 ```mermaid
 flowchart LR
     kernel[Linux kernel events]
     sensor[Falco sensor<br/>modern eBPF]
-    local[Local syslog<br/>operational fallback]
+    local[Local syslog]
     sidekick[Falcosidekick<br/>event router]
     loki[Loki<br/>notice and above]
-    grafana[Grafana investigation]
+    grafana[Grafana]
     alerts[Alertmanager<br/>warning and above]
-    operator[Reviewed notification]
+    operator[Notifications]
 
     kernel --> sensor
     sensor -- JSON HTTP --> sidekick
@@ -23,37 +20,27 @@ flowchart LR
     sidekick --> alerts --> operator
 ```
 
-## Boundaries
+## Routing
 
-| Boundary | Control |
+| Connection | Configuration |
 |---|---|
-| Kernel to sensor | Falco runs on selected Linux guests with the modern eBPF engine; hypervisors are outside this public role's target group |
-| Sensor to router | The endpoint is an explicit inventory variable with no embedded credentials; ingress must be restricted to sensor hosts |
-| Router to log store | Events at `notice` and above are sent to Loki for investigation |
-| Router to alerting | Events at `warning` and above are sent to Alertmanager v2 to reduce interruptive noise |
-| Tuning | Local exceptions append to named upstream rules and require process plus workload context |
+| Kernel → Falco | Modern eBPF engine on hosts in `falco_sensors` |
+| Falco → Falcosidekick | JSON over HTTP; endpoint set in inventory and restricted to sensor hosts |
+| Falcosidekick → Loki | Events at `notice` and above, including container details |
+| Falcosidekick → Alertmanager | Events at `warning` and above, using the v2 API |
 
-## Failure Behavior
+## If delivery fails
 
-- Candidate configuration and rules are checked together with `falco --dry-run`
-  before one managed configuration activates an immutable rules release.
-- Hosts are changed one at a time. A failed host stops the rollout.
-- File watching is disabled so Falco cannot hot-reload a partially activated
-  policy.
-- If the loopback process-health endpoint does not remain reachable after a
-  policy change, the previous managed configuration is restored before the play
-  fails. This checks process liveness, not eBPF event processing.
-- Syslog remains enabled as a local event path when the HTTP router is
-  unavailable. This is not a durable delivery guarantee.
-- Falcosidekick is a router, not a persistent queue. A router or downstream
-  outage can still create an event-delivery gap and must be monitored separately.
+Local syslog stays enabled when Falcosidekick is unreachable. Falcosidekick has no
+persistent queue, so an outage can lose events. Monitor delivery to Loki and
+Alertmanager separately from Falco's process-health check.
 
-## Event Contract
+File watching is disabled to prevent partial configuration reloads. The
+[Ansible role](README.md#deployment-and-rollback) handles configuration checks,
+restart, and rollback.
+
+## Test events
 
 [`tests/fixtures/falco-event.json`](tests/fixtures/falco-event.json) and
 [`tests/fixtures/falco-notice-event.json`](tests/fixtures/falco-notice-event.json)
-are synthetic examples of the JSON fields and priority thresholds used for
-routing. They are not captured runtime evidence.
-
-The operated environment's complete suppression set, internal destinations,
-notification receivers, and raw event history remain private.
+contain test events with the JSON fields and priority thresholds used for routing.

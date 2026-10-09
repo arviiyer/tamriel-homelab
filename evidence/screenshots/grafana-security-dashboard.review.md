@@ -2,7 +2,7 @@
 
 - Capture month: 2026-09
 - Review status: Approved for inclusion
-- Claim demonstrated: Vulnerability totals and delta-based finding presentation
+- What it shows: Vulnerability totals and changes between scans
 - Source: Real operated environment
 - Cropped to minimum evidence: Yes; Summary section only
 - Opaque redactions applied: Not needed in the retained crop
@@ -21,16 +21,16 @@
 
 Trivy dashboard showing vulnerability totals and new critical and fixable HIGH findings.
 
-## Evidence Boundary
+## What this shows
 
 This is the operated Trivy dashboard, not the purpose-written public Grafana
 provisioning example. It supports observed finding presentation, not validation
 of that example's queries, Falco activity, or the latest scan's completeness.
 
-The displayed secret-scan result is not an independent complete-history audit or
-a guarantee that no credentials exist. The public scanner's
-[current-tree secret-scanning boundary](../../automation/trivy/README.md#secret-scanning-boundary)
-is unchanged. Counts are not a claim of remediation, and this capture has not been
-correlated to the separate Discord notification as the same scan.
+The secret panel shows file-scan results despite its Git-history label. The
+[Trivy example](../../automation/trivy/README.md#secret-scans) checks the current
+files; Gitleaks checks Git history separately. Counts do not show remediation,
+and this capture has not been correlated to the Discord notification as the same
+scan.
 
 Original captures and OCR output remain outside the repository.
