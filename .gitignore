@@ -2,7 +2,6 @@
 *
 
 !.gitignore
-!AGENTS.md
 !LICENSE
 !README.md
 !ROADMAP.md
@@ -22,6 +21,9 @@
 !scripts/**
 !tests/
 !tests/**
+
+# Keep agent instructions local.
+AGENTS.md
 
 # Keep generated validation output out of the repository.
 **/__pycache__/
