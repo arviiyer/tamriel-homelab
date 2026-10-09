@@ -5,7 +5,7 @@ security tools, Git/CI, and backups. Most applications run with Docker Compose.
 Terraform and cloud-init handle VM provisioning and templates; Ansible handles
 host configuration.
 
-[Overview diagram](../README.md#the-setup)
+[Overview diagram](../README.md#the-setup) · [Hardware](../README.md#hardware)
 
 ## Access and networking
 
