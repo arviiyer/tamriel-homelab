@@ -5,15 +5,15 @@ work on security projects. Most services run in Docker on Debian VMs, with
 TrueNAS for shared files and OPNsense handling the network. This repo has notes
 on the setup, screenshots, scripts, and configuration examples from building it.
 
-## Explore the lab
+## Table of Contents
 
-- [Apps and services](apps/): the tools I use, with screenshots and project links.
-- [Proxmox](proxmox/): the cluster, VM roles, and supporting hardware.
-- [Networking](networking/): OPNsense, Tailscale, Caddy, and Authentik.
-- [Storage and backups](storage/): TrueNAS, ZFS, PBS, Restic, and restore testing.
-- [Monitoring](monitoring/): Prometheus, Loki, Grafana, and notifications.
-- [Security](security/): vulnerability scans, runtime detection, and alerts.
-- [Automation](automation/): Forgejo, Renovate, Ansible, and runnable examples.
+- [Apps](apps/) - Apps and services running in the lab.
+- [Proxmox](proxmox/) - Proxmox cluster and virtual machine setup.
+- [Networking](networking/) - Firewall, DNS, remote access, and sign-in.
+- [Storage](storage/) - Current storage and backup setup.
+- [Monitoring](monitoring/) - Grafana dashboards, metrics, logs, and alerts.
+- [Security](security/) - Trivy, Falco, CrowdSec, and ClamAV.
+- [Automation](automation/) - Forgejo, Renovate, Ansible, and deployment scripts.
 
 ## The setup
 

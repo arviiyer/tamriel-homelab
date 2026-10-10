@@ -139,7 +139,7 @@ person.
 Use this order in `README.md`:
 
 1. A short introduction to Tamriel and what I use it for.
-2. An "Explore the lab" section linking to each category.
+2. A "Table of Contents" linking to each category with a short description.
 3. The setup diagram and a short explanation.
 4. Hardware grouped into compute, storage, networking, and supporting devices.
 5. A compact list of named applications and infrastructure.
