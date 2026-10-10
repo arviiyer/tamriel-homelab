@@ -25,9 +25,8 @@ Setup guides: [TrueNAS shares and VM mounts](nfs/README.md) ·
 | Vaultwarden data | Local Pi storage, with Restic copies |
 
 I keep databases on VM-local disks so a shared-storage outage does not also
-take away their database files. Services can still depend on shared files,
-and local and shared data need separate backups. This arrangement does not
-provide automatic database failover.
+take away their database files. Apps such as Immich still need their NAS files,
+and both parts need backups.
 
 ZFS supplies snapshots and integrity checks for the shared files. See the
 [hardware list](../README.md#storage) for the NAS specifications.
@@ -49,8 +48,7 @@ boundary. It is not an off-site copy.
 [![A completed PBS backup task](../screenshots/pbs-backup.webp)](../screenshots/README.md#pbs-backup)
 
 ZFS snapshots cover selected file and photo datasets. Vaultwarden has a local
-Restic repository and a copy on another host, with repository checks. Keeping
-another copy on the same device would not cover losing that device.
+Restic repository and a copy on another host, with repository checks.
 
 [![Finished periodic snapshot tasks in TrueNAS](../screenshots/truenas-snapshots.webp)](../screenshots/README.md#truenas-snapshots)
 
@@ -68,52 +66,31 @@ another copy on the same device would not cover losing that device.
 Keep credentials and encryption keys in the private backup process. An image
 rollback after a schema migration may also need the matching database backup.
 
-For an application, identify both its database and its files before choosing a
-restore procedure. A restored archive needs application-level checks before
-replacing live data. The
-[recovery notes](../docs/case-studies/recovery-and-storage-dependencies.md)
-walk through the public example's archive checks and separate restore destination.
+The application guides explain how to check a restored copy. Restore to a
+separate instance, then test login, saved data, and writes before replacing
+the working application.
 
 ## Try a restore
 
 ### Restic files
 
-The [Restic walkthrough](restic/README.md) creates a repository, backs up example
-files, changes a note, and restores the earlier version into a new directory.
-It is a small way to try the tool before choosing real backup sources.
+The [Restic guide](restic/README.md) covers application archives, a second
+repository on another host, and restoring to a new directory. Its
+[disposable-file exercise](restic/README.md#try-it-with-disposable-files) is a
+quick way to learn the commands.
 
 ### A VM from PBS
 
-In Proxmox, open the VM's **Backup** tab and select the PBS storage. Check the
-latest task result and the disks included in that backup. Guest-mounted NAS
-files still need their separate backup.
-
-If PBS is new to you, [connect the datastore and create a backup job](pbs/README.md)
-first.
-
-To rehearse a restore:
-
-1. Select a completed backup and choose **Restore**.
-2. Choose a new, unused VM ID and storage with enough free space. Leave automatic
-   startup disabled.
-3. Before the first boot, disconnect its network interfaces or attach them to an
-   isolated test network. The restored guest contains the original hostname,
-   network settings, service credentials, and scheduled jobs.
-4. Boot from the console. Check the OS, local disks, and application data. For
-   services that need shared files, supply a copied test dataset on the isolated
-   network before starting them.
-5. Check the application itself: sign in, open saved data, and try a small write.
-   Keep the original VM running separately while evaluating the restored copy.
-
-For a single file, use Proxmox's **File Restore** action on the backup instead of
-restoring the whole VM. A database directory extracted this way still needs the
-application's consistency and restore checks.
+The [PBS guide](pbs/README.md#try-a-restore) takes a completed backup through
+restore to a new VM ID, isolated startup, and application checks. It also covers
+connecting the datastore and scheduling backups.
 
 ### Archive checks
 
-The [restore tool](../automation/recovery/README.md) checks archives before
-extracting them into a new directory. Its guide includes the archive format,
-commands, and a disposable restore exercise.
+I also wrote a small [archive-checking exercise](../automation/recovery/README.md)
+using generated files. It tests corrupt input, path handling, and extraction into
+a new directory. The [notes](../docs/case-studies/recovery-and-storage-dependencies.md)
+explain those checks.
 
 ## Waiting for shared storage
 

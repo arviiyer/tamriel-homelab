@@ -30,10 +30,8 @@ lab copy lives on the NAS. It replaced Nextcloud for this job.
 
 [![Landscape album in Immich](../screenshots/immich-album.webp)](immich/README.md)
 
-I keep my photo library in Immich, with the photos on TrueNAS and the database
-on the application VM. It uses Authentik for sign-in. Backing it up means keeping
-both the library and database, since neither is useful as a complete restore
-on its own.
+I keep my photo library in Immich, with photos on TrueNAS and the database on
+the application VM. The guide covers phone backups as well as the server.
 
 [Setup, phone backups, and updates](immich/README.md) ·
 [Immich documentation](https://docs.immich.app/)
@@ -41,8 +39,7 @@ on its own.
 ### Stirling PDF
 
 I use Stirling PDF for browser-based jobs such as rotating pages and merging
-documents. It has its own login. Updates go through a manually triggered Forgejo
-workflow that saves its configuration before changing the image.
+documents. It runs on the application VM and has its own login.
 
 [Setup and updates](utilities/README.md#stirling-pdf) ·
 [Stirling PDF documentation](https://docs.stirlingpdf.com/)
@@ -64,10 +61,9 @@ article images so the reading view can load them locally behind sign-in.
 
 [![Homarr service cards and reading brief](../screenshots/homarr-home.webp)](../screenshots/README.md#homarr)
 
-Homarr brings my service links and widgets together. I also use it to read the
-[Morning SOC Briefing](projects/README.md#morning-soc-briefing), with source
-excerpts and links back to FreshRSS. It uses a Custom API widget because the RSS
-widget cuts the text short. Homarr has its own local login.
+Homarr is my starting page for service links, Pi-hole statistics, and the
+[Morning SOC Briefing](../projects/reading-brief/README.md). The brief shows
+source excerpts with links back to FreshRSS.
 
 [Setup, Compose, and reading widget](homarr/README.md) ·
 [Homarr documentation](https://homarr.dev/docs/)
@@ -75,8 +71,7 @@ widget cuts the text short. Homarr has its own local login.
 ### Vaultwarden
 
 Vaultwarden holds my passwords, with Bitwarden clients connecting to it. It runs
-on the Raspberry Pi behind Caddy. I keep Restic backups locally and on another
-host, so the vault's only copy is not on the Pi.
+on the Raspberry Pi, with Restic backups locally and on another host.
 
 [Setup and client sync](utilities/README.md#vaultwarden) ·
 [Vaultwarden documentation](https://github.com/dani-garcia/vaultwarden/wiki)
@@ -130,15 +125,14 @@ covers setup and GPU checks.
 | Gluetun | VPN connection for the download stack | [Setup](../media/servarr/README.md#start-the-stack) · [Docs](https://github.com/qdm12/gluetun-wiki) |
 | FlareSolverr | Browser helper for indexer requests | [Project](https://github.com/FlareSolverr/FlareSolverr) |
 | deunhealth | Restart selected unhealthy containers | [Project](https://github.com/qdm12/deunhealth) |
-| Seerr Discord Approver | Approve or deny requests from Discord | [Notes](projects/README.md#seerr-discord-approver) |
+| Seerr Discord Approver | Approve or deny requests from Discord | [Setup](../projects/seerr-discord-approver/README.md) |
 | Minecraft | Game server in its own VM | [Project](https://www.minecraft.net/) |
 
 ## Small projects
 
-The [project notes](projects/README.md) cover the Morning SOC Briefing, Forge VM
-provisioner, Seerr Discord Approver, and desktop Printer Monitor. The
-[sandbox notes](../security/README.md#tamriel-sandbox) describe the paused analysis
-project.
+The [Projects section](../projects/README.md) has dedicated guides and runnable
+examples for the Morning SOC Briefing, Forge VM provisioner, Seerr Discord
+Approver, Printer Monitor, and Tamriel Sandbox.
 
 ## Dashboards and monitoring
 
@@ -146,42 +140,20 @@ project.
 
 [![CPU, memory, network, and disk panels in Grafana](../screenshots/grafana-host-metrics.webp)](../monitoring/README.md)
 
-I use Grafana to view metrics and logs. The Node Exporter dashboard above shows
-host CPU, memory, network traffic, and disk usage. A separate
-[Trivy dashboard](../screenshots/README.md#trivy-dashboard) shows finding
-totals and new findings with available fixes. The public dashboard example also
-includes Falco events.
+I use Grafana to view host resource use, application metrics, and security scans.
+The screenshot shows Node Exporter Full on the Raspberry Pi.
 
 [Monitoring](../monitoring/README.md) ·
 [Dashboard configuration](../automation/monitoring/README.md) ·
 [Grafana documentation](https://grafana.com/docs/grafana/latest/)
 
-### Prometheus, Loki, and Alertmanager
-
-Prometheus collects metrics, Loki collects logs, and Alertmanager handles
-notifications. Grafana brings the metrics and logs together. The
-[monitoring notes](../monitoring/README.md#metrics-logs-and-alerts) show how scan
-results and runtime events reach the dashboard and notifications.
-
-[Prometheus](https://prometheus.io/docs/introduction/overview/) ·
-[Loki](https://grafana.com/docs/loki/latest/) ·
-[Alertmanager](https://prometheus.io/docs/alerting/latest/alertmanager/)
-
-### Uptime Kuma, Node Exporter, Promtail, and Pushgateway
-
-Uptime Kuma checks whether services are reachable. Node Exporter supplies host
-metrics, Promtail ships host logs to Loki, and Pushgateway holds batch-job metrics
-from Trivy and ClamAV. The [monitoring page](../monitoring/README.md) covers both
-host health and application checks.
-
-[Uptime Kuma](https://github.com/louislam/uptime-kuma) ·
-[Node Exporter](https://github.com/prometheus/node_exporter) ·
-[Promtail](https://grafana.com/docs/loki/latest/send-data/promtail/) ·
-[Pushgateway](https://github.com/prometheus/pushgateway)
-
-[Kuma setup](../monitoring/uptime-kuma/README.md) ·
-[Host metrics and alerts](../monitoring/host-metrics/README.md) ·
-[Log collection and Promtail migration](../monitoring/logs/README.md)
+| Service | What I use it for | Setup or notes |
+|---|---|---|
+| Prometheus and Node Exporter | Host and application metrics | [Host metrics](../monitoring/host-metrics/README.md) |
+| Loki and Promtail | Searching host journals; new installs use Alloy | [Logs and migration](../monitoring/logs/README.md) |
+| Alertmanager | Routing alerts to Discord and email | [Host alerts](../monitoring/host-metrics/README.md#alerts-and-discord) |
+| Uptime Kuma | Checking host and application reachability | [Kuma](../monitoring/uptime-kuma/README.md) |
+| Pushgateway | Holding Trivy and ClamAV batch-job metrics between scrapes | [Metrics flow](../monitoring/README.md#metrics-logs-and-alerts) |
 
 ## Git and updates
 
@@ -189,17 +161,12 @@ host health and application checks.
 
 [![Forgejo checking a dependency-update pull request](../screenshots/forgejo-validation-run.png)](../screenshots/README.md#forgejo-ci)
 
-Forgejo hosts my private configuration repositories. The screenshot shows
-Compose checks passing on a dependency-update pull request. The
-[deployment example](../automation/ci/README.md) shows how a separate request can
-deploy the commit that passed validation and roll back an unhealthy change.
+Forgejo hosts my private configuration repositories. Its Actions runners check
+changes on a separate VM. The screenshot shows Compose checks passing on a
+dependency-update pull request.
 
 [Git and update workflow](../automation/README.md#git-and-updates) ·
 [Forgejo documentation](https://forgejo.org/docs/latest/)
-
-Forgejo Actions uses separate general CI and image-release runners on a dedicated
-VM. The [runner notes](../automation/README.md#runners-and-deployment) explain
-which jobs run on each.
 
 ### Renovate
 
@@ -211,8 +178,8 @@ Those changes go through the Git workflow described on the automation page.
 
 ### Ansible
 
-I use Ansible for host configuration. The public examples cover key-only SSH,
-automatic security updates, and full upgrades one host at a time.
+I use Ansible for SSH settings and host updates. The playbooks here cover
+key-only SSH, automatic security updates, and full upgrades one host at a time.
 
 [Host maintenance](../automation/README.md#host-maintenance) ·
 [Playbooks and requirements](../automation/ansible/README.md) ·
@@ -275,9 +242,8 @@ the [storage notes](../storage/README.md#where-data-lives) explain that choice.
 
 [![PBS backup task completed successfully](../screenshots/pbs-backup.webp)](../storage/README.md#backups)
 
-PBS and Restic are the lab's backup tools, alongside VM snapshots and off-host
-copies for selected data. The storage page introduces the different backup
-layers and links to a restore exercise using generated files.
+PBS backs up VM disks; Restic handles file backups, including Vaultwarden's
+off-host copy. The storage page shows what each backup covers.
 
 [Backups and restore testing](../storage/README.md#backups) ·
 [PBS documentation](https://pbs.proxmox.com/docs/) ·

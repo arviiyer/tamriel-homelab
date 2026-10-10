@@ -6,9 +6,15 @@ Jellyfin plays the media library, Seerr handles requests, and the Servarr stack
 manages downloads and library organization. They run in a Debian VM on the ROG
 Ally, with its AMD GPU passed through for transcoding.
 
-Setup guides: [Requests, downloads, and Gluetun](servarr/README.md) ·
-[Jellyfin and GPU transcoding](jellyfin/README.md) ·
-[NAS mounts](../storage/nfs/README.md)
+To build a similar setup:
+
+1. Prepare a [Debian Docker VM](../proxmox/debian-vm/README.md) and its
+   [NAS mounts](../storage/nfs/README.md).
+2. Install [Jellyfin](jellyfin/README.md) and check playback from the library.
+3. Add [requests, downloads, and Gluetun](servarr/README.md), then connect Seerr
+   to Jellyfin.
+4. Configure [private HTTPS](../networking/private-access/README.md) for the
+   browser and media clients.
 
 ## The setup
 
@@ -59,7 +65,7 @@ The [download-stack walkthrough](servarr/README.md) includes Compose files,
 directory permissions, VPN setup, and the addresses and settings used to connect
 these applications.
 
-The [Discord approver](../apps/projects/README.md#seerr-discord-approver) adds
+The [Discord approver](../projects/seerr-discord-approver/README.md) adds
 request actions to Discord. It rechecks the request in Seerr before applying an
 action and keeps its webhook inside the media stack.
 

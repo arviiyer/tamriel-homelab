@@ -4,6 +4,7 @@ services:
       - ./alerts.prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./hosts.rules.yml:/etc/prometheus/hosts.rules.yml:ro
   alertmanager:
+    restart: unless-stopped
     image: prom/alertmanager:v0.31.1@sha256:88b605de9aba0410775c1eb3438f951115054e0d307f23f274a4c705f51630c1
     user: "65534:65534"
     read_only: true

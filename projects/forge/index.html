@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forge · Virtual machines</title>
+{{if .Busy}}<meta http-equiv="refresh" content="4">{{end}}
+<style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#111820;color:#e8edf1}body{max-width:1100px;margin:40px auto;padding:0 24px}header{display:flex;justify-content:space-between;align-items:center}h1{margin:0;font-size:32px}h2{font-size:20px}p,small,label{color:#aebdca}.badge{background:#293e4d;border-radius:20px;padding:6px 14px;font-size:13px}.panel{background:#19232d;border:1px solid #344553;border-radius:12px;margin-top:24px;padding:24px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px}label{display:block;font-size:13px}input,select,button{font:inherit;border:1px solid #425766;border-radius:6px;background:#111820;color:inherit;padding:9px;margin-top:7px;box-sizing:border-box}input,select{width:100%}button{cursor:pointer;background:#2f596c}button:disabled{opacity:.4;cursor:default}.actions{display:flex;gap:8px;flex-wrap:wrap}.actions form{display:inline-flex;gap:6px;align-items:center}.actions input{width:160px}.danger{background:#653c43}table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;padding:14px 10px;border-bottom:1px solid #344553}th{color:#aebdca}.table{overflow:auto}.notice{padding:14px;background:#253849;border-radius:8px;margin-top:24px;overflow-wrap:anywhere}footer{margin-top:24px;color:#aebdca;font-size:13px}
+</style></head><body>
+<header><div><h1>Forge</h1><p>Virtual machines from Proxmox templates</p></div><span class="badge">{{if .Demo}}Sample data{{else}}Local portal{{end}}</span></header>
+{{if .Result}}<div class="notice" role="status">{{.Result}}</div>{{end}}
+<section class="panel"><h2>Launch a VM</h2>
+<form method="post" action="/action"><input type="hidden" name="csrf" value="{{.CSRF}}"><input type="hidden" name="action" value="launch">
+<div class="grid">
+<label>Name<input name="name" placeholder="test-01" pattern="[a-z][a-z0-9-]{0,39}" required></label>
+<label>VM ID<input name="id" type="number" min="100" max="999999" placeholder="301" required></label>
+<label>Node<select name="node">{{range .Config.Nodes}}<option>{{.}}</option>{{end}}</select></label>
+<label>Template<select name="template">{{range $name,$template := .Config.Templates}}<option value="{{$name}}">{{$name}} ({{$template.ID}})</option>{{end}}</select></label>
+<label>Size<select name="size">{{range $name,$size := .Config.Sizes}}<option value="{{$name}}">{{$name}} · {{$size.Cores}} CPU / {{$size.Memory}} MiB</option>{{end}}</select></label>
+</div><button {{if .Busy}}disabled{{end}}>Launch VM</button></form></section>
+<section class="panel"><h2>Managed VMs</h2><div class="table"><table><thead><tr><th>Name</th><th>ID / Node</th><th>Resources</th><th>Protection</th></tr></thead><tbody>
+{{range $name,$vm := .VMs}}<tr><td><strong>{{$name}}</strong></td><td>{{$vm.ID}} / {{$vm.Node}}</td><td>{{$vm.Cores}} CPU / {{$vm.Memory}} MiB</td><td>{{if $vm.Protected}}Protected{{else}}Off{{end}}</td></tr>
+<tr><td colspan="4"><div class="actions">
+<form method="post" action="/action"><input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="name" value="{{$name}}"><button name="action" value="start">Start</button><button name="action" value="shutdown">Shut down</button><button name="action" value="protect">{{if $vm.Protected}}Remove protection{{else}}Protect{{end}}</button></form>
+<form method="post" action="/action"><input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="name" value="{{$name}}"><label>Confirm name<input name="confirm" placeholder="{{$name}}" required {{if $vm.Protected}}disabled{{end}}></label><button class="danger" name="action" value="destroy" {{if $vm.Protected}}disabled{{end}}>Destroy</button></form>
+</div></td></tr>{{else}}<tr><td colspan="4">{{if .Busy}}Operation in progress. This page refreshes automatically.{{else}}No managed VMs.{{end}}</td></tr>{{end}}
+</tbody></table></div></section>
+<footer>{{if .Demo}}Sample operations stay in memory and reset when this process stops.{{else}}Terraform provisions VMs. Power controls use the Proxmox API.{{end}}</footer>
+</body></html>

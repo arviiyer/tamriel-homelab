@@ -12,6 +12,9 @@ Requirements: Docker Engine, Compose, curl, and local persistent storage. In a
 new directory outside this checkout, download [compose.yml](compose.yml):
 
 ```bash
+mkdir -p "$HOME/homelab-examples"
+mkdir "$HOME/homelab-examples/uptime-kuma"
+cd "$HOME/homelab-examples/uptime-kuma"
 curl -fLo compose.yml \
   https://raw.githubusercontent.com/arviiyer/tamriel-homelab/main/monitoring/uptime-kuma/compose.yml
 docker compose config --quiet

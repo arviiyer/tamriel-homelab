@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Printer Monitor
+Comment=Printer status, supplies, and queued jobs
+Exec=printer-monitor
+Icon=printer
+Terminal=false
+Categories=Utility;GTK;

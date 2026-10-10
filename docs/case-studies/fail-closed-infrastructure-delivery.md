@@ -1,4 +1,7 @@
-# Deploying the Commit That Passed CI
+# Deploying the commit that passed CI
+
+[Home](../../README.md) · [Automation](../../automation/README.md) ·
+[Deployment setup](../../automation/ci/README.md)
 
 A green CI run is only useful if the deployed commit is the one that passed.
 Giving pull-request code a deployment key also gives it a way into the host.

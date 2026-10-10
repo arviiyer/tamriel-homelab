@@ -3,9 +3,9 @@
 [Home](../README.md) · [Apps and services](../apps/README.md) ·
 [Security](../security/README.md)
 
-Forgejo hosts the lab's configuration, Renovate opens dependency-update pull
-requests, and Ansible handles host configuration. This page connects that
-workflow to the scripts, roles, and examples in the repository.
+I keep configuration in Forgejo, review image updates from Renovate, and use
+Ansible for host settings and OS updates. Merging a change and applying it are
+separate steps.
 
 ## Git and updates
 
@@ -15,20 +15,16 @@ Compose checks passing on a dependency-update pull request. The lab's
 configuration repositories live in private Forgejo, with credentials and
 application data outside Git.
 
-Renovate opens update pull requests for review. Compose and service-specific
-checks run before merge. Merging records the configuration change; applying it
-is a separate step.
+For a typical application update:
+
+1. Review Renovate's image change and the upstream release notes.
+2. Wait for Compose and service checks, then merge the pull request.
+3. Back up the app's data and configuration, keeping the old image reference.
+4. Apply the checked commit on its host and recreate the affected containers.
+5. Check sign-in and an ordinary task in the app, then record the result.
 
 The [Renovate guide](renovate/README.md) covers the bot account, Docker
 configuration, daily timer, and the steps from an update PR to deployment.
-
-The [deployment example](ci/README.md) separates validation from deployment.
-A manual request selects one commit, validation checks that commit, and the
-target checks it again before allowing an image change. Service health checks
-decide whether to record success or restore the previous definition.
-
-[How deployment and rollback work](../docs/case-studies/fail-closed-infrastructure-delivery.md) ·
-[Disposable-host test results](../docs/drills/2026-08-24-fail-closed-delivery-rollback.md)
 
 ## Runners and deployment
 
@@ -41,13 +37,14 @@ Other services use their documented manual apply steps after review and merge.
 Stirling PDF deployment saves its persistent configuration before changing the
 image. The sandbox also needs database-aware handling when migrations change.
 
-The public deployment example exercises commit selection, image-only changes,
-health checks, and rollback against a disposable service. Its
-[test documentation](ci/README.md#tests) describes that scope.
+The [deployment guide](ci/README.md) implements the exact-commit request and
+rollback pattern for a small API service. The
+[design notes](../docs/case-studies/fail-closed-infrastructure-delivery.md)
+explain the checks on the runner and target.
 
 ## VM provisioning
 
-The [Forge portal](../proxmox/README.md#provisioning) uses Terraform and cloud-init
+The [Forge portal](../projects/forge/README.md) uses Terraform and cloud-init
 for VMs. Ansible configures the hosts afterward. Provisioning a machine and
 updating an application on it are separate workflows.
 
@@ -59,7 +56,7 @@ timer before changing access. Full upgrades run one host at a time and stop on
 failure. The setup guide lists prerequisites and the checks still to exercise
 on disposable hosts.
 
-## Examples
+## Scripts and playbooks
 
 Each component has setup instructions and test commands:
 
@@ -74,15 +71,8 @@ Each component has setup instructions and test commands:
 | [ClamAV](../security/clamav/README.md) | Scan downloads and distinguish findings from scan errors |
 | [Terraform](../proxmox/terraform/README.md) | Clone one Debian VM with cloud-init and an SSH public key |
 | [Grafana](monitoring/README.md) | Display scan results and Falco events |
-| [Syncthing](../apps/syncthing/README.md) | Run file sync with a local management interface |
-| [FreshRSS](../apps/freshrss/README.md) | Run a feed reader with SQLite and restore its data |
-| [Homarr](../apps/homarr/README.md) | Build a service dashboard and display a reading brief |
-| [Jellyfin](../media/jellyfin/README.md) | Play a read-only media library, with optional GPU transcoding |
-| [Media stack](../media/servarr/README.md) | Connect requests, indexers, download clients, and library managers through Gluetun |
-| [Caddy](../networking/caddy/README.md) | Route a hostname to an internal upstream |
-| [Private HTTPS](../networking/private-access/README.md) | Add DNS certificates, Tailscale access, and Authentik sign-in |
-| [Host metrics](../monitoring/host-metrics/README.md) | Scrape metrics and load a Grafana dashboard |
-| [Host logs](../monitoring/logs/README.md) | Send journal entries through Alloy to Loki |
+
+Application configuration lives beside its [setup guide](../README.md#setup-guides).
 
 ## Checks in this repository
 
@@ -92,9 +82,9 @@ Each component has setup instructions and test commands:
 | [Automation examples](../.github/workflows/examples.yml) | Relevant automation or service-example changes, or manual runs | Component tests, Terraform plans, and configuration validation |
 | [Integration checks](../.github/workflows/integration.yml) | Manual runs | App stacks, DNS, browser sign-in, alerts, Grafana, PromQL, and the delivery drill image build |
 
-The complete delivery drill has its own
-[disposable-host requirements](ci/README.md#tests). The integration workflow
-builds its image; the recorded drill describes the full SSH and Compose exercise.
+See the [setup guide check results](../docs/drills/setup-guide-checks.md) for the
+container and browser runs, and the [deployment drill](ci/README.md#tests) for
+the separate SSH and Compose exercise.
 
 ## Notes
 

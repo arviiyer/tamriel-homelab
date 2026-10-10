@@ -1,0 +1,31 @@
+services:
+  approver:
+    build: .
+    restart: unless-stopped
+    env_file: environment
+    environment:
+      LISTEN_ADDRESS: 0.0.0.0:8080
+      STATE_PATH: /data/state.json
+      DISCORD_BOT_TOKEN_FILE: /run/secrets/discord
+      SEERR_PASSWORD_FILE: /run/secrets/seerr
+      WEBHOOK_SECRET_FILE: /run/secrets/webhook
+      COMPONENT_SIGNING_KEY_FILE: /run/secrets/signing
+    volumes: ["./data:/data"]
+    secrets: [discord, seerr, webhook, signing]
+    networks: [requests]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 128m
+    pids_limit: 64
+    logging:
+      options: {max-size: 5m, max-file: "2"}
+networks:
+  requests:
+    external: true
+    name: ${REQUESTS_NETWORK:-media-requests}
+secrets:
+  discord: {file: ./secrets/discord}
+  seerr: {file: ./secrets/seerr}
+  webhook: {file: ./secrets/webhook}
+  signing: {file: ./secrets/signing}

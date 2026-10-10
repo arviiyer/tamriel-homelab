@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sandbox · Workflow demo</title><style>
+:root{color-scheme:dark;background:#111820;color:#e4edf2;font-family:system-ui,sans-serif}body{max-width:1100px;margin:36px auto;padding:0 24px}header{display:flex;align-items:center;justify-content:space-between}h1{margin:0;font-size:30px}h2{font-size:19px}p,small{color:#aebfcd}.badge{border-radius:20px;background:#294255;padding:6px 14px;font-size:13px}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin:26px 0}.card,.panel{background:#192530;border:1px solid #354856;border-radius:10px;padding:20px}.card strong{display:block;margin-top:8px;font-size:23px;text-transform:capitalize}nav{display:flex;flex-wrap:wrap;gap:12px;margin:24px 0}a{color:#91c7ea;text-decoration:none}nav a{background:#263c4a;padding:10px 14px;border-radius:6px}.table{overflow:auto}table{border-collapse:collapse;width:100%;font-size:13px}td,th{text-align:left;padding:11px 8px;border-bottom:1px solid #354856}th{color:#aebfcd}td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums}footer{font-size:13px;margin-top:24px;color:#aebfcd}
+</style></head><body>
+<header><div><h1>Tamriel Sandbox</h1><p>Worker lifecycle walkthrough</p></div><span class="badge">Generated sample data</span></header>
+<nav aria-label="Scenario"><a href="/?scenario=complete">Completed run</a><a href="/?scenario=stop">Stopped run</a><a href="/?scenario=missing-evidence">Missing evidence</a><a href="/?scenario=failed-reset">Failed reset</a></nav>
+<section class="cards"><div class="card"><small>Run state</small><strong>{{state}}</strong></div><div class="card"><small>Worker-01</small><strong>{{worker}}</strong></div><div class="card"><small>Evidence</small><strong>{{evidence}}</strong></div></section>
+<section class="panel"><h2>Example URL analysis</h2><p>example.com · Scenario: {{scenario}} · <a href="/run.json?scenario={{scenario}}">View JSON</a></p><div class="table"><table><thead><tr><th>Time (UTC)</th><th>Event</th><th>Detail</th></tr></thead><tbody>{{events}}</tbody></table></div></section>
+<footer>This local demo replays generated events. It has no file execution, network capture, guest agent, or Proxmox connection.</footer>
+</body></html>

@@ -34,8 +34,7 @@ and Tailscale clients.
 This example uses plain HTTP on loopback. A real private application also needs
 TLS, the intended client access rules, and either its own login or an Authentik
 integration. See [the sign-in table](../README.md#caddy-and-authentik) and
-[FreshRSS notes](../../apps/freshrss/README.md#sign-in). Hostname routing by itself
-does not authenticate a client.
+the [private HTTPS walkthrough](../private-access/README.md) to add those pieces.
 
 ## Check and stop
 

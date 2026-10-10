@@ -80,7 +80,7 @@ Enabled snapshot tasks with finished status.
 
 A VM backup completed with status OK in 4 minutes 38 seconds.
 
-[PBS restore notes](../storage/README.md#a-vm-from-pbs) · [Review details](pbs-backup.review.md)
+[PBS restore notes](../storage/pbs/README.md#try-a-restore) · [Review details](pbs-backup.review.md)
 
 ## Trivy dashboard
 
@@ -121,6 +121,23 @@ A VM backup completed with status OK in 4 minutes 38 seconds.
 [Cluster setup](../proxmox/README.md)
 
 [Redaction and review details](proxmox-cluster-summary.review.md)
+
+## Project examples
+
+[![Forge sample portal](forge-demo.webp)](../projects/forge/README.md)
+
+Forge's public portal with generated VM inventory.
+[Review](forge-demo.review.md).
+
+[![Printer Monitor sample window](printer-demo.webp)](../projects/printer-monitor/README.md)
+
+Printer Monitor's GTK window using sample data.
+[Review](printer-demo.review.md).
+
+[![Sandbox workflow demo](sandbox-demo.webp)](../projects/sandbox/README.md)
+
+Sandbox's generated lifecycle walkthrough, showing a missing-evidence result.
+[Review](sandbox-demo.review.md).
 
 <details>
 <summary>Adding screenshots</summary>

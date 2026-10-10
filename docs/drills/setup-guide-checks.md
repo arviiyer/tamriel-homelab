@@ -35,6 +35,30 @@ embedded outpost. It caught an internal-hostname redirect in the walkthrough;
 the guide now uses the reachable HTTPS identity URL and checks that connection
 from the Authentik container too.
 
+## Guide walkthroughs
+
+The revised installation steps were also followed in fresh working directories:
+
+| Guide | Result |
+|---|---|
+| [Host metrics](../../monitoring/host-metrics/README.md) | Generated admin password accepted, anonymous API access denied, login persisted after restart, and all three services had the documented restart policy |
+| [Security dashboard](../../automation/monitoring/README.md) | Both host and security dashboards loaded together, with the expected datasource UIDs and one default datasource |
+| [Syncthing](../../apps/syncthing/README.md) | The configured numeric identity could create and read a file through the documented bind mount |
+| [SearXNG](../../apps/utilities/README.md#searxng) | Copying, editing, and returning the settings file changed the running instance after restart |
+| [Restic](../../storage/restic/README.md) | Backup, separate restore, repository copy with a second password, full data checks, retention preview, and the disposable-file exercise passed |
+
+The Restic copy check used two local repositories. The SFTP destination still
+needs its own SSH and remote-write checks. The Syncthing bind-mount check used a
+local directory; NFS ownership and mount readiness are covered in the storage
+guide's host checks.
+
+## Documentation checks
+
+Local browser rendering passed for 18 overview, setup, and notes pages, including
+their images and Mermaid diagrams. The README, media overview, and host-metrics
+guide also fit a narrow mobile viewport. Internal Markdown links and anchors
+passed, and all 109 external documentation links responded successfully.
+
 The repository's 159 Python unit tests, configuration checks, isolated restore
 drill, Markdown links, and publication checks also passed. The local publication
 audit included the private denylist. The retained Trivy screenshot is an

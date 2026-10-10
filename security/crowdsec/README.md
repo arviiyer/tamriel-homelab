@@ -59,7 +59,7 @@ curl --fail http://192.0.2.1:6060/metrics
 Replace the documentation address. Add the job from
 [prometheus.yml](prometheus.yml) to your existing `scrape_configs`, rather than
 creating a second top-level key. Validate Prometheus and restart/reload it using
-the [metrics guide](../../monitoring/host-metrics/README.md#adapting-it).
+the [metrics guide](../../monitoring/host-metrics/README.md#add-other-hosts).
 
 Query `up{job="crowdsec"}` and `sum(cs_active_decisions{job="crowdsec",action="ban"})`.
 CrowdSec 1.7+ uses the `cs_` metric prefix. An empty decisions series can mean

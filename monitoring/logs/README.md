@@ -58,7 +58,7 @@ ports to the internet.
 ## Search in Grafana
 
 With Grafana login enabled as described in the
-[metrics guide](../host-metrics/README.md#adapting-it), add a **Loki** datasource.
+[metrics guide](../host-metrics/README.md#configure-grafana-login), add a **Loki** datasource.
 Use a URL reachable from Grafana's container. A host service's `127.0.0.1` is not
 the container's localhost: use the monitoring host's allowed private address,
 or join the two containers to a dedicated network and use `http://loki:3100`.

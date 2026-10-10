@@ -3,7 +3,7 @@
 [Home](../../README.md) · [Apps](../README.md) · [Networking](../../networking/README.md)
 
 FreshRSS is my browser-based feed reader. It holds security news and technical
-articles and supplies the input for the [Morning SOC Briefing](../projects/README.md#morning-soc-briefing).
+articles and supplies the input for the [Morning SOC Briefing](../../projects/reading-brief/README.md).
 
 [![FreshRSS feed categories and articles](../../screenshots/freshrss-reader.webp)](../../screenshots/README.md#freshrss)
 
@@ -157,7 +157,7 @@ containing `compose.yml`; it needs `tar` in the container, supplied by the image
 
 If the copy fails, fix the error before starting FreshRSS again. Move the backup
 off this host with your backup tool. The [Restic walkthrough](../../storage/restic/README.md)
-shows the backup-and-restore cycle using disposable files.
+covers copying the archive off-host and checking a restored copy.
 
 To check a backup, copy the saved Compose file into a new directory. Use a new
 Compose project and a different loopback port, keep OIDC disabled for the local

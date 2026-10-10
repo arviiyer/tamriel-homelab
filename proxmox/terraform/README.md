@@ -2,7 +2,7 @@
 
 [Home](../../README.md) · [Proxmox](../README.md) · [Debian VM](../debian-vm/README.md)
 
-My Forge portal uses Terraform to clone Debian templates. This smaller example
+My [Forge portal](../../projects/forge/README.md) uses Terraform to clone Debian templates. This smaller example
 creates one VM directly: two CPU cores, 4 GiB RAM, a 64 GiB local disk, DHCP, and
 an operator account with your SSH public key. It uses the same `bpg/proxmox`
 provider and full-clone approach.

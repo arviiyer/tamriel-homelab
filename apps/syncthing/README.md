@@ -6,49 +6,25 @@ Syncthing syncs my documents, pictures, and Obsidian notes. The lab copy lives o
 TrueNAS, with configuration on the application VM. It replaced Nextcloud for
 file synchronization.
 
-## Try it locally
+## Install
 
-This example uses a Docker volume and binds the management and TCP sync ports to
-localhost. Use explicit device addresses for this local trial. Syncthing's normal
-outbound discovery and relay behavior is available on the project network; those
-options can be disabled in Settings when using only direct connections.
+Requirements: Docker Engine, Docker Compose, curl, and a second device running
+[Syncthing](https://syncthing.net/downloads/). Prepare the Docker host with the
+[Debian VM guide](../../proxmox/debian-vm/README.md) if needed.
 
-Requirements: Docker Engine and Docker Compose. From the repository root:
+Download [compose.yml](compose.yml) into a new working directory:
 
 ```bash
-docker compose -p syncthing-example -f apps/syncthing/compose.yml config --quiet
-docker compose -p syncthing-example -f apps/syncthing/compose.yml up -d
-curl --fail http://127.0.0.1:8384/rest/noauth/health
+mkdir -p "$HOME/homelab-examples"
+mkdir "$HOME/homelab-examples/syncthing"
+cd "$HOME/homelab-examples/syncthing"
+curl -fLO https://raw.githubusercontent.com/arviiyer/tamriel-homelab/main/apps/syncthing/compose.yml
 ```
 
-Open <http://127.0.0.1:8384>. Set a GUI username and password in Settings before
-adapting access for other devices. The Docker image prepares the volume and then
-runs Syncthing as UID/GID 1000.
-
-To pair with Syncthing running directly on the same computer:
-
-1. Exchange device IDs and approve the device on each side.
-2. In the host-side app, set this container's address to `tcp://127.0.0.1:22000`.
-3. Leave the host-side app initiating the connection to the container. Its own
-   GUI and listener must use different ports if they conflict with the example.
-4. Create a test folder in the container under `/var/syncthing/example-files`,
-   share it with the host-side device, and accept it into a new empty host folder.
-5. Add a disposable text file and check that both sides become Up to Date.
-
-For LAN or Tailscale use, choose the intended host interface for the sync port,
-allow it through the firewall, and configure a reachable device address. Keep
-GUI access private. The lab's Caddy route is for the GUI, not the sync protocol.
-
-## Storage and backups
-
-The example keeps configuration, device keys, and files in its named volume.
-The lab instead mounts the NAS file share separately and makes Docker wait for
-that mount. Follow the [NFS guide](../../storage/nfs/README.md) to prepare a share
-owned by UID/GID 1000 and make Docker wait for it.
-
-For that setup, copy [compose.yml](compose.yml) into your own working directory.
-Keep the existing configuration volume and add the NAS folder to the service's
-`volumes` list:
+The configuration and device identity stay in a Docker volume on this host.
+For a NAS-backed file library, follow the [NFS guide](../../storage/nfs/README.md)
+first, including the Docker mount dependency. Add this entry to Syncthing's
+existing `volumes` list, keeping the configuration volume:
 
 ```yaml
       - type: bind
@@ -58,37 +34,94 @@ Keep the existing configuration volume and add the NAS folder to the service's
           create_host_path: false
 ```
 
-Check the mount and numeric ownership, run `docker compose config --quiet`, and
-start with `docker compose up -d`. In Syncthing, add a folder under `/data/sync`
-and share it with the intended devices. Existing folders need their data moved
-and paths changed deliberately; adding the mount does not migrate them.
+Replace the source with your mounted share. For local storage, create a directory
+on the VM and use its absolute path instead. The container runs as UID/GID 1000;
+set `PUID` and `PGID` to the identity that owns your files if it differs.
+
+Under `ports`, change the sync binding from `127.0.0.1:22000:22000/tcp` to your
+server's LAN address, for example `192.0.2.83:22000:22000/tcp`. Allow the intended
+devices to reach TCP 22000. For direct remote syncing, use a Tailscale binding
+and a corresponding tailnet rule, or Syncthing's discovery and relay facilities.
+
+Keep the management port on localhost for initial setup:
+
+```bash
+docker compose config --quiet
+docker compose up -d
+docker compose ps
+curl --fail http://127.0.0.1:8384/rest/noauth/health
+```
+
+Open <http://127.0.0.1:8384>. On a remote VM, first run
+`ssh -L 8384:127.0.0.1:8384 operator@apps-01` from your workstation. Set a GUI
+username and password in **Actions → Settings → GUI**.
+
+For a regular browser URL, add a [private Caddy route](../../networking/private-access/README.md#use-it-with-an-application).
+Caddy reaches the GUI only; device synchronization uses its own connection.
+
+## Connect devices and folders
+
+1. Exchange device IDs using **Actions → Show ID**, then add and approve each
+   device on the other side.
+2. For a direct connection, set the server's address on the other device to
+   `tcp://192.0.2.83:22000`, replacing the address. Use the Tailscale address
+   instead when connecting through that interface.
+3. Add a folder on the server at `/data/sync/test`. Share it with the other device
+   and accept it into a new empty folder there.
+4. Add a text file, check both sides become **Up to Date**, then edit it on the
+   other device and confirm the change returns.
+5. Add the folders you want to keep, such as `documents`, `pictures`, and
+   `obsidian`, choosing the folder type and versioning settings for each.
+
+Existing folders need their data moved and paths changed deliberately; adding a
+Docker mount does not migrate them. Discovery and relays are enabled by default.
+If you want direct-only connections, disable them in **Settings → Connections**
+after checking the explicit device addresses work.
+
+## Storage and backups
 
 Sync propagates deletions too. Keep snapshots or backups independently of the
 sync relationship, and back up configuration and device keys privately. When
 restoring, avoid running two instances with the same device identity.
+
+Use the [cold-copy steps](../utilities/README.md#cold-copies-updates-and-cleanup)
+with service name `syncthing` for its configuration volume. Back up the shared
+files separately with [Restic](../../storage/restic/README.md) or your NAS backup
+tool. After restoring, check the device ID, folder paths, and a test file before
+resuming synchronization.
 
 ## Troubleshooting
 
 | Symptom | First thing to check |
 |---|---|
 | Devices stay disconnected | Approved device IDs, explicit TCP address, and the published sync port |
-| Folder reports permission denied | UID/GID 1000 write access on the mounted share |
+| Folder reports permission denied | Configured PUID/PGID write access on the mounted share |
 | GUI works but files do not sync | Caddy reaches the GUI only; TCP 22000 needs its own connection path |
 | Deletion appears on every device | Sync propagated it; recover from folder versioning or a separate snapshot |
 
-## Updates and cleanup
+## Updates
 
 The image is pinned by digest and in-app upgrades are disabled. To update,
 review the release notes, back up the volume, change the image reference, and
-recreate the service. Check device connections and folder status afterward.
-
-Stop the example while keeping its volume:
+recreate the service:
 
 ```bash
-docker compose -p syncthing-example -f apps/syncthing/compose.yml down
+docker compose pull
+docker compose up -d
+docker compose logs --tail=50 syncthing
 ```
 
-Add `--volumes` only when discarding the example's files and identity.
+Check device connections and folder status afterward. `docker compose down`
+keeps the configuration volume; adding `--volumes` deletes its device identity.
+
+## Try it on one computer
+
+For a local trial, use the unmodified Compose file. It keeps files in the named
+volume and binds both ports to localhost. Pair a host-installed Syncthing with
+the container at `tcp://127.0.0.1:22000`, and use `/var/syncthing/example-files`
+as the container's folder. Give the host-side app different GUI/listener ports
+if they conflict, and let it initiate the connection. Exchange a disposable file
+before setting up shared storage or remote access.
 
 ## Checks
 

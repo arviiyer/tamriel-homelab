@@ -1,0 +1,6 @@
+{
+  "queue": "printer",
+  "device_uri": "ipp://localhost:60000/ipp/print",
+  "scanner": "",
+  "refresh_seconds": 30
+}

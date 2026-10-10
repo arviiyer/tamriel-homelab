@@ -8,6 +8,10 @@ CrowdSec for network defense, and ClamAV for malware scanning. Prometheus, Loki,
 Grafana, and Alertmanager connect scan results and events to dashboards and
 notifications.
 
+Setup guides: [Trivy](../automation/trivy/README.md) ·
+[Falco](../automation/falco/README.md) · [CrowdSec](crowdsec/README.md) ·
+[ClamAV](clamav/README.md)
+
 ## Trivy
 
 Repeated scans can produce a lot of the same findings. I compare complete
@@ -26,14 +30,13 @@ result and reports the failure separately.
 
 ## Falco
 
-Falco watches runtime activity using its modern eBPF engine. The public example
-includes an Ansible role, two rule-tuning examples, and a Falcosidekick Compose
-configuration.
+Falco watches runtime activity on the service VMs using its modern eBPF engine.
+I use Falcosidekick to send those events to Loki and Alertmanager. The
+[setup guide](../automation/falco/README.md) includes an Ansible role and two
+rule-tuning examples.
 
-Falcosidekick routes events to Loki for searching and Alertmanager for
-notifications. Falco's process health and successful event delivery are separate
-things to check; the [routing notes](../automation/falco/event-flow.md) explain
-what happens if delivery fails.
+The [routing notes](../automation/falco/event-flow.md) explain which priorities
+produce notifications and how to check event delivery.
 
 [Falco setup and tuning](../automation/falco/README.md) ·
 [Falco documentation](https://falco.org/docs/)
@@ -68,10 +71,8 @@ while the private API, UI, and database remain available. Broader reliability
 and browser-telemetry work is unfinished.
 
 The worker has separate network access from ordinary applications, and analysis
-data has its own storage. The [network notes](../docs/network-and-identity.md)
-describe the high-level separation. The
-[deployment example](../automation/ci/README.md) demonstrates the separate
-exact-commit deployment pattern used in the lab.
+data has its own storage. The [project guide](../projects/sandbox/README.md)
+explains the architecture and includes a generated lifecycle walkthrough.
 
 ## Repository checks
 

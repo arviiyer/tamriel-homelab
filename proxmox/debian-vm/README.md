@@ -100,7 +100,7 @@ curl -fsS http://127.0.0.1:9100/metrics | head
 ```
 
 Allow the monitoring host to reach TCP 9100 and add this VM to its
-[scrape configuration](../../monitoring/host-metrics/README.md#adapting-it).
+[scrape configuration](../../monitoring/host-metrics/README.md#add-other-hosts).
 For key-only SSH and automatic security updates, use the
 [Ansible guide](../../automation/ansible/README.md) after confirming a working key login.
 

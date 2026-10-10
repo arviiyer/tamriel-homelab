@@ -2,50 +2,67 @@
 
 [Home](../README.md) · [Apps and services](../apps/README.md)
 
-Three Proxmox nodes host Debian VMs for applications, identity, monitoring,
-security tools, Git/CI, and backups. Most applications run with Docker Compose;
-TrueNAS provides shared bulk storage. The [Proxmox page](../proxmox/README.md)
-covers VM roles, provisioning tools, and supporting devices.
+Most services run in Docker Compose on Debian VMs. Three Proxmox nodes host the
+VMs, with separate machines for the router, NAS, and Raspberry Pi services.
+The [hardware list](../README.md#hardware) and [VM table](../proxmox/README.md#virtual-machines)
+show the machines and workloads.
 
-The [app catalogue](../apps/README.md) lists the personal services: Syncthing,
-Immich, FreshRSS, Stirling PDF, Homarr, Vaultwarden, and SearXNG. The
-[media VM](../media/README.md) runs Jellyfin, Seerr, and the download stack with
-GPU passthrough. CI has a separate VM from Forgejo's application data.
+## Opening an application
 
-[Overview diagram](../README.md#the-setup) · [Hardware](../README.md#hardware)
+For an app such as FreshRSS, the path at home is:
 
-## Access and networking
+1. Pi-hole resolves the app's name to the Raspberry Pi's LAN address.
+2. Caddy on the Pi terminates HTTPS and forwards the request to the app VM.
+3. FreshRSS sends the browser to Authentik for sign-in, then opens the reader.
 
-OPNsense separates network zones. Tailscale provides private admin access, while
-trusted clients reach web applications through Caddy with Authentik sign-in
-where supported. See the [networking page](../networking/README.md) for the access
-diagram and [network-zone notes](network-and-identity.md) for allowed connections.
+Away from home, the same name resolves through public DNS to the Pi's Tailscale
+address. The client joins the tailnet before opening it. Other apps use their
+own login or Authentik's proxy outpost, as listed in the
+[sign-in table](../networking/README.md#caddy-and-authentik).
 
-## Storage
+The [private-access guide](../networking/private-access/README.md) walks through
+DNS, certificates, and sign-in. The [network-zone notes](network-and-identity.md)
+explain which clients and workloads can make those connections.
 
-Databases stay on the VMs' own disks; TrueNAS and ZFS hold shared files. The
-[storage page](../storage/README.md) explains that choice, the backup layers, and
-the example startup check for services that depend on a mount.
+## Files and databases
 
-## Monitoring and security
+I keep databases on VM-local disks and bulk files on TrueNAS. For Immich, that
+means PostgreSQL is backed up with the application VM while the photo library
+needs its own file backup. The [storage page](../storage/README.md) has the full
+data and backup layout.
 
-Prometheus, Loki, Grafana, and Alertmanager handle metrics, logs, dashboards,
-and notifications. The [monitoring page](../monitoring/README.md) shows the
-dashboard and alert screenshots and how scan results and events flow between tools.
+The app and media VMs wait for their NAS mounts before starting Docker. The
+media VM sees only the download and media exports. Jellyfin reads the library;
+Sonarr and Radarr write to it. The [media page](../media/README.md) follows that
+path from request to playback.
 
-The [security page](../security/README.md) introduces Trivy, Falco, CrowdSec, and
-ClamAV. The [security notes](threat-model.md) cover threats and assumptions.
+## Shared dependencies
 
-## Changes and deployment
+Grouping services into VMs makes them easier to maintain separately, but they
+still share hardware and supporting services:
 
-Forgejo holds private configuration repositories, Renovate opens update pull
-requests, and Ansible configures hosts. The
-[automation page](../automation/README.md) links the Git workflow, host maintenance,
-and deployment example to their implementation and test commands.
+| Dependency | What relies on it |
+|---|---|
+| OPNsense, switch, and access point | Routing between zones and client connectivity |
+| Raspberry Pi | DNS, private web proxy, Vaultwarden, search, and the cluster quorum device |
+| Authentik VM | New sign-ins for integrated apps; behavior of existing sessions depends on the app |
+| TrueNAS | Photos, synced files, downloads, media, and the PBS datastore |
+| ROG Ally GPU | Hardware transcoding in the media VM |
+| Monitoring VM | Metrics, logs, dashboards, and most centralized alerts |
 
-## Recovery
+The quorum device contributes a vote, not another copy of a VM disk. Likewise,
+PBS on a NAS export can recover a VM disk but shares the NAS's failure boundary.
+The [Proxmox notes](../proxmox/README.md#supporting-devices) and
+[backup notes](../storage/README.md#backups) cover those tradeoffs.
 
-The backup tools are PBS and Restic. See the [backup notes](../storage/README.md#backups)
-and the [restore example](../automation/recovery/README.md), which checks generated
-archives and restores them to a new directory. Application-specific recovery
-needs its own checks before replacing live data.
+## Keeping it running
+
+- [Monitoring](../monitoring/README.md) connects host metrics, logs, application
+  checks, and notifications.
+- [Automation](../automation/README.md) follows a configuration change from a
+  Forgejo pull request through backup, deployment, and checking the application.
+- [Security](../security/README.md) covers image scans, runtime events, firewall
+  blocking, and download scans.
+
+The [roadmap](../ROADMAP.md) includes the management/server VLAN split, UPS
+monitoring, and the remaining deployment and recovery exercises.

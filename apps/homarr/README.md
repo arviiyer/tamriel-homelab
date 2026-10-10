@@ -3,7 +3,7 @@
 [Home](../../README.md) · [Apps](../README.md) · [FreshRSS](../freshrss/README.md)
 
 Homarr is my starting page for the lab. It brings service links and the
-[Morning SOC Briefing](../projects/README.md#morning-soc-briefing) onto one board.
+[Morning SOC Briefing](../../projects/reading-brief/README.md) onto one board.
 I use its local login, with Caddy providing the private HTTPS route.
 
 [![Homarr service cards and reading brief](../../screenshots/homarr-home.webp)](../../screenshots/README.md#homarr)
@@ -81,8 +81,8 @@ as JSON. Homarr fetches that file every five minutes through a Custom API widget
 The RSS widget in the deployed v1 setup truncated the text, so I switched to
 the custom display.
 
-The [reading-project notes](../projects/README.md#morning-soc-briefing) explain
-generation. To build a similar display in v2, start with a read-only JSON endpoint
+The [reading-brief guide](../../projects/reading-brief/README.md) includes the
+worker and feed server. To build a similar display in v2, use a read-only JSON endpoint
 that returns this shape (the values here are invented):
 
 ```json
@@ -172,7 +172,7 @@ copy and starts it again after the archive succeeds:
 
 If copying fails, fix the error before starting Homarr again. Move the backup off
 this host with your backup tool. The [Restic guide](../../storage/restic/README.md)
-shows an isolated backup-and-restore cycle.
+covers copying the archive off-host and restoring into a separate directory.
 
 To test a restore, copy the saved `compose.yml` and `.env` into a new private
 directory. Change its loopback port to `127.0.0.1:7576:7575`, and choose a fresh

@@ -1,0 +1,17 @@
+{
+  "timezone": "Etc/UTC",
+  "freshrss_url": "https://rss.example.com",
+  "homepage_url": "https://home.example.com",
+  "interests": ["Linux administration", "self-hosted services", "detection engineering", "incident analysis"],
+  "excluded": ["Promotional product announcements without technical findings"],
+  "weights": {"relevance": 0.5, "practicality": 0.3, "depth": 0.2},
+  "minimum_score": 0.55,
+  "lookback_days": 7,
+  "max_candidates": 150,
+  "max_articles": 5,
+  "max_per_source": 2,
+  "max_per_topic": 2,
+  "jev_model": "jev-1.13.0",
+  "model_url": "http://127.0.0.1:8092",
+  "model_sha256": "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4"
+}

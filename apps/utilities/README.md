@@ -5,7 +5,12 @@
 These smaller services each have a separate Compose file. Vaultwarden, SearXNG,
 and OpenSpeedTest run on my Raspberry Pi. Stirling PDF runs on the application VM.
 
-## Install an example
+- [Vaultwarden](#vaultwarden)
+- [SearXNG](#searxng)
+- [Stirling PDF](#stirling-pdf)
+- [OpenSpeedTest](#openspeedtest)
+
+## Install
 
 Requirements: Docker Engine, Compose, curl, and OpenSSL. Create a new directory
 outside this checkout for the service, download its linked YAML file as
@@ -76,9 +81,18 @@ docker compose up -d
 ```
 
 Open `http://localhost:8082`, try a query, and select engines under Preferences.
-For persistent instance settings, edit `/etc/searxng/settings.yml` in its
-configuration volume. Keep `use_default_settings: true` and override only the
-settings you need. I keep the Bing web engine inactive because it sometimes
+For persistent instance settings, copy the generated file out of its configuration
+volume, edit it, and copy it back:
+
+```bash
+docker compose cp searxng:/etc/searxng/settings.yml ./settings.yml
+# Edit settings.yml with your text editor.
+docker compose cp ./settings.yml searxng:/etc/searxng/settings.yml
+docker compose restart searxng
+```
+
+Keep `use_default_settings: true` and override only the settings you need.
+I keep the Bing web engine inactive because it sometimes
 ignored terms in multi-word queries; Google CSE is my main general engine.
 
 Set `SEARCH_URL` in `.env` to the final HTTPS URL and recreate the service after

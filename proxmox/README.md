@@ -46,7 +46,7 @@ media VM has a separate network segment and mounts only the shares it needs.
 
 ## Provisioning
 
-The custom [Forge portal](../apps/projects/README.md#forge-vm-provisioner) uses
+The custom [Forge portal](../projects/forge/README.md) uses
 Terraform and cloud-init to create VMs from Debian templates. Start and stop
 operations use the Proxmox API directly.
 

@@ -85,15 +85,24 @@ required by that operation.
 
 ## Try a restore
 
-Use the [isolated VM restore steps](../README.md#a-vm-from-pbs): restore to a new
-VM ID, keep automatic startup off, disconnect its network before boot, and check
-the OS and application data. A copied guest still contains the original identities
-and scheduled jobs.
+In Proxmox, open the VM's **Backup** tab and select the PBS storage. Check the
+latest task result and the disks included in the backup, then:
 
-For an app with NAS files, supply a separate copied test library on an isolated
-network. Confirm login, older data, and a small write. File Restore is useful
-for an individual file; it does not establish that an application database is
-consistent and complete.
+1. Select a completed backup and choose **Restore**.
+2. Choose a new, unused VM ID and storage with enough free space. Leave automatic
+   startup disabled.
+3. Before the first boot, disconnect its network interfaces or attach them to an
+   isolated test network. The restored guest contains the original hostname,
+   network settings, service credentials, and scheduled jobs.
+4. Boot from the console. Check the OS, local disks, and application data. For
+   services that need NAS files, supply a copied test dataset on the isolated
+   network before starting them.
+5. Check the application itself: sign in, open older data, and try a small write.
+   Keep the original VM running separately while evaluating the restored copy.
+
+For one file, use Proxmox's **File Restore** action instead of restoring the whole
+VM. An extracted database directory still needs the application's consistency
+and restore checks.
 
 ## What to keep elsewhere
 

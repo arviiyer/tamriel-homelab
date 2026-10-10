@@ -1,4 +1,7 @@
-# Restoring Without Overwriting Live Data
+# Restoring without overwriting live data
+
+[Home](../../README.md) · [Storage](../../storage/README.md) ·
+[Restore tool](../../automation/recovery/README.md)
 
 A backup might be corrupt or contain the wrong data. Restoring straight over
 live files makes either mistake harder to recover from.

@@ -11,6 +11,11 @@ This walkthrough puts a small web page behind Authentik forward authentication.
 It includes the proxy configuration and the DNS, certificate, and provider steps.
 The lab's native OIDC integrations are linked at the end.
 
+- [Before starting](#before-starting)
+- [Use it with an application](#use-it-with-an-application)
+- [Changes and backups](#changes-and-backups)
+- [Checks](#checks)
+
 ## Before starting
 
 You need a Linux host with Docker Engine, Compose, curl, OpenSSL, Python 3, and
@@ -97,10 +102,13 @@ without opening an inbound WAN port. Create a Cloudflare API token with
 ```bash
 mkdir "$HOME/homelab-examples/private-access"
 cd "$HOME/homelab-examples/private-access"
-for file in compose.yml Dockerfile .dockerignore Caddyfile environment.example; do
-  curl --fail --location --output "$file" \
-    "https://raw.githubusercontent.com/arviiyer/tamriel-homelab/main/networking/private-access/$file" || break
-done
+(
+  set -eu
+  for file in compose.yml Dockerfile .dockerignore Caddyfile environment.example; do
+    curl --fail --location --output "$file" \
+      "https://raw.githubusercontent.com/arviiyer/tamriel-homelab/main/networking/private-access/$file"
+  done
+)
 cp environment.example .env
 chmod 600 .env
 ```
@@ -203,6 +211,12 @@ Set `APP_UPSTREAM` to the service's reachable private address. Keep direct clien
 access to that backend blocked. With Caddy on another host, account for Docker's
 forwarding rules as well as the ordinary host firewall when limiting access.
 
+For example, FreshRSS initially publishes `127.0.0.1:8080:80`. To reach it from
+the Pi's Caddy, change that binding to `192.0.2.83:8080:80`, using the app VM's
+actual private address, recreate FreshRSS, and set `APP_UPSTREAM=192.0.2.83:8080`
+in the proxy's `.env`. Permit only the proxy to that backend port. From the proxy
+host, check `curl -I http://192.0.2.83:8080` before testing the HTTPS route.
+
 For an application with its own login or native OIDC, replace the app block with
 this route. It retains the private-client check and leaves sign-in to the app:
 
@@ -215,6 +229,10 @@ this route. It retains the private-client check and leaves sign-in to the app:
 	}
 }
 ```
+
+After changing the upstream and route, run
+`docker compose up -d --force-recreate caddy` from the proxy directory. Check the
+app's HTTPS URL from an allowed client.
 
 For OIDC, configure the provider using the app-specific guide:
 
@@ -231,7 +249,7 @@ the remaining services.
 
 After editing only the Caddyfile, reload with
 `docker compose exec caddy caddy reload --config /etc/caddy/Caddyfile`.
-After changing `.env`, recreate Caddy with `docker compose up -d --force-recreate`.
+After changing `.env`, recreate Caddy with `docker compose up -d --force-recreate caddy`.
 On the lab's host-installed Caddy, I use `sudo systemctl reload caddy`.
 
 Back up the proxy configuration, private environment, and certificate volume.

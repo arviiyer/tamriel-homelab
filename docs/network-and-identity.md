@@ -56,5 +56,8 @@ rules depend on the source zone. Resolving a name does not grant access to a ser
 - New dependencies need specific connections allowed, not blanket access.
 
 Allowed connections can still carry malicious traffic, and administrators have
-broad access. See the [security notes](threat-model.md). Tests for segmentation,
-DNS, and sign-in are on the [roadmap](../ROADMAP.md).
+broad access. See the [security notes](threat-model.md). The
+[DNS](../networking/dns/README.md#checks) and
+[browser sign-in](../networking/private-access/README.md#checks) guides include
+isolated checks; routed VLAN and tailnet client tests are on the
+[roadmap](../ROADMAP.md).

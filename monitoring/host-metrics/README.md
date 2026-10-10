@@ -2,49 +2,92 @@
 
 [Home](../../README.md) · [Monitoring](../README.md)
 
-A small Node Exporter, Prometheus, and Grafana stack for host CPU, memory, and
-root-filesystem metrics. Grafana loads the datasource and dashboard from files.
+I use Node Exporter on the hosts and VMs, Prometheus to collect their metrics,
+and Grafana to view them. This guide starts with the monitoring host, then adds
+other machines and Discord alerts.
 
-## Run it
+- [Install](#install)
+- [Add other hosts](#add-other-hosts)
+- [Alerts and Discord](#alerts-and-discord)
+- [Updates and backups](#updates-and-backups)
+- [Try it locally](#try-it-locally)
 
-Requirements: a Linux Docker Engine host, Docker Compose, and free local ports
-3000 and 9090. Node Exporter mounts the host's root filesystem, procfs, and sysfs
-read-only. Docker Desktop reports its Linux VM rather than the desktop OS.
+## Install
 
-From the repository root:
+Requirements: a Linux Docker Engine host, Docker Compose, Bash, curl, OpenSSL,
+and free local ports 3000 and 9090 (plus 9093 for alerts). Node Exporter mounts
+the host's root filesystem, procfs, and sysfs read-only. Docker Desktop reports
+its Linux VM rather than the desktop OS.
+
+Download the files on your monitoring host, preserving the provisioning paths:
 
 ```bash
-docker compose -p host-metrics-example -f monitoring/host-metrics/compose.yml config --quiet
-docker compose -p host-metrics-example -f monitoring/host-metrics/compose.yml up -d
+mkdir -p "$HOME/homelab-examples"
+mkdir "$HOME/homelab-examples/host-metrics"
+cd "$HOME/homelab-examples/host-metrics"
+(
+  set -eu
+  mkdir -p provisioning/datasources provisioning/dashboards
+  for file in compose.yml prometheus.yml dashboard.json \
+    provisioning/datasources/prometheus.yml provisioning/dashboards/hosts.yml; do
+    curl --fail --location --output "$file" \
+      "https://raw.githubusercontent.com/arviiyer/tamriel-homelab/main/monitoring/host-metrics/$file"
+  done
+)
 ```
 
-Open [Grafana](http://127.0.0.1:3000/d/host-metrics-example) and
-[Prometheus targets](http://127.0.0.1:9090/targets). Allow a few scrapes for the
-CPU rate. The dashboard shows exporter reachability, available memory, available
-root-filesystem space, and CPU use.
+### Configure Grafana login
 
-Grafana is an anonymous, read-only viewer for this loopback-bound example; initial
-admin creation is disabled. Node Exporter has no host-published port and uses
-only the internal metrics network. Prometheus and Grafana also join an access
-network for their loopback-published interfaces.
+The supplied file also supports a [local trial](#try-it-locally) without an
+account. For this installation, replace these entries under Grafana's
+`environment` before its first start:
 
-## Files
+```yaml
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_AUTH_DISABLE_LOGIN_FORM: "false"
+      GF_SECURITY_DISABLE_INITIAL_ADMIN_CREATION: "false"
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?Set an initial admin password}
+```
 
-- [Compose stack](compose.yml)
-- [Prometheus scrape configuration](prometheus.yml)
-- [Dashboard](dashboard.json)
-- [Datasource](provisioning/datasources/prometheus.yml)
-- [Dashboard provider](provisioning/dashboards/hosts.yml)
+Create `.env` once and keep the generated password in your password manager:
 
-Only the CPU, memory, filesystem, and host-information collectors are enabled.
-The lab runs Node Exporter as a host service and scrapes multiple machines; this
-example keeps everything in one Compose project for a local trial.
+```bash
+(
+  set -euC
+  umask 077
+  printf 'GRAFANA_ADMIN_PASSWORD=%s\n' "$(openssl rand -hex 24)" > .env
+)
+```
 
-## Adapting it
+In `prometheus.yml`, change `host: example-host` to a stable name for this
+machine, such as `observability-01`. In `compose.yml`, change
+`--storage.tsdb.retention.time=1d` to the history you want to retain; I use `15d`
+in the lab. Watch disk use as you add targets.
 
-For a persistent setup, copy this directory's example files into a directory such
-as `/srv/host-metrics` on your monitoring VM. Keep its `provisioning/` directory
-structure. Use that working directory for the commands below.
+```bash
+docker compose config --quiet
+docker compose up -d
+docker compose ps
+```
+
+On a remote VM, run this from your workstation:
+
+```bash
+ssh -N -L 3000:127.0.0.1:3000 -L 9090:127.0.0.1:9090 \
+  -L 9093:127.0.0.1:9093 operator@observability-01
+```
+
+Open [Grafana](http://127.0.0.1:3000/d/host-metrics-example), sign in as `admin`
+with the password in `.env`, and open [Prometheus targets](http://127.0.0.1:9090/targets).
+Allow a few scrapes for the CPU rate. The included dashboard shows reachability,
+available memory, root-filesystem space, and CPU use. Grafana loads it from
+[dashboard.json](dashboard.json); edit that file to change these panels.
+
+Use the [private HTTPS guide](../../networking/private-access/README.md#use-it-with-an-application)
+for daily browser access. Existing Grafana accounts retain their saved password;
+the initial-password setting only applies to a fresh database.
+
+## Add other hosts
 
 On each Debian host, install the exporter and allow TCP 9100 from the monitoring
 host through its firewall:
@@ -55,8 +98,8 @@ sudo systemctl enable --now prometheus-node-exporter
 curl -fsS http://127.0.0.1:9100/metrics | head
 ```
 
-Add a target under the `node` job in `prometheus.yml`, replacing the documentation
-address with that host's address:
+Append another entry to `static_configs` under the existing `node` job in
+`prometheus.yml`. Replace the documentation address with that host's address:
 
 ```yaml
       - targets: [192.0.2.83:9100]
@@ -72,20 +115,13 @@ docker compose run --rm --no-deps --entrypoint promtool prometheus \
 docker compose up -d --force-recreate prometheus
 ```
 
-Check **Status → Target health**, then query `up{job="node"}`. The supplied
-dashboard uses the `host` labels. For a wider set of panels, enable Grafana login
-as below and import [Node Exporter Full, 1860](https://grafana.com/grafana/dashboards/1860-node-exporter-full/),
-selecting the Prometheus datasource.
-
-Before extending Grafana access, edit its environment in `compose.yml`: set
-`GF_AUTH_ANONYMOUS_ENABLED=false`, `GF_AUTH_DISABLE_LOGIN_FORM=false`, and
-`GF_SECURITY_DISABLE_INITIAL_ADMIN_CREATION=false`. Add
-`GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?Set an initial admin password}`
-and create a private `.env` with the generated password. On a fresh volume,
-recreate Grafana, sign in as `admin`, and verify the dashboard. Existing Grafana
-accounts retain their saved password. Configure the
-[private HTTPS route](../../networking/private-access/README.md) before binding
-the port to a private interface reachable by another proxy host.
+Check **Status → Target health**, then query `up{job="node"}`. Each target should
+report `1`. The supplied dashboard uses the `host` labels. For the dashboard shown
+on the [monitoring page](../README.md#grafana), use **Dashboards → New → Import**
+and import [Node Exporter Full, 1860](https://grafana.com/grafana/dashboards/1860-node-exporter-full/),
+selecting the provisioned Prometheus datasource. It supplies the wider network,
+disk, and system panels for host-installed exporters. The bundled container
+enables only CPU, memory, filesystem, and host-information collectors.
 
 The [networking page](../../networking/README.md#caddy-and-authentik) describes
 Grafana's Authentik integration in the lab. The separate
@@ -95,10 +131,20 @@ and Falco logs, which this example does not generate.
 ## Alerts and Discord
 
 The optional [override](alerts.override.yml) adds Alertmanager and
-[host alerts](hosts.rules.yml). Download it together with `alerts.prometheus.yml`,
-`hosts.rules.yml`, and `alertmanager.yml` into the same working directory. Carry
-your extra scrape targets into `alerts.prometheus.yml`; the override selects
-that file instead of `prometheus.yml`.
+[host alerts](hosts.rules.yml). In the same working directory:
+
+```bash
+(
+  set -eu
+  for file in alerts.override.yml alerts.prometheus.yml hosts.rules.yml alertmanager.yml; do
+    curl --fail --location --output "$file" \
+      "https://raw.githubusercontent.com/arviiyer/tamriel-homelab/main/monitoring/host-metrics/$file"
+  done
+)
+```
+
+Carry your host labels and extra scrape targets into `alerts.prometheus.yml`;
+the override selects that file instead of `prometheus.yml`.
 
 ```bash
 docker compose -f compose.yml -f alerts.override.yml config --quiet
@@ -153,11 +199,49 @@ message. Change that test target to `node-exporter:9100`, recreate Prometheus,
 and check the recovery message. Then remove the test target. This exercises
 scraping, rule evaluation, routing, and external delivery together.
 
-Keep both `-f` arguments on later Compose commands. Back up configuration,
-Grafana data, and Alertmanager data (including silences); choose whether the
-metrics history also needs a backup. For consistent volume copies, stop the
-relevant service first. Review retention and free space before increasing the
-one-day example retention in `compose.yml`.
+Keep both `-f` arguments on later Compose commands.
+
+## Updates and backups
+
+Back up configuration, Grafana data, and Alertmanager data (including silences);
+choose whether the metrics history also needs a backup. For consistent volume
+copies, stop the relevant service first. Follow the
+[volume backup steps](../../apps/utilities/README.md#cold-copies-updates-and-cleanup)
+using both Compose files when alerts are enabled. Keep `.env` and the Discord
+webhook file with the private backup.
+
+To update, change the reviewed image digest, pull, and recreate the stack:
+
+```bash
+docker compose -f compose.yml -f alerts.override.yml pull
+docker compose -f compose.yml -f alerts.override.yml up -d
+```
+
+Without the alerts extension, use `docker compose pull` and `docker compose up -d`.
+
+Check scrape targets, dashboard queries, and a test notification afterward.
+Restore Grafana into a separate project and port before replacing its working
+data; keep notifications off in an Alertmanager test copy.
+
+| Symptom | First thing to check |
+|---|---|
+| Target is down | Exporter listener, target address, and firewall from the monitoring host |
+| Target is up but a panel is empty | Selected host, datasource, enabled collectors, and time range |
+| An added host disappears after enabling alerts | Targets in `alerts.prometheus.yml` |
+| Alert fires but Discord stays quiet | Receiver name, webhook mount/read permissions, and Alertmanager logs |
+
+## Try it locally
+
+To view just the included dashboard, run the unmodified files from the repository
+root:
+
+```bash
+docker compose -p host-metrics-example -f monitoring/host-metrics/compose.yml up -d
+```
+
+This starts an anonymous, read-only Grafana viewer on localhost with no admin
+account. Open <http://127.0.0.1:3000/d/host-metrics-example>. Its data stays in
+separate project volumes; use the installation steps above for your own stack.
 
 ## Checks and cleanup
 
@@ -181,8 +265,6 @@ Stop the initial local example while retaining its data:
 docker compose -p host-metrics-example -f monitoring/host-metrics/compose.yml down
 ```
 
-For the copied stack with alerts, run
+For the installed stack with alerts, run
 `docker compose -f compose.yml -f alerts.override.yml down` in its working
-directory instead. Add `--volumes` to discard the selected stack's saved data. To update,
-change the reviewed image digest, back up persistent data, recreate the stack,
-and check targets and dashboard queries again.
+directory instead. Add `--volumes` only to discard the selected stack's saved data.
