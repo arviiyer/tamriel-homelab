@@ -64,8 +64,10 @@ The launcher builds a temporary target without a default network route. Generate
 Git history, a loopback TLS registry, and an SSH endpoint let the drill test real
 deployments, rejected requests, failed health checks, rollback, and cleanup.
 
-The full drill takes about a minute for the intentional health failure. Normal
-CI only builds the image. Privileged containers do not isolate the host securely;
+The full drill takes about a minute for the intentional health failure. The manual
+[integration workflow](../../.github/workflows/integration.yml) builds the image.
+Its pinned packages allow dependencies from the base image to upgrade within the
+same Alpine release. Privileged containers do not isolate the host securely;
 the full drill must not run on a production, shared, or credential-bearing host.
 
 ## How deployment works

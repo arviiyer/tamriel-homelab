@@ -1,0 +1,156 @@
+name: Automation examples
+
+on:
+  pull_request:
+    paths:
+      - 'automation/**'
+      - '!automation/**/*.md'
+      - '.github/workflows/examples.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'automation/**'
+      - '!automation/**/*.md'
+      - '.github/workflows/examples.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    name: Select changed examples
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      components: ${{ steps.select.outputs.components }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Select test suites
+        id: select
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import subprocess
+
+          components = ["ansible", "ci", "falco", "monitoring", "recovery", "trivy"]
+          base = os.environ["BASE_SHA"]
+          head = os.environ["HEAD_SHA"]
+          event = os.environ["EVENT_NAME"]
+          if event == "workflow_dispatch" or not base or set(base) == {"0"}:
+              selected = components
+          elif subprocess.run(
+              ["git", "cat-file", "-e", f"{base}^{{commit}}"], capture_output=True
+          ).returncode:
+              # A force-push can leave the previous commit outside fetched history.
+              selected = components
+          else:
+              if event == "pull_request":
+                  base = subprocess.check_output(
+                      ["git", "merge-base", base, head], text=True
+                  ).strip()
+              paths = subprocess.check_output(
+                  ["git", "diff", "--name-only", "--no-renames", "-z", base, head],
+                  text=True,
+              ).split("\0")
+              selected = components if ".github/workflows/examples.yml" in paths else [
+                  component for component in components
+                  if any(path.startswith(f"automation/{component}/")
+                         and not path.endswith(".md") for path in paths)
+              ]
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              output.write(f"components={json.dumps(selected)}\n")
+          print("Selected examples:", ", ".join(selected) or "none")
+          PY
+
+  test:
+    name: ${{ matrix.component }} tests and configuration
+    needs: changes
+    if: needs.changes.outputs.components != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        component: ${{ fromJSON(needs.changes.outputs.components) }}
+    defaults:
+      run:
+        working-directory: automation/${{ matrix.component }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+
+      - name: Install test dependencies
+        run: |
+          if [ -f requirements.txt ]; then
+            python3 -m pip install --requirement requirements.txt
+          fi
+
+      - name: Run tests and check Python syntax
+        run: |
+          python3 -m unittest discover -s tests -p 'test_*.py' -v
+          python3 -m compileall -q .
+
+      - name: Check shell scripts
+        run: find . -name '*.sh' -print0 | xargs -0 -r shellcheck
+
+      - name: Check Ansible inventory and playbooks
+        if: matrix.component == 'ansible'
+        run: |
+          ansible-playbook --syntax-check playbooks/site.yml
+          ansible-playbook --syntax-check playbooks/controlled-upgrade.yml
+          ansible-inventory --host pve-01 > "$RUNNER_TEMP/pve-01.json"
+          ansible-inventory --host apps-01 > "$RUNNER_TEMP/apps-01.json"
+          python3 - "$RUNNER_TEMP/pve-01.json" "$RUNNER_TEMP/apps-01.json" <<'PY'
+          import json
+          import pathlib
+          import sys
+
+          pve = json.loads(pathlib.Path(sys.argv[1]).read_text())
+          apps = json.loads(pathlib.Path(sys.argv[2]).read_text())
+          assert pve["ansible_user"] == "root"
+          assert pve["ssh_permit_root_login"] == "prohibit-password"
+          assert pve["ssh_allowed_users"] == ["root"]
+          assert apps["ansible_user"] == "operator"
+          assert apps["ssh_permit_root_login"] == "no"
+          assert apps["ssh_allowed_users"] == ["operator"]
+          PY
+
+      - name: Check restricted deployment endpoint policy
+        if: matrix.component == 'ci'
+        run: |
+          if ! command -v sshd >/dev/null || ! command -v visudo >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install --yes --no-install-recommends openssh-server sudo
+          fi
+          bash tests/validate_target.sh
+
+      - name: Check Falco playbook and event router configuration
+        if: matrix.component == 'falco'
+        run: |
+          ansible-playbook --syntax-check playbooks/falco.yml
+          docker compose --env-file falcosidekick/environment.example \
+            -f falcosidekick/compose.yml config --quiet
+
+      - name: Check restore and storage-readiness policy
+        if: matrix.component == 'recovery'
+        run: |
+          python3 tests/run_isolated_restore_drill.py
+          systemd-analyze verify --recursive-errors=no \
+            systemd/example-storage-dependent.service

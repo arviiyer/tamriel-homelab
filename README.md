@@ -1,7 +1,5 @@
 # Tamriel Homelab
 
-[![CI](https://github.com/arviiyer/tamriel-homelab/actions/workflows/validate.yml/badge.svg)](https://github.com/arviiyer/tamriel-homelab/actions/workflows/validate.yml)
-
 Tamriel is my three-node Proxmox homelab. I use it to run personal services and
 work on security projects. This repo has notes on the setup, scripts, and
 configuration examples from building it.
@@ -69,6 +67,10 @@ Each folder has its own setup and test commands:
 - [Falco](automation/falco/): detect suspicious runtime activity and send events to Loki and Alertmanager.
 - [Grafana](automation/monitoring/): a dashboard for scan results and Falco events.
 - [Recovery](automation/recovery/): test restores with generated archives and check storage before starting services.
+
+GitHub Actions checks links, publication rules, and secrets on each push. Changes
+to automation also run the relevant tests. Container builds and integration
+checks run manually from [Actions](https://github.com/arviiyer/tamriel-homelab/actions/workflows/integration.yml).
 
 ## Screenshots
 

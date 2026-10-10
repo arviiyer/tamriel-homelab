@@ -1,0 +1,127 @@
+name: Integration checks
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    name: Container and integration checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out complete history
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+
+      - name: Install test dependencies
+        run: |
+          python3 -m pip install --requirement automation/ansible/requirements.txt
+          python3 -m pip install --requirement automation/falco/requirements.txt
+          python3 -m pip install --requirement automation/monitoring/requirements.txt
+
+      - name: Build disposable delivery drill target
+        run: bash automation/ci/tests/run_disposable_host_drill.sh --build-only
+
+      - name: Check dashboard failure-count PromQL
+        run: python3 automation/monitoring/tests/validate_promql.py
+
+      - name: Check Falco configuration and rules
+        run: |
+          rendered="$RUNNER_TEMP/falco.yaml"
+          python3 automation/falco/tests/render_config.py "$rendered"
+          docker run --rm \
+            -v "$rendered:/tmp/falco.yaml:ro" \
+            -v "$PWD/automation/falco/roles/falco/files/falco_rules.local.yaml:/etc/falco/falco_rules.local.yaml:ro" \
+            --entrypoint falco \
+            falcosecurity/falco@sha256:d0cfe422d6ac0e0f20857798f46c7d7273210e1b064b22821e4e6e7f843cde6b \
+            --dry-run -c /tmp/falco.yaml \
+            -r /etc/falco/falco_rules.yaml \
+            -r /etc/falco/falco_rules.local.yaml
+
+      - name: Check Grafana provisioning and dashboard loading
+        run: python3 automation/monitoring/tests/validate_grafana.py
+
+      - name: Check Debian apt policy compatibility
+        run: |
+          output="$RUNNER_TEMP/apt-policy"
+          python3 automation/ansible/tests/render_apt_candidates.py "$output"
+          docker run --rm -v "$output:/candidate:ro" \
+            debian@sha256:3a39a0592364683e6bab97937b72cad5a8fa6dcbbee90edb3bb48c7f8e94f258 \
+            sh -lc '
+              cp /candidate/50unattended-upgrades /run/50unattended-upgrades
+              cp /candidate/20auto-upgrades /run/20auto-upgrades
+              apt-config -o Dir::Etc::parts=/dev/null \
+                -c /run/50unattended-upgrades dump
+              apt-config -o Dir::Etc::parts=/dev/null \
+                -c /run/20auto-upgrades dump
+            ' > "$RUNNER_TEMP/apt-policy-effective.txt"
+          python3 automation/ansible/tests/check_apt_candidates.py \
+            < "$RUNNER_TEMP/apt-policy-effective.txt"
+
+      - name: Check Prometheus rules
+        run: >-
+          docker run --rm
+          -v "$PWD:/workspace:ro"
+          --entrypoint promtool
+          prom/prometheus@sha256:508729e0e2d18e11fd742a5a5ca70e557b940a93948c3c95fd0123a6fd538b69
+          check rules
+          /workspace/automation/trivy/prometheus-rules.yml
+
+      - name: Scan repository with Trivy
+        run: >-
+          docker run --rm
+          -v "$PWD:/workspace:ro"
+          aquasec/trivy@sha256:7cced7cae583819fc7806d4cbc0dbbc7cad18b99f7d3e235192e6da8c091045c
+          fs
+          --scanners vuln,misconfig,secret
+          --severity HIGH,CRITICAL
+          --exit-code 1
+          --ignorefile /workspace/automation/trivy/repository-ignore.yaml
+          --no-progress
+          --skip-version-check
+          /workspace
+
+      - name: Check Trivy CLI compatibility
+        run: |
+          image="aquasec/trivy@sha256:7cced7cae583819fc7806d4cbc0dbbc7cad18b99f7d3e235192e6da8c091045c"
+          output="$RUNNER_TEMP/trivy-compat"
+          mkdir -p "$output/current"
+          docker run --rm -v "$PWD:/workspace:ro" -v "$output:/out" "$image" config \
+            --exit-code 0 \
+            --format json \
+            --output /out/current/apps-misconfig.json \
+            --quiet \
+            /workspace/automation/trivy/tests/fixtures
+          docker run --rm -v "$PWD:/workspace:ro" -v "$output:/out" "$image" repo \
+            --scanners secret \
+            --exit-code 0 \
+            --format json \
+            --output /out/current/apps-secret.json \
+            --quiet \
+            /workspace/automation/trivy/tests/fixtures
+          docker run --rm -v "$output:/out" "$image" image \
+            --scanners vuln \
+            --exit-code 0 \
+            --format json \
+            --output /out/current/apps--alpine-vuln.json \
+            --quiet \
+            --timeout 10m \
+            alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+          python3 automation/trivy/delta.py report \
+            --current-dir "$output/current" \
+            --last-dir "$output/missing-baseline" \
+            --repositories automation/trivy/tests/fixtures/repositories.tsv \
+            --output "$output/findings.prom" \
+            --report-output "$output/current/_delta-report.json" \
+            --manifest-output "$output/current/_baseline.json" \
+            --initialize-baseline

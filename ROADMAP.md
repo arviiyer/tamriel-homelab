@@ -1,7 +1,5 @@
 # Roadmap
 
-- Refresh the deployment-drill image's package pins: Alpine no longer resolves
-  its pinned Python version, so the image build currently fails.
 - Test the remaining Grafana queries with generated Prometheus and Loki data.
 - Try Ansible SSH/update changes and Falco deployment, including rollback, on
   disposable Debian hosts.

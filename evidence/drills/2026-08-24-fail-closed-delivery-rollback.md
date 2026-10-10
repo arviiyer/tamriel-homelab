@@ -49,6 +49,7 @@ was unchanged. A fresh run passed; generated files and raw logs were not retaine
 ## Running it again
 
 The full test needs privileged nested Docker on a dedicated disposable host or
-isolated daemon. CI runs the unit tests and builds the target image.
+isolated daemon. Automation changes run the unit tests; the manual
+[integration workflow](../../.github/workflows/integration.yml) builds the target image.
 
 See the [test commands](../../automation/ci/README.md#tests).
