@@ -11,6 +11,8 @@
 !.github/**
 !apps/
 !apps/**
+!media/
+!media/**
 !proxmox/
 !proxmox/**
 !networking/

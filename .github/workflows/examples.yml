@@ -5,6 +5,13 @@ on:
     paths:
       - 'automation/**'
       - '!automation/**/*.md'
+      - 'apps/**'
+      - '!apps/**/*.md'
+      - 'networking/**'
+      - '!networking/**/*.md'
+      - 'monitoring/**'
+      - '!monitoring/**/*.md'
+      - 'scripts/check-service-examples.py'
       - '.github/workflows/examples.yml'
   push:
     branches:
@@ -12,6 +19,13 @@ on:
     paths:
       - 'automation/**'
       - '!automation/**/*.md'
+      - 'apps/**'
+      - '!apps/**/*.md'
+      - 'networking/**'
+      - '!networking/**/*.md'
+      - 'monitoring/**'
+      - '!monitoring/**/*.md'
+      - 'scripts/check-service-examples.py'
       - '.github/workflows/examples.yml'
   workflow_dispatch:
 
@@ -19,6 +33,17 @@ permissions:
   contents: read
 
 jobs:
+  service-examples:
+    name: Service example configuration
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Check Compose and local-access settings
+        run: python3 scripts/check-service-examples.py --validate
+
   changes:
     name: Select changed examples
     runs-on: ubuntu-latest

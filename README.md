@@ -8,6 +8,7 @@ on the setup, screenshots, scripts, and configuration examples from building it.
 ## Table of Contents
 
 - [Apps](apps/) - Apps and services running in the lab.
+- [Media](media/) - Jellyfin, Seerr, the *arr stack, and GPU transcoding.
 - [Proxmox](proxmox/) - Proxmox cluster and virtual machine setup.
 - [Networking](networking/) - Firewall, DNS, remote access, and sign-in.
 - [Storage](storage/) - Current storage and backup setup.
@@ -77,16 +78,22 @@ The NAS hard drives are arranged as two mirrored pairs.
 
 ## What's running
 
-The lab hosts file sync, photos, documents, a password vault, search, media, and
-development services. Supporting those:
+I use Syncthing for documents and notes, Immich for photos, FreshRSS for reading,
+and Jellyfin for media. Homarr brings the service links and reading brief together.
 
 | Job | Tools |
 |---|---|
+| Files, photos, and documents | [Syncthing, Immich, Stirling PDF](apps/README.md#files-photos-and-documents) |
+| Reading and utilities | [FreshRSS, Homarr, Vaultwarden, SearXNG](apps/README.md#reading-and-utilities) |
+| Media | [Jellyfin, Seerr, Servarr, Gluetun](media/README.md) |
 | Networking and access | [OPNsense, Tailscale, Caddy, Authentik](apps/README.md#networking-and-sign-in) |
 | Storage and backups | [TrueNAS, ZFS, Proxmox Backup Server, Restic](apps/README.md#storage-and-backups) |
 | Git and updates | [Forgejo, Renovate, Ansible](apps/README.md#git-and-updates) |
 | Metrics, logs, and alerts | [Prometheus, Loki, Grafana, Alertmanager](apps/README.md#dashboards-and-monitoring) |
 | Security | [Trivy, Falco, CrowdSec, ClamAV](apps/README.md#security) |
+
+There are also a few [small projects](apps/projects/README.md): a VM provisioning
+portal, Discord actions for media requests, a reading brief, and a printer monitor.
 
 ## Automation
 
@@ -94,6 +101,10 @@ Forgejo hosts the lab's private configuration repositories, and Renovate opens
 dependency-update pull requests. The [automation page](automation/README.md)
 connects that workflow to the deployment, host maintenance, scanning, and restore
 examples. Each example has its own setup and test commands.
+
+For smaller starting points, try the [Syncthing example](apps/syncthing/README.md),
+[Caddy proxy](networking/caddy/README.md), or
+[host-monitoring stack](monitoring/host-metrics/README.md).
 
 GitHub Actions checks links, publication rules, and secrets on each push. Changes
 to automation also run the relevant tests. Container builds and integration

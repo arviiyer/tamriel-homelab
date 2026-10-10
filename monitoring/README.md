@@ -4,8 +4,8 @@
 [Security](../security/README.md)
 
 I use Prometheus for metrics, Loki for logs, Grafana for dashboards, and
-Alertmanager for notifications. Scan results and runtime events feed into
-those tools alongside the lab's monitoring.
+Alertmanager for notifications. Uptime Kuma checks service reachability. Host
+metrics, application metrics, scan results, and runtime events feed these tools.
 
 ## Grafana
 
@@ -20,15 +20,26 @@ The example loads its dashboard and datasources from files. Its setup guide
 links to the JSON and provisioning configuration and explains the datasource
 UIDs and Loki labels used by the panels.
 
+The wider lab also has dashboards for host CPU, memory, disks, and uptime;
+Immich jobs; Forgejo activity; Falco events; and Prometheus/Alertmanager health.
+A general overview helps find the affected host before opening a service-specific
+dashboard.
+
+For a small starting point, the [host-metrics example](host-metrics/README.md)
+connects Node Exporter, Prometheus, and a provisioned Grafana dashboard.
+
 ## Metrics, logs, and alerts
 
 ```mermaid
 flowchart LR
-    trivy[Trivy scan results] --> metrics[Prometheus metrics]
+    hosts[Node Exporter] --> metrics[Prometheus]
+    apps[Application metrics] --> metrics
+    scans[Trivy · ClamAV] --> push[Pushgateway] --> metrics
+    journals[Host journals] --> promtail[Promtail] --> loki[Loki]
     metrics --> grafana[Grafana]
     metrics -- Alert rules --> alerts[Alertmanager]
     falco[Falco events] --> sidekick[Falcosidekick]
-    sidekick --> loki[Loki] --> grafana
+    sidekick --> loki --> grafana
     sidekick --> alerts --> notifications[Notifications]
 ```
 
@@ -38,6 +49,24 @@ flowchart LR
 | Loki | Falco events with source, priority, host, and rule labels |
 | Grafana | Finding totals, scanner health, and runtime events |
 | Alertmanager | Finding alerts, scanner failures, stale scans, and routed Falco events |
+
+Node Exporter supplies operating-system metrics from the hosts and VMs. Immich,
+Forgejo, and CrowdSec also expose their own metrics. Pushgateway holds results
+from batch scans so Prometheus can scrape them between runs. A stored result
+still needs a timestamp or health metric to tell whether it is stale.
+
+The documented host log shipper is Promtail, sending journal logs to Loki.
+Falcosidekick sends structured Falco events directly to Loki and Alertmanager.
+
+## Uptime Kuma
+
+Kuma checks hosts and application endpoints separately from Prometheus metrics.
+A working host scrape does not prove that DNS, HTTPS, and application sign-in
+work from the client path.
+
+Standalone monitors notify directly. Display-only groups stay quiet, while the
+Servarr group sends one aggregate notification rather than one per dependent
+application when the media host becomes unavailable.
 
 The [Trivy metrics guide](../automation/trivy/README.md#metrics-and-alerts)
 lists the exported metrics and alert rules. The
@@ -51,6 +80,11 @@ and delivery behavior.
 An alert for eight new high-severity findings with fixes available. The
 [alerting notes](../docs/case-studies/actionable-vulnerability-management.md)
 explain which changes trigger a notification.
+
+General infrastructure notifications and security findings use separate Discord
+routes. Critical security events also have an email route. Host-memory warnings
+use a recovery window to reduce repeated warning/recovery messages during short
+fluctuations.
 
 ## Checking the dashboard
 

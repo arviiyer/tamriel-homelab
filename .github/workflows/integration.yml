@@ -51,6 +51,9 @@ jobs:
       - name: Check Grafana provisioning and dashboard loading
         run: python3 automation/monitoring/tests/validate_grafana.py
 
+      - name: Exercise service examples
+        run: python3 scripts/check-service-examples.py --smoke all
+
       - name: Check Debian apt policy compatibility
         run: |
           output="$RUNNER_TEMP/apt-policy"

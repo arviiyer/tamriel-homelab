@@ -10,12 +10,29 @@ Caddy for web applications, and Authentik for sign-in where supported.
 
 The ThinkCentre M720q runs OPNsense with an Intel i350-T4 NIC. A Ubiquiti
 USW-Lite-16-PoE switch and U6-Plus access point provide wired and wireless
-connections. The Raspberry Pi supplies DNS and the reverse proxy.
+connections, managed through UniFi Network in its own VM. The Raspberry Pi
+supplies DNS and the reverse proxy.
 
 The network separates infrastructure, trusted clients, work devices, guests,
 media, and sandbox workloads. Connections between zones are allowed for specific
 needs. The [network-zone table](../docs/network-and-identity.md#network-zones)
 lists the roles and restrictions.
+
+## DNS
+
+Client DNS goes through Pi-hole, with Unbound on the Pi resolving upstream
+queries. OPNsense supplies the client DNS settings and enforces the allowed DNS
+path for restricted device networks.
+
+Selected private application names use split DNS. At home, Pi-hole answers with
+the proxy's LAN address. Public DNS returns the proxy's Tailscale address, so
+remote clients still need the private network. Both answers lead to Caddy with
+the same hostname and certificate. FreshRSS, Jellyfin, and Seerr use this pattern.
+
+Cloudflare hosts the public DNS records. Ordinary Caddy-backed apps use DNS-only
+records. Minecraft has a separate Cloudflare Tunnel, and the sandbox has a
+fixed-response Cloudflare Worker used for URL testing. The Worker has no route
+back into the lab.
 
 ## Access paths
 
@@ -29,8 +46,8 @@ flowchart LR
 
 ## Tailscale
 
-Tailscale gives me private access to administration interfaces. Hypervisor,
-gateway, and storage management stay off the public internet. Each management
+Tailscale gives me remote access to private apps and administration interfaces.
+Hypervisor, gateway, and storage management stay off the public internet. Each management
 service still requires its own login.
 
 This makes administration depend on Tailscale and trusted devices. The
@@ -43,9 +60,29 @@ Trusted clients reach web applications through Caddy. Authentik supplies OIDC
 or forward authentication where supported; applications retain their own
 permissions and use their own login when an integration is unavailable.
 
+| Application | Sign-in |
+|---|---|
+| Grafana, Immich, Forgejo | Authentik OAuth2/OIDC |
+| FreshRSS | Authentik OIDC through `mod_auth_openidc` |
+| Jellyfin | Authentik through the SSO plugin |
+| Uptime Kuma | Authentik proxy outpost |
+| Forge VM portal | Authentik forward authentication |
+| Sandbox UI | Application-enforced Authentik OIDC |
+| Homarr, Stirling PDF | Local application login |
+
+The [FreshRSS notes](../apps/freshrss/README.md#sign-in) cover its callback and
+username mapping. These integrations are configured per application; adding a
+Caddy route does not automatically add Authentik.
+
 DNS resolution, routing, proxying, and application sign-in are separate parts
 of this path. A working hostname alone does not establish that a client can
 reach a service or is allowed to use it.
+
+## Try a reverse proxy
+
+The [Caddy example](caddy/README.md) runs a proxy and a tiny upstream on an
+isolated Docker network. It demonstrates hostname routing on localhost before
+adding real DNS, TLS, or an identity provider.
 
 ## Notes
 
@@ -55,3 +92,5 @@ reach a service or is allowed to use it.
 - [Tailscale documentation](https://tailscale.com/kb)
 - [Caddy documentation](https://caddyserver.com/docs/)
 - [Authentik documentation](https://docs.goauthentik.io/)
+- [Pi-hole documentation](https://docs.pi-hole.net/)
+- [Unbound documentation](https://unbound.docs.nlnetlabs.nl/)

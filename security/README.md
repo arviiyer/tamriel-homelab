@@ -40,12 +40,38 @@ what happens if delivery fails.
 
 ## CrowdSec and ClamAV
 
-CrowdSec and ClamAV cover network defense and malware scanning. They sit alongside
-the access controls described in the [networking notes](../networking/README.md)
-and the host maintenance covered by [Ansible](../automation/ansible/README.md).
+CrowdSec runs on OPNsense, using local detections and community decisions for
+network blocking. Prometheus collects its metrics alongside the firewall's host
+metrics.
+
+ClamAV runs on the media VM and scans the downloads share. A host-side job waits
+for the mount and daemon, invokes the container's scanner, and sends result and
+freshness metrics to Pushgateway. Quarantined files stay separate from the media
+library. The [Media page](../media/README.md) explains the storage layout.
+
+These tools sit alongside the access controls in the
+[networking notes](../networking/README.md) and host maintenance covered by
+[Ansible](../automation/ansible/README.md).
 
 [CrowdSec documentation](https://docs.crowdsec.net/) ·
 [ClamAV documentation](https://docs.clamav.net/)
+
+## Tamriel Sandbox
+
+The sandbox project has a FastAPI control plane, a React analyst interface, and
+a C# agent in a disposable Windows VM. Proxmox snapshots provide a clean baseline
+between runs. The UI brings together run state, telemetry, screenshots, and
+console access.
+
+Analysis is currently paused: the Windows worker and scheduler are stopped,
+while the private API, UI, and database remain available. Broader reliability
+and browser-telemetry work is unfinished.
+
+The worker has separate network access from ordinary applications, and analysis
+data has its own storage. The [network notes](../docs/network-and-identity.md)
+describe the high-level separation. The
+[deployment example](../automation/ci/README.md) demonstrates the separate
+exact-commit deployment pattern used in the lab.
 
 ## Repository checks
 

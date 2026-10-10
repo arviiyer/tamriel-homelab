@@ -1,0 +1,37 @@
+services:
+  syncthing:
+    image: syncthing/syncthing:2.1.5@sha256:397aa00b92b48d65540ea3ae3cbf271b87bdccbe07a0b7bd7d2debc3a7b29138
+    restart: unless-stopped
+    read_only: true
+    cap_drop:
+      - ALL
+    # The image's entrypoint owns the volume, then drops to PUID/PGID.
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      STNOUPGRADE: "1"
+    ports:
+      - "127.0.0.1:8384:8384"
+      - "127.0.0.1:22000:22000/tcp"
+    volumes:
+      - syncthing-data:/var/syncthing
+    tmpfs:
+      - /tmp:size=32m,noexec,nosuid,nodev
+    networks:
+      - sync
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  sync: {}
+
+volumes:
+  syncthing-data:

@@ -7,10 +7,9 @@ catalogue, category guides, screenshots, and configuration examples.
 
 This plan records the comparison and work order. The
 [roadmap](../ROADMAP.md#documentation) tracks the work. The
-[homepage](../README.md), [documented-services catalogue](../apps/README.md), and
-category introductions now link to the existing screenshots and examples. The
-personal application inventory and new captures are the next inputs needed to
-complete the first milestone.
+[homepage](../README.md), [app catalogue](../apps/README.md), and category guides
+now include the personal services and link to the existing screenshots and
+examples. New app, general-monitoring, and storage captures remain to be added.
 
 ## Comparison
 
@@ -52,17 +51,32 @@ updates, and troubleshooting. The
 still points to an older repository in its clone command, illustrating why
 instructions and examples need to be maintained together.
 
+## Source review
+
+The inventory was reviewed against the private architecture reference, individual
+service READMEs, and tracked Compose definitions. The catalogue now covers file
+sync, photos, documents, reading, passwords, search, media, games, custom tools,
+and supporting infrastructure. Databases, caches, and workers are described with
+their parent applications.
+
+The source review also clarified changes that older notes did not reflect:
+
+- Syncthing replaced Nextcloud for documents, pictures, and notes.
+- Jellyfin and Seerr returned to private access; the public media edge is retired.
+- Homarr uses local credentials.
+- Sandbox analysis is paused while its private API and UI remain available.
+- The reading brief is a pilot using source excerpts, with external ranking and
+  local excerpt selection.
+- The laptop chat service starts on demand.
+
+The review describes recorded configuration and operational notes. It did not
+run a live-service audit. No tracked application screenshots were found in the
+reviewed app, media, proxy, monitoring, provisioning, or Discord-approver repos.
+
 ## Details to collect
 
-The personal application names are the main missing input. Collect a rough list
-for file sync, photos, documents, passwords, search, media, development, and a
-service dashboard if one is used:
-
-```text
-Service -> what I use it for -> where it runs -> useful notes
-```
-
-For each entry, confirm:
+The remaining inputs are reviewed screenshots and the exact application behind
+the Speedtest service. For future catalogue additions, confirm:
 
 - The application name and purpose.
 - Its placement by role, such as a Docker service in `apps-01` or a dedicated VM.
@@ -70,36 +84,52 @@ For each entry, confirm:
 - A real reason for choosing it, customization, or troubleshooting discovery.
 - Available screenshots, reviewed configuration examples, and existing notes.
 
-Choose three services to feature prominently. Add detail about the ROG Ally's
-GPU/media role, the Pi's DNS/proxy/quorum roles, and the backup responsibilities
-of PBS and Restic. The existing docs mention CrowdSec, ClamAV, Terraform,
-cloud-init, and Renovate, but have limited or no dedicated public examples for
-them. Expanded guides need supporting details before describing those setups.
+Immich, FreshRSS, and Jellyfin now have setup notes. The category guides cover the
+ROG Ally's GPU role, the Pi's services, VM provisioning, sign-in methods, and the
+backup responsibilities of PBS, Restic, and NAS snapshots. Further code examples
+for CrowdSec, ClamAV, Terraform, and Renovate can build on those descriptions.
 
 Use public role names and follow the [publication policy](publication-policy.md)
 when collecting material for this repository.
 
 ## Proposed layout
 
-The category folders are in place. Service subfolders and their configuration
-examples will be added as the inventory is confirmed:
+The category folders are in place, including Media. Service subfolders hold
+focused guides and runnable examples:
 
 ```text
 README.md
 apps/
   README.md
-  <service>/
-    README.md
+  syncthing/
     compose.yml
-    environment.example
+    README.md
+  immich/
+    README.md
+  freshrss/
+    README.md
+  projects/
+    README.md
+media/
+  README.md
 proxmox/
   README.md
 networking/
   README.md
+  caddy/
+    README.md
+    compose.yml
+    Caddyfile
 storage/
   README.md
 monitoring/
   README.md
+  host-metrics/
+    README.md
+    compose.yml
+    prometheus.yml
+    dashboard.json
+    provisioning/
 security/
   README.md
 automation/
@@ -129,10 +159,9 @@ pages for topic-specific details.
 
 ### 1. Confirm the inventory
 
-Use the details above to establish the app list and select the first services
-to feature. Existing documentation supplies the starting list of infrastructure
-tools. Confirm personal usage and setup details before writing them in first
-person.
+The private reference and service checkouts supply the app list. Use that source
+for future additions too, preferring newer dated records when older notes differ.
+Confirm personal usage and setup details before writing them in first person.
 
 ### 2. Update the homepage and navigation
 
@@ -169,6 +198,7 @@ main visual tour of the lab.
 | Planned page | What to explain | Starting material |
 |---|---|---|
 | `proxmox/README.md` | Cluster layout, VM roles, Debian/Compose setup, ROG Ally GPU use, Pi roles | [Hardware](../README.md#hardware), [architecture](architecture.md), [cluster screenshot](../evidence/screenshots/README.md#proxmox-cluster) |
+| `media/README.md` | Jellyfin, Seerr, downloads, VPN health, GPU checks, and NAS layout | [App catalogue](../apps/README.md#media-and-games), reviewed service definitions and dated private notes |
 | `networking/README.md` | OPNsense, DNS, Tailscale, Caddy, Authentik, and an access-flow diagram | [Networking and sign-in](network-and-identity.md) |
 | `storage/README.md` | Mirrored ZFS storage, local databases, shared files, PBS/Restic responsibilities, application backup contents | [Storage choices](architecture.md#storage), [restore notes](case-studies/recovery-and-storage-dependencies.md) |
 | `monitoring/README.md` | Metrics collection, log collection, dashboards, and notifications | [Grafana configuration](../automation/monitoring/README.md), [Falco routing](../automation/falco/event-flow.md) |
@@ -182,11 +212,19 @@ exercise; application-specific backup and restore guidance needs its own detail.
 
 ### 5. Add the first service examples
 
-Start with three examples, selected after the inventory is confirmed:
+The first three examples are:
 
-1. A frequently used personal application.
-2. A networking integration, such as Caddy with an application.
-3. Monitoring that connects the existing dashboard to its documented dependencies.
+1. [Syncthing](../apps/syncthing/README.md), with persistent file and device data.
+2. [Caddy](../networking/caddy/README.md), routing a local hostname to an internal
+   upstream and returning an error when the upstream is unavailable.
+3. [Host metrics](../monitoring/host-metrics/README.md), connecting Node Exporter,
+   Prometheus, and a provisioned Grafana dashboard.
+
+These examples run locally without lab credentials. Their
+[shared check script](../scripts/check-service-examples.py) validates Compose and
+uses temporary projects for startup, file transfer, routing, dashboard queries,
+and failure checks. The existing security dashboard retains its separate Trivy
+and Falco dependencies.
 
 Each example should include requirements beside commands, purpose-written
 configuration, an `environment.example` where needed, setup/startup steps,
@@ -221,8 +259,9 @@ These changes belong with the pages and examples that need them:
   along with other `.env` paths.
 - Keep reviewed images at the location expected by the screenshot checks.
 - Extend [example validation](../.github/workflows/examples.yml) to cover
-  configuration added outside `automation/`, including any required integration
-  checks in the [integration workflow](../.github/workflows/integration.yml).
+  configuration added outside `automation/`. The service-example job now checks
+  `apps/`, `networking/`, and `monitoring/`; their startup and behavior checks run
+  in the manual [integration workflow](../.github/workflows/integration.yml).
 - The [Markdown checker](../scripts/check-markdown-links.py) now validates local
   image targets and heading anchors, including linked images and repeated
   headings. [Focused tests](../tests/test_markdown_links.py) cover those behaviors.
@@ -253,6 +292,6 @@ relevant screenshots. It is ready when:
 - The homepage explains the hardware and how the major parts fit together.
 - Links and publication checks pass, and remaining work is on the roadmap.
 
-Then expand the category guides and add the first three service examples.
-Screenshot collection can proceed alongside the writing; new configuration
-should receive validation coverage as it is introduced.
+The category guides and first three service examples are now included. Screenshot
+collection can proceed alongside further writing; new configuration should receive
+validation coverage as it is introduced.

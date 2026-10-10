@@ -26,21 +26,48 @@ I group the VMs by role:
 
 | Role | What runs there |
 |---|---|
-| Applications | Personal services, mostly managed with Docker Compose |
-| Identity | Application sign-in |
-| Monitoring | Metrics, logs, dashboards, and alerts |
-| Security | Scanning and security tools |
-| Git and CI | Configuration repositories and automation |
-| Backups | Backup services |
+| Applications | Syncthing, Immich, Stirling PDF, Homarr, FreshRSS, Forgejo, and the reading brief |
+| Media | Jellyfin, Seerr, Servarr, Gluetun, and ClamAV, with GPU passthrough |
+| Identity | Authentik and its database |
+| Monitoring | Prometheus, Loki, Grafana, Alertmanager, and Uptime Kuma |
+| Security | Trivy, Ansible control node, and Falcosidekick |
+| CI | Separate Forgejo validation and image-release runners |
+| Backups | Proxmox Backup Server |
+| Network controller | UniFi Network |
+| Games | Minecraft |
+| Analysis | Sandbox control plane and a separate Windows worker; analysis is paused |
 
-Terraform and cloud-init handle VM provisioning and templates; Ansible handles
-host configuration. The published [Ansible examples](../automation/ansible/README.md)
-cover SSH and updates. The [automation page](../automation/README.md) connects
-those examples to the Git workflow.
+Forgejo itself runs with the applications; its runners have a dedicated VM. The
+media VM has a separate network segment and mounts only the shares it needs.
+
+## Provisioning
+
+The custom [Forge portal](../apps/projects/README.md#forge-vm-provisioner) uses
+Terraform and cloud-init to create VMs from Debian templates. Start and stop
+operations use the Proxmox API directly.
+
+The templates include Docker, the QEMU guest agent, NFS support, and the host
+monitoring tools. After cloning, the VM needs its own hostname, network assignment,
+Tailscale enrollment, and Prometheus target. GPU-specific firmware belongs on the
+media guest rather than every template.
+
+Ansible handles SSH policy and updates after provisioning. The published
+[Ansible examples](../automation/ansible/README.md) cover that part of the setup.
+Terraform state and credentials stay with the provisioner.
+
+## GPU passthrough
+
+The ROG Ally passes its AMD GPU to the media VM for Jellyfin VA-API transcoding.
+The [Media page](../media/README.md#jellyfin-and-the-gpu) covers the host, guest,
+container, and playback checks. The GPU is assigned to that workload rather than
+shared between VMs.
 
 ## Supporting devices
 
-The Raspberry Pi 5 provides DNS, reverse proxy, and cluster quorum-device roles.
+The Raspberry Pi 5 runs Pi-hole, Unbound, Caddy, Tailscale, Vaultwarden, SearXNG,
+and Speedtest. It also supplies the cluster's quorum-device vote. The quorum
+device participates in voting; it does not host VMs or provide another copy of
+their disks.
 OPNsense runs on a separate ThinkCentre, and TrueNAS SCALE runs on the UGREEN NAS.
 The [hardware list](../README.md#supporting-devices) also includes UPS power
 protection.

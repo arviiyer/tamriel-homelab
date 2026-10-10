@@ -7,6 +7,11 @@ security tools, Git/CI, and backups. Most applications run with Docker Compose;
 TrueNAS provides shared bulk storage. The [Proxmox page](../proxmox/README.md)
 covers VM roles, provisioning tools, and supporting devices.
 
+The [app catalogue](../apps/README.md) lists the personal services: Syncthing,
+Immich, FreshRSS, Stirling PDF, Homarr, Vaultwarden, and SearXNG. The
+[media VM](../media/README.md) runs Jellyfin, Seerr, and the download stack with
+GPU passthrough. CI has a separate VM from Forgejo's application data.
+
 [Overview diagram](../README.md#the-setup) · [Hardware](../README.md#hardware)
 
 ## Access and networking
