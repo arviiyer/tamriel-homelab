@@ -1,6 +1,6 @@
 # Screenshots
 
-[Home](../../README.md) · [Apps and services](../../apps/README.md)
+[Home](../README.md) · [Apps and services](../apps/README.md)
 
 Captures from the lab. Click an image to open it at full resolution.
 
@@ -10,7 +10,7 @@ Captures from the lab. Click an image to open it at full resolution.
 
 Service links, Pi-hole statistics, and the Morning SOC Briefing.
 
-[Homarr notes](../../apps/README.md#homarr) · [Review details](homarr-home.review.md)
+[Homarr notes](../apps/README.md#homarr) · [Review details](homarr-home.review.md)
 
 ## Immich
 
@@ -18,7 +18,7 @@ Service links, Pi-hole statistics, and the Morning SOC Briefing.
 
 Landscape photos and videos in an album.
 
-[Immich setup](../../apps/immich/README.md) · [Review details](immich-album.review.md)
+[Immich setup](../apps/immich/README.md) · [Review details](immich-album.review.md)
 
 ## FreshRSS
 
@@ -32,7 +32,7 @@ Security feeds grouped by topic.
 
 An expanded article with its text and image.
 
-[FreshRSS setup](../../apps/freshrss/README.md) · [Article-view review](freshrss-article.review.md)
+[FreshRSS setup](../apps/freshrss/README.md) · [Article-view review](freshrss-article.review.md)
 
 ## Jellyfin
 
@@ -40,7 +40,7 @@ An expanded article with its text and image.
 
 Media categories and the Continue Watching row.
 
-[Jellyfin setup](../../media/jellyfin/README.md) · [Review details](jellyfin-library.review.md)
+[Jellyfin setup](../media/jellyfin/README.md) · [Review details](jellyfin-library.review.md)
 
 ## Seerr
 
@@ -48,7 +48,7 @@ Media categories and the Continue Watching row.
 
 Browsing trending and popular titles in Seerr.
 
-[Media setup](../../media/README.md) · [Review details](seerr-discover.review.md)
+[Media setup](../media/README.md) · [Review details](seerr-discover.review.md)
 
 ## Host monitoring
 
@@ -56,7 +56,7 @@ Browsing trending and popular titles in Seerr.
 
 The Node Exporter dashboard in Grafana.
 
-[Monitoring setup](../../monitoring/README.md) · [Review details](grafana-host-metrics.review.md)
+[Monitoring setup](../monitoring/README.md) · [Review details](grafana-host-metrics.review.md)
 
 ## TrueNAS storage
 
@@ -64,7 +64,7 @@ The Node Exporter dashboard in Grafana.
 
 Two mirrored data VDEVs, storage usage, and disk health.
 
-[Storage setup](../../storage/README.md) · [Review details](truenas-storage.review.md)
+[Storage setup](../storage/README.md) · [Review details](truenas-storage.review.md)
 
 ## TrueNAS snapshots
 
@@ -72,7 +72,7 @@ Two mirrored data VDEVs, storage usage, and disk health.
 
 Enabled snapshot tasks with finished status.
 
-[Backup notes](../../storage/README.md#backups) · [Review details](truenas-snapshots.review.md)
+[Backup notes](../storage/README.md#backups) · [Review details](truenas-snapshots.review.md)
 
 ## PBS backup
 
@@ -80,7 +80,7 @@ Enabled snapshot tasks with finished status.
 
 A VM backup completed with status OK in 4 minutes 38 seconds.
 
-[PBS restore notes](../../storage/README.md#a-vm-from-pbs) · [Review details](pbs-backup.review.md)
+[PBS restore notes](../storage/README.md#a-vm-from-pbs) · [Review details](pbs-backup.review.md)
 
 ## Trivy dashboard
 
@@ -88,10 +88,10 @@ A VM backup completed with status OK in 4 minutes 38 seconds.
 
 *Vulnerability totals, new critical findings, and new high-severity findings with fixes.*
 
-The dashboard's secret status comes from [Trivy file scans](../../automation/trivy/README.md#secret-scans).
+The dashboard's secret status comes from [Trivy file scans](../automation/trivy/README.md#secret-scans).
 Git-history scans run separately.
 
-[Monitoring setup](../../monitoring/README.md)
+[Monitoring setup](../monitoring/README.md)
 
 [Redaction and review details](grafana-security-dashboard.review.md)
 
@@ -101,7 +101,7 @@ Git-history scans run separately.
 
 *Compose checks passing on a dependency-update pull request.*
 
-[Git and update workflow](../../automation/README.md#git-and-updates)
+[Git and update workflow](../automation/README.md#git-and-updates)
 
 [Redaction and review details](forgejo-validation-run.review.md)
 
@@ -111,7 +111,7 @@ Git-history scans run separately.
 
 *Trivy alert delivered to Discord for eight new high-severity findings with available fixes.*
 
-[Alerting notes](../../docs/case-studies/actionable-vulnerability-management.md)
+[Alerting notes](../docs/case-studies/actionable-vulnerability-management.md)
 
 [Redaction and review details](security-scan-alert.review.md)
 
@@ -121,7 +121,7 @@ Git-history scans run separately.
 
 *Proxmox cluster health showing three nodes online and quorum established.*
 
-[Cluster setup](../../proxmox/README.md)
+[Cluster setup](../proxmox/README.md)
 
 [Redaction and review details](proxmox-cluster-summary.review.md)
 
@@ -136,7 +136,7 @@ and browser bars can stay. Originals and working copies stay outside this repo.
 
 This directory accepts only final, reviewed screenshots. Original captures and
 working redaction files stay outside the repository. Follow the
-[screenshot checklist](../../docs/publication-policy.md#screenshot-review).
+[screenshot checklist](../docs/publication-policy.md#screenshot-review).
 
 The deny-by-default `.gitignore` requires each image and its same-name `.review.md`
 record to be force-added after review. For example:

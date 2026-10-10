@@ -36,7 +36,7 @@ workload command; testing it with missing or incorrect mounts is on the
 
 ## Result
 
-The [restore drill](../../evidence/drills/2026-08-24-isolated-synthetic-restore.md)
+The [restore drill](../drills/2026-08-24-isolated-synthetic-restore.md)
 restored exact test files and permissions. It rejected corruption, unsafe paths,
 links, and the wrong dataset. An injected write failure left no partial
 destination. The [unit tests](../../automation/recovery/tests) cover archive

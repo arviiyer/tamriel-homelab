@@ -4,7 +4,7 @@
 - Review status: Approved for inclusion
 - What it shows: Three Proxmox nodes online with quorum at the time of capture
 - Source: Real operated environment; Proxmox Datacenter Summary
-- Cropped to minimum evidence: Yes; Health panel only
+- Crop: Health panel
 - Opaque redactions applied: Not needed in the retained crop
 - Browser URL removed: Not present
 - Hostnames and addresses removed: Node tree excluded; project-aligned cluster display name retained with owner approval

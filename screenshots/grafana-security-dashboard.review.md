@@ -4,7 +4,7 @@
 - Review status: Approved for inclusion
 - What it shows: Vulnerability totals and changes between scans
 - Source: Real operated environment
-- Cropped to minimum evidence: Yes; Summary section only
+- Crop: Summary section
 - Opaque redactions applied: Not needed in the retained crop
 - Browser URL removed: Not present
 - Hostnames and addresses removed: Surrounding detail tables excluded
@@ -28,7 +28,7 @@ provisioning example. It supports observed finding presentation, not validation
 of that example's queries, Falco activity, or the latest scan's completeness.
 
 The secret panel shows file-scan results despite its Git-history label. The
-[Trivy example](../../automation/trivy/README.md#secret-scans) checks the current
+[Trivy example](../automation/trivy/README.md#secret-scans) checks the current
 files; Gitleaks checks Git history separately. Counts do not show remediation,
 and this capture has not been correlated to the Discord notification as the same
 scan.

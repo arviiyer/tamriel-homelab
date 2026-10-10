@@ -282,7 +282,7 @@ class PublicationSafetyTests(unittest.TestCase):
         self.assertIn("symbolic links are prohibited", result.stderr)
 
     def test_screenshot_requires_review_record(self) -> None:
-        screenshot = self.repository / "evidence/screenshots/example.png"
+        screenshot = self.repository / "screenshots/example.png"
         screenshot.parent.mkdir(parents=True)
         screenshot.write_bytes(b"synthetic image fixture")
         self.run_command("git", "add", str(screenshot.relative_to(self.repository)))
@@ -293,11 +293,11 @@ class PublicationSafetyTests(unittest.TestCase):
         self.assertIn("example.review.md", result.stderr)
 
     def test_reviewed_screenshot_has_a_four_mib_limit(self) -> None:
-        screenshot = self.repository / "evidence/screenshots/example.webp"
+        screenshot = self.repository / "screenshots/example.webp"
         screenshot.parent.mkdir(parents=True)
         screenshot.write_bytes(b"\x00" * (4 * 1024 * 1024))
         screenshot.with_suffix(".review.md").write_text("Synthetic review fixture\n")
-        self.run_command("git", "add", "evidence/screenshots")
+        self.run_command("git", "add", "screenshots")
 
         result = self.run_checker()
         self.assertEqual(result.returncode, 0, result.stderr)

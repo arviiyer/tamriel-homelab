@@ -42,7 +42,7 @@ sequenceDiagram
 ## Result
 
 The [tests](../../automation/ci/tests) cover rejected requests, deployment,
-rollback, and interrupted writes. A [disposable-host drill](../../evidence/drills/2026-08-24-fail-closed-delivery-rollback.md)
+rollback, and interrupted writes. A [disposable-host drill](../drills/2026-08-24-fail-closed-delivery-rollback.md)
 used real SSH and Docker Compose with generated Git history and images. It
 deployed A → B, rejected a non-image change, restored B after unhealthy revision
 C, and rolled back B → A.

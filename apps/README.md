@@ -28,7 +28,7 @@ lab copy lives on the NAS. It replaced Nextcloud for this job.
 
 ### Immich
 
-[![Landscape album in Immich](../evidence/screenshots/immich-album.webp)](immich/README.md)
+[![Landscape album in Immich](../screenshots/immich-album.webp)](immich/README.md)
 
 I keep my photo library in Immich, with the photos on TrueNAS and the database
 on the application VM. It uses Authentik for sign-in. Backing it up means keeping
@@ -51,7 +51,7 @@ workflow that saves its configuration before changing the image.
 
 ### FreshRSS
 
-[![FreshRSS feed categories and articles](../evidence/screenshots/freshrss-reader.webp)](freshrss/README.md)
+[![FreshRSS feed categories and articles](../screenshots/freshrss-reader.webp)](freshrss/README.md)
 
 FreshRSS is my browser-based feed reader, with security news and technical
 articles. Selected feeds fetch full article text. A custom extension caches
@@ -62,7 +62,7 @@ article images so the reading view can load them locally behind sign-in.
 
 ### Homarr
 
-[![Homarr service cards and reading brief](../evidence/screenshots/homarr-home.webp)](../evidence/screenshots/README.md#homarr)
+[![Homarr service cards and reading brief](../screenshots/homarr-home.webp)](../screenshots/README.md#homarr)
 
 Homarr brings my service links and widgets together. I also use it to read the
 [Morning SOC Briefing](projects/README.md#morning-soc-briefing), with source
@@ -105,9 +105,9 @@ through to the media VM for transcoding. The [Media page](../media/README.md)
 shows how the pieces connect, and the [Jellyfin guide](../media/jellyfin/README.md)
 covers setup and GPU checks.
 
-[![Jellyfin library and Continue Watching](../evidence/screenshots/jellyfin-library.webp)](../media/jellyfin/README.md)
+[![Jellyfin library and Continue Watching](../screenshots/jellyfin-library.webp)](../media/jellyfin/README.md)
 
-[![Seerr discovery view](../evidence/screenshots/seerr-discover.webp)](../media/README.md#requests-and-downloads)
+[![Seerr discovery view](../screenshots/seerr-discover.webp)](../media/README.md#requests-and-downloads)
 
 | Service | Use | Project |
 |---|---|---|
@@ -137,11 +137,11 @@ project.
 
 ### Grafana
 
-[![CPU, memory, network, and disk panels in Grafana](../evidence/screenshots/grafana-host-metrics.webp)](../monitoring/README.md)
+[![CPU, memory, network, and disk panels in Grafana](../screenshots/grafana-host-metrics.webp)](../monitoring/README.md)
 
 I use Grafana to view metrics and logs. The Node Exporter dashboard above shows
 host CPU, memory, network traffic, and disk usage. A separate
-[Trivy dashboard](../evidence/screenshots/README.md#trivy-dashboard) shows finding
+[Trivy dashboard](../screenshots/README.md#trivy-dashboard) shows finding
 totals and new findings with available fixes. The public dashboard example also
 includes Falco events.
 
@@ -176,7 +176,7 @@ host health and application checks.
 
 ### Forgejo
 
-[![Forgejo checking a dependency-update pull request](../evidence/screenshots/forgejo-validation-run.png)](../evidence/screenshots/README.md#forgejo-ci)
+[![Forgejo checking a dependency-update pull request](../screenshots/forgejo-validation-run.png)](../screenshots/README.md#forgejo-ci)
 
 Forgejo hosts my private configuration repositories. The screenshot shows
 Compose checks passing on a dependency-update pull request. The
@@ -251,7 +251,7 @@ the ordinary web apps use private Caddy routes.
 
 ### TrueNAS and ZFS
 
-[![TrueNAS storage layout and health](../evidence/screenshots/truenas-storage.webp)](../storage/README.md)
+[![TrueNAS storage layout and health](../screenshots/truenas-storage.webp)](../storage/README.md)
 
 TrueNAS SCALE runs on the UGREEN NAS and holds shared bulk files. The four hard
 drives form two mirrored pairs. Application databases stay on the VMs' own disks;
@@ -262,7 +262,7 @@ the [storage notes](../storage/README.md#where-data-lives) explain that choice.
 
 ### Proxmox Backup Server and Restic
 
-[![PBS backup task completed successfully](../evidence/screenshots/pbs-backup.webp)](../storage/README.md#backups)
+[![PBS backup task completed successfully](../screenshots/pbs-backup.webp)](../storage/README.md#backups)
 
 PBS and Restic are the lab's backup tools, alongside VM snapshots and off-host
 copies for selected data. The storage page introduces the different backup

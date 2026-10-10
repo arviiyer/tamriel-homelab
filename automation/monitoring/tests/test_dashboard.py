@@ -72,7 +72,7 @@ class DashboardStructureTests(unittest.TestCase):
             self.assertFalse(occupied.intersection(cells), panel["title"])
             occupied.update(cells)
 
-    def test_every_query_panel_has_evidence_description_and_datasource(self) -> None:
+    def test_every_query_panel_has_description_and_datasource(self) -> None:
         allowed_datasources = {"security-prometheus", "security-loki"}
         for panel in self.query_panels:
             self.assertTrue(panel["description"].strip(), panel["title"])
@@ -86,7 +86,7 @@ class DashboardStructureTests(unittest.TestCase):
                     panel["datasource"]["uid"], target["datasource"]["uid"]
                 )
 
-    def test_required_review_paths_are_visible(self) -> None:
+    def test_expected_panels_are_present(self) -> None:
         titles = {panel["title"] for panel in self.panels}
         required = {
             "Latest Scan Attempt",
@@ -186,8 +186,8 @@ class ProvisioningTests(unittest.TestCase):
 
     def test_dashboard_provider_is_file_owned_and_read_only(self) -> None:
         provider = self.dashboard_provider["providers"][0]
-        self.assertEqual("security-evidence", provider["name"])
-        self.assertEqual("security-evidence", provider["folderUid"])
+        self.assertEqual("security", provider["name"])
+        self.assertEqual("security", provider["folderUid"])
         self.assertEqual("file", provider["type"])
         self.assertTrue(provider["disableDeletion"])
         self.assertFalse(provider["allowUiUpdates"])

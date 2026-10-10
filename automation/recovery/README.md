@@ -8,7 +8,7 @@ Includes generated test archives and a systemd unit that checks storage before
 starting a service.
 
 [Design notes](../../docs/case-studies/recovery-and-storage-dependencies.md) ·
-[Restore drill](../../evidence/drills/2026-08-24-isolated-synthetic-restore.md)
+[Restore drill](../../docs/drills/2026-08-24-isolated-synthetic-restore.md)
 
 ## Try it
 

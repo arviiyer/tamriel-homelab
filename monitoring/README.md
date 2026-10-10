@@ -9,14 +9,14 @@ metrics, application metrics, scan results, and runtime events feed these tools.
 
 ## Grafana
 
-[![Node Exporter CPU, memory, network, and disk panels](../evidence/screenshots/grafana-host-metrics.webp)](../evidence/screenshots/README.md#host-monitoring)
+[![Node Exporter CPU, memory, network, and disk panels](../screenshots/grafana-host-metrics.webp)](../screenshots/README.md#host-monitoring)
 
 The Node Exporter dashboard gives me a view of host CPU, memory, network traffic,
 and disk usage over time.
 
 ### Security scans
 
-[![Trivy dashboard summary](../evidence/screenshots/grafana-security-dashboard.png)](../evidence/screenshots/README.md#trivy-dashboard)
+[![Trivy dashboard summary](../screenshots/grafana-security-dashboard.png)](../screenshots/README.md#trivy-dashboard)
 
 The Trivy dashboard shows vulnerability totals and new findings. The secret
 panel reports file scans; Git-history scans run separately. The
@@ -82,7 +82,7 @@ and delivery behavior.
 
 ## Notifications
 
-[![Trivy alert delivered to Discord](../evidence/screenshots/security-scan-alert.png)](../evidence/screenshots/README.md#discord-alert)
+[![Trivy alert delivered to Discord](../screenshots/security-scan-alert.png)](../screenshots/README.md#discord-alert)
 
 An alert for eight new high-severity findings with fixes available. The
 [alerting notes](../docs/case-studies/actionable-vulnerability-management.md)

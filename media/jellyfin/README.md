@@ -6,7 +6,7 @@ Jellyfin plays my media library. It runs in a Debian VM on the ROG Ally, with th
 AMD GPU passed through for transcoding. The library is mounted read-only from
 TrueNAS; Jellyfin's database, metadata, and cache stay on the VM.
 
-[![Jellyfin library and Continue Watching](../../evidence/screenshots/jellyfin-library.webp)](../../evidence/screenshots/README.md#jellyfin)
+[![Jellyfin library and Continue Watching](../../screenshots/jellyfin-library.webp)](../../screenshots/README.md#jellyfin)
 
 - [Install](#install)
 - [Pass the GPU to the VM](#pass-the-gpu-to-the-vm)

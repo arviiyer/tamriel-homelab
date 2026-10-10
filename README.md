@@ -81,7 +81,7 @@ The NAS hard drives are arranged as two mirrored pairs.
 I use Syncthing for documents and notes, Immich for photos, FreshRSS for reading,
 and Jellyfin for media. Homarr brings the service links and reading brief together.
 
-[![Homarr service cards and reading brief](evidence/screenshots/homarr-home.webp)](apps/README.md#homarr)
+[![Homarr service cards and reading brief](screenshots/homarr-home.webp)](apps/README.md#homarr)
 
 | Job | Tools |
 |---|---|
@@ -118,10 +118,10 @@ checks run manually from [Actions](https://github.com/arviiyer/tamriel-homelab/a
 
 ## Screenshots
 
-[![Landscape album in Immich](evidence/screenshots/immich-album.webp)](apps/immich/README.md)
+[![Landscape album in Immich](screenshots/immich-album.webp)](apps/immich/README.md)
 
 A landscape album in Immich. More captures are beside the app descriptions and
-in the [screenshot gallery](evidence/screenshots/README.md), including FreshRSS,
+in the [screenshot gallery](screenshots/README.md), including FreshRSS,
 Jellyfin, Seerr, Grafana, TrueNAS, and PBS.
 
 ## Notes

@@ -31,7 +31,7 @@ credentials, and repository histories stay outside this checkout.
   home addresses, precise personal locations, and private messages or documents
 - Emergency access procedures
 - Complete production detection suppressions or allowlists
-- Malware, PCAPs, log exports, database dumps, or captured evidence
+- Malware, PCAPs, log exports, database dumps, or raw investigation data
 - Sensitive information in screenshots, browser tabs, notifications, or image
   metadata
 
@@ -111,7 +111,7 @@ require replacing ordinary labels in screenshots or descriptions of the lab.
 ## Screenshot Review
 
 Screenshots must be staged and edited outside this repository. Only the final
-reviewed image may be force-added to `evidence/screenshots/`. Each image may be up
+reviewed image may be force-added to `screenshots/`. Each image may be up
 to 4 MiB; use lossless compression where practical to keep interface text clear.
 The review limit for other files is 2 MiB.
 

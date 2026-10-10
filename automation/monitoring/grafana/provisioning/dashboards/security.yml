@@ -1,9 +1,9 @@
 apiVersion: 1
 providers:
-  - name: security-evidence
+  - name: security
     orgId: 1
     folder: Security
-    folderUid: security-evidence
+    folderUid: security
     type: file
     disableDeletion: true
     updateIntervalSeconds: 30

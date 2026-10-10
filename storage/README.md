@@ -6,7 +6,7 @@
 TrueNAS SCALE provides shared storage on the UGREEN NAS. Its four 4 TB hard
 drives are arranged as two mirrored pairs. PBS and Restic are the backup tools.
 
-[![TrueNAS storage layout and health](../evidence/screenshots/truenas-storage.webp)](../evidence/screenshots/README.md#truenas-storage)
+[![TrueNAS storage layout and health](../screenshots/truenas-storage.webp)](../screenshots/README.md#truenas-storage)
 
 ## Where data lives
 
@@ -43,13 +43,13 @@ configuration. Guest-mounted NFS files are outside those VM disk backups. The
 datastore is itself on the NAS, so a PBS backup there shares the NAS's failure
 boundary. It is not an off-site copy.
 
-[![A completed PBS backup task](../evidence/screenshots/pbs-backup.webp)](../evidence/screenshots/README.md#pbs-backup)
+[![A completed PBS backup task](../screenshots/pbs-backup.webp)](../screenshots/README.md#pbs-backup)
 
 ZFS snapshots cover selected file and photo datasets. Vaultwarden has a local
 Restic repository and a copy on another host, with repository checks. Keeping
 another copy on the same device would not cover losing that device.
 
-[![Finished periodic snapshot tasks in TrueNAS](../evidence/screenshots/truenas-snapshots.webp)](../evidence/screenshots/README.md#truenas-snapshots)
+[![Finished periodic snapshot tasks in TrueNAS](../screenshots/truenas-snapshots.webp)](../screenshots/README.md#truenas-snapshots)
 
 | Application | What needs to be recoverable together |
 |---|---|
@@ -117,7 +117,7 @@ python3 automation/recovery/tests/run_isolated_restore_drill.py
 ```
 
 [Restore tool and archive format](../automation/recovery/README.md) ·
-[Recorded synthetic restore exercise](../evidence/drills/2026-08-24-isolated-synthetic-restore.md)
+[Restore test results](../docs/drills/2026-08-24-isolated-synthetic-restore.md)
 
 ## Waiting for shared storage
 

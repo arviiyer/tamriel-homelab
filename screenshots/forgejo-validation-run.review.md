@@ -4,7 +4,7 @@
 - Review status: Approved for inclusion
 - What it shows: Compose checks passing on a dependency-update pull request
 - Source: Real operated environment
-- Cropped to minimum evidence: Yes; workflow heading, job, and successful steps
+- Crop: Workflow heading, job, and successful steps
 - Opaque redactions applied: Yes; image/version title details and commit/actor/PR details
 - Browser URL removed: Not present
 - Hostnames and addresses removed: Repository heading excluded and image reference masked
@@ -30,6 +30,6 @@ are included.
 This does not establish the workflow trigger, required-check enforcement, branch
 protection, runner isolation, or the semantics of the checked-out revision. It is
 not a deployment or rollback run; those have separate
-[test results](../drills/2026-08-24-fail-closed-delivery-rollback.md).
+[test results](../docs/drills/2026-08-24-fail-closed-delivery-rollback.md).
 
 Original captures and OCR output remain outside the repository.

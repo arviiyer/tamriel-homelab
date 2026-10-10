@@ -122,7 +122,7 @@ def main() -> None:
             raise RuntimeError("Grafana did not load the expected dashboard UID")
         if dashboard.get("title") != "Security Control Overview":
             raise RuntimeError("Grafana did not load the expected dashboard title")
-        if metadata.get("folderUid") != "security-evidence":
+        if metadata.get("folderUid") != "security":
             raise RuntimeError("Grafana did not use the expected public folder UID")
         if metadata.get("provisioned") is not True:
             raise RuntimeError("Grafana did not mark the dashboard as provisioned")

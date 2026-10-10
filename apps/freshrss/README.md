@@ -5,7 +5,7 @@
 FreshRSS is my browser-based feed reader. It holds security news and technical
 articles and supplies the input for the [Morning SOC Briefing](../projects/README.md#morning-soc-briefing).
 
-[![FreshRSS feed categories and articles](../../evidence/screenshots/freshrss-reader.webp)](../../evidence/screenshots/README.md#freshrss)
+[![FreshRSS feed categories and articles](../../screenshots/freshrss-reader.webp)](../../screenshots/README.md#freshrss)
 
 - [Install](#install)
 - [Add feeds](#add-feeds)
@@ -116,7 +116,7 @@ own local login.
 
 ## Article text and images
 
-[![An article open in FreshRSS](../../evidence/screenshots/freshrss-article.webp)](../../evidence/screenshots/freshrss-article.webp)
+[![An article open in FreshRSS](../../screenshots/freshrss-article.webp)](../../screenshots/freshrss-article.webp)
 
 Some feeds only provide summaries. I enable FreshRSS's full-content extraction
 for selected feeds instead of applying it to every subscription. Selectors need

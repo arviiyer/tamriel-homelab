@@ -4,7 +4,7 @@
 - Review status: Approved for inclusion
 - What it shows: One delivered alert for new high-severity vulnerabilities with fixes
 - Source: Real operated environment; Discord notification
-- Cropped to minimum evidence: Yes; alert card only
+- Crop: Alert card
 - Opaque redactions applied: Yes; repository labels, image reference/version, and wrapped digest
 - Browser URL removed: Not present
 - Hostnames and addresses removed: Repository/image details masked; no destination URL visible

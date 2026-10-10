@@ -27,7 +27,7 @@ retired. See [networking](../networking/README.md#dns).
 
 ## Jellyfin and the GPU
 
-[![Jellyfin library and Continue Watching](../evidence/screenshots/jellyfin-library.webp)](jellyfin/README.md)
+[![Jellyfin library and Continue Watching](../screenshots/jellyfin-library.webp)](jellyfin/README.md)
 
 The ROG Ally's integrated AMD GPU is passed from Proxmox to the media VM. The
 guest loads the AMD driver and firmware, and the Jellyfin container receives
@@ -43,7 +43,7 @@ SSO plugin.
 
 ## Requests and downloads
 
-[![Trending and popular titles in Seerr](../evidence/screenshots/seerr-discover.webp)](../evidence/screenshots/README.md#seerr)
+[![Trending and popular titles in Seerr](../screenshots/seerr-discover.webp)](../screenshots/README.md#seerr)
 
 Seerr sends requests to Sonarr and Radarr. Prowlarr manages indexers, qBittorrent
 handles torrents, and NZBGet handles Usenet. Lidarr and Readarr handle music and

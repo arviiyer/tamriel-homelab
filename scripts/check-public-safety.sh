@@ -50,8 +50,8 @@ for path in "${candidate_files[@]}"; do
   esac
 
   case "$lower_path" in
-    evidence/screenshots/*.png|evidence/screenshots/*.jpg|\
-    evidence/screenshots/*.jpeg|evidence/screenshots/*.webp)
+    screenshots/*.png|screenshots/*.jpg|\
+    screenshots/*.jpeg|screenshots/*.webp)
       screenshot_path=1
       review="${path%.*}.review.md"
       if ! git ls-files --error-unmatch "$review" >/dev/null 2>&1; then

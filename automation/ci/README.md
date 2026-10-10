@@ -6,7 +6,7 @@ A Forgejo workflow and SSH helper that deploy the commit checked by CI, test
 service health, and roll back failures.
 
 [Design notes](../../docs/case-studies/fail-closed-infrastructure-delivery.md) ·
-[Rollback drill](../../evidence/drills/2026-08-24-fail-closed-delivery-rollback.md)
+[Rollback drill](../../docs/drills/2026-08-24-fail-closed-delivery-rollback.md)
 
 ## Setup
 

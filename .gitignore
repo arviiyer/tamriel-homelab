@@ -29,8 +29,7 @@
 !diagrams/**
 !docs/
 !docs/**
-!evidence/
-!evidence/**
+!screenshots/
 !scripts/
 !scripts/**
 !tests/
@@ -46,5 +45,5 @@ automation/trivy/repositories.tsv
 automation/trivy/var/
 
 # Screenshots require an explicit force-add after review.
-evidence/screenshots/*
-!evidence/screenshots/README.md
+screenshots/*
+!screenshots/README.md

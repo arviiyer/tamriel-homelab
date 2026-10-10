@@ -9,7 +9,7 @@ workflow to the scripts, roles, and examples in the repository.
 
 ## Git and updates
 
-[![Compose validation in Forgejo](../evidence/screenshots/forgejo-validation-run.png)](../evidence/screenshots/README.md#forgejo-ci)
+[![Compose validation in Forgejo](../screenshots/forgejo-validation-run.png)](../screenshots/README.md#forgejo-ci)
 
 Compose checks passing on a dependency-update pull request. The lab's
 configuration repositories live in private Forgejo, with credentials and
@@ -25,7 +25,7 @@ target checks it again before allowing an image change. Service health checks
 decide whether to record success or restore the previous definition.
 
 [How deployment and rollback work](../docs/case-studies/fail-closed-infrastructure-delivery.md) ·
-[Recorded disposable-host exercise](../evidence/drills/2026-08-24-fail-closed-delivery-rollback.md)
+[Disposable-host test results](../docs/drills/2026-08-24-fail-closed-delivery-rollback.md)
 
 ## Runners and deployment
 
