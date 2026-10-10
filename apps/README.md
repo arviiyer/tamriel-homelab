@@ -28,17 +28,19 @@ lab copy lives on the NAS. It replaced Nextcloud for this job.
 
 ### Immich
 
-Immich holds my photo library. The photos live on TrueNAS, while PostgreSQL and
-the other application data stay on the application VM. Sign-in uses Authentik.
+I keep my photo library in Immich, with the photos on TrueNAS and the database
+on the application VM. It uses Authentik for sign-in. Backing it up means keeping
+both the library and database, since neither is useful as a complete restore
+on its own.
 
-[Storage, sign-in, and update notes](immich/README.md) ·
+[Setup, phone backups, and updates](immich/README.md) ·
 [Immich documentation](https://docs.immich.app/)
 
 ### Stirling PDF
 
-Stirling PDF handles browser-based PDF editing. It uses its own login and is one
-of the services I deploy through a manually triggered Forgejo workflow. The
-deployment takes a copy of its configuration before changing the image.
+I use Stirling PDF for browser-based jobs such as rotating pages and merging
+documents. It has its own login. Updates go through a manually triggered Forgejo
+workflow that saves its configuration before changing the image.
 
 [Deployment workflow](../automation/README.md#git-and-updates) ·
 [Stirling PDF documentation](https://docs.stirlingpdf.com/)
@@ -56,24 +58,26 @@ article images so the reading view can load them locally behind sign-in.
 
 ### Homarr
 
-Homarr is the homepage for service links and widgets. A Custom API widget also
-shows the [Morning SOC Briefing](projects/README.md#morning-soc-briefing).
-Homarr currently uses local credentials.
+Homarr brings my service links and widgets together. I also use it to read the
+[Morning SOC Briefing](projects/README.md#morning-soc-briefing), with source
+excerpts and links back to FreshRSS. It uses a Custom API widget because the RSS
+widget cuts the text short. Homarr has its own local login.
 
 [Homarr documentation](https://homarr.dev/docs/)
 
 ### Vaultwarden
 
-Vaultwarden provides the password vault, accessed through Bitwarden clients. It
-runs on the Raspberry Pi behind Caddy, with local and off-host Restic backups.
+Vaultwarden holds my passwords, with Bitwarden clients connecting to it. It runs
+on the Raspberry Pi behind Caddy. I keep Restic backups locally and on another
+host, so the vault's only copy is not on the Pi.
 
 [Backup notes](../storage/README.md#backups) ·
 [Vaultwarden documentation](https://github.com/dani-garcia/vaultwarden/wiki)
 
 ### SearXNG
 
-SearXNG provides a private search interface on the Raspberry Pi. Its Caddy route
-works through local DNS at home and Tailscale when away.
+SearXNG is my private search page on the Raspberry Pi. The same hostname works
+through local DNS at home and Tailscale when away.
 
 [DNS and access](../networking/README.md#dns) ·
 [SearXNG documentation](https://docs.searxng.org/)
@@ -89,13 +93,15 @@ need documenting.
 
 ## Media and games
 
-Jellyfin plays the library, Seerr handles requests, and the Servarr applications
-organize downloads and media. The [Media page](../media/README.md) covers how
-they fit together and the ROG Ally's GPU passthrough.
+I use Jellyfin for playback and Seerr for requests. The Servarr applications
+organize downloads and media. This runs on the ROG Ally, whose GPU is passed
+through to the media VM for transcoding. The [Media page](../media/README.md)
+shows how the pieces connect, and the [Jellyfin guide](../media/jellyfin/README.md)
+covers setup and GPU checks.
 
 | Service | Use | Project |
 |---|---|---|
-| Jellyfin | Media playback and hardware transcoding | [Docs](https://jellyfin.org/docs/) |
+| Jellyfin | Media playback and hardware transcoding | [Setup](../media/jellyfin/README.md) · [Docs](https://jellyfin.org/docs/) |
 | Seerr | Media requests | [Docs](https://docs.seerr.dev/) |
 | Sonarr | TV library management | [Docs](https://wiki.servarr.com/sonarr) |
 | Radarr | Movie library management | [Docs](https://wiki.servarr.com/radarr) |

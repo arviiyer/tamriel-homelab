@@ -95,6 +95,10 @@ and Jellyfin for media. Homarr brings the service links and reading brief togeth
 There are also a few [small projects](apps/projects/README.md): a VM provisioning
 portal, Discord actions for media requests, a reading brief, and a printer monitor.
 
+Setup guides: [Immich](apps/immich/README.md) ·
+[FreshRSS](apps/freshrss/README.md) · [Jellyfin](media/jellyfin/README.md) ·
+[Restic backup and restore](storage/restic/README.md)
+
 ## Automation
 
 Forgejo hosts the lab's private configuration repositories, and Renovate opens
@@ -127,5 +131,4 @@ checked separately. [Monitoring setup](monitoring/README.md) ·
 - [Making vulnerability alerts useful](docs/case-studies/actionable-vulnerability-management.md)
 - [Deploying the commit that passed CI](docs/case-studies/fail-closed-infrastructure-delivery.md)
 - [Restoring without overwriting live data](docs/case-studies/recovery-and-storage-dependencies.md)
-- [Documentation plan](docs/documentation-plan.md)
 - [Next steps](ROADMAP.md)

@@ -6,6 +6,8 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
+import shutil
 import subprocess
 import tempfile
 import time
@@ -20,24 +22,30 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLES = {
     "syncthing": ROOT / "apps/syncthing/compose.yml",
+    "freshrss": ROOT / "apps/freshrss/compose.yml",
+    "jellyfin": ROOT / "media/jellyfin/compose.yml",
     "caddy": ROOT / "networking/caddy/compose.yml",
     "host-metrics": ROOT / "monitoring/host-metrics/compose.yml",
 }
 HTTP = urllib.request.build_opener(urllib.request.ProxyHandler({}))
 
 
-def run(*args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(args, check=check, capture_output=True, text=True, timeout=180)
+def run(*args: str, check: bool = True, env=None) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        args, check=check, capture_output=True, text=True, timeout=180, env=env,
+    )
 
 
-def render(path: Path) -> dict:
-    result = run("docker", "compose", "-f", str(path), "config", "--format", "json")
+def render(*paths: Path, env=None) -> dict:
+    files = [arg for path in paths for arg in ("-f", str(path))]
+    result = run("docker", "compose", *files, "config", "--format", "json", env=env)
     return json.loads(result.stdout)
 
 
 def validate() -> None:
+    env = dict(os.environ, JELLYFIN_UID="1000", JELLYFIN_GID="1000", RENDER_GID="123")
     for name, path in EXAMPLES.items():
-        config = render(path)
+        config = render(path, env=env)
         for service in config["services"].values():
             assert "@sha256:" in service["image"], f"{name}: image must be pinned"
             assert not service.get("privileged"), f"{name}: privileged container"
@@ -46,8 +54,21 @@ def validate() -> None:
                 assert port["host_ip"] == "127.0.0.1", f"{name}: non-loopback port"
             for volume in service.get("volumes", []):
                 if volume["type"] == "bind":
+                    if name == "jellyfin" and volume["target"] in ("/config", "/cache"):
+                        expected = path.parent / volume["target"].lstrip("/")
+                        assert Path(volume["source"]) == expected, "unexpected data path"
+                        assert not volume.get("read_only"), "application data must be writable"
+                        continue
                     assert volume.get("read_only"), f"{name}: writable bind mount"
         assert all(not n.get("external") for n in config["networks"].values()), name
+        if name == "jellyfin":
+            gpu = render(path, path.with_name("gpu.override.yml"), env=env)
+            service = gpu["services"]["jellyfin"]
+            assert service["group_add"] == ["123"], "render group not passed through"
+            assert service["devices"][0]["target"] == "/dev/dri/renderD128"
+            assert not service.get("privileged"), "GPU override enables privileged mode"
+            media = next(v for v in service["volumes"] if v["target"] == "/media")
+            assert media["read_only"] and not media["bind"]["create_host_path"]
         print(f"PASS: {name} Compose and local-access checks", flush=True)
 
 
@@ -81,8 +102,17 @@ class Project:
     def __init__(self, name: str, directory: Path):
         self.name = name
         self.path = EXAMPLES[name]
+        self.directory = directory
+        self.env = dict(os.environ)
+        if name == "jellyfin":
+            # Keep writable bind mounts and generated media outside the checkout.
+            self.path = directory / "compose.yml"
+            shutil.copyfile(EXAMPLES[name], self.path)
+            for folder in ("config", "cache", "media"):
+                (directory / folder).mkdir()
+            self.env.update(JELLYFIN_UID=str(os.getuid()), JELLYFIN_GID=str(os.getgid()))
         self.project = f"tamriel-example-{uuid.uuid4().hex[:12]}"
-        config = render(self.path)
+        config = render(self.path, env=self.env)
         # !override replaces fixed ports with random loopback ports (Compose 2.24.4+).
         lines = ["services:"]
         for service, definition in config["services"].items():
@@ -108,7 +138,7 @@ class Project:
         ]
 
     def compose(self, *args, check=True):
-        return run(*self.command, *args, check=check)
+        return run(*self.command, *args, check=check, env=self.env)
 
     def url(self, service, port):
         address = self.compose("port", service, str(port)).stdout.strip()
@@ -117,6 +147,8 @@ class Project:
 
     def exec(self, service, *args, check=True):
         user = ["--user", "1000:1000"] if service.startswith("syncthing") else []
+        if service == "freshrss":
+            user = ["--user", "www-data"]
         return self.compose("exec", "-T", *user, service, *args, check=check)
 
 
@@ -184,6 +216,68 @@ def syncthing(project):
     assert result.stdout == "example file\n"
 
 
+def freshrss(project):
+    url = project.url("freshrss", 80)
+    wait_for("FreshRSS wizard", lambda: "FreshRSS" in request(url)[1])
+    project.exec("freshrss", "cli/do-install.php", "--default-user", "reader",
+                 "--auth-type", "form")
+    project.exec("freshrss", "cli/create-user.php", "--user", "reader",
+                 "--password", uuid.uuid4().hex)
+    marker = "/var/www/FreshRSS/data/example.txt"
+    project.exec("freshrss", "sh", "-c", f"printf 'before backup\\n' > {marker}")
+    project.compose("stop", "freshrss")
+    archive = project.directory / "data.tar.gz"
+    with archive.open("wb") as output:
+        subprocess.run(
+            [*project.command, "run", "--rm", "-T", "--no-deps", "--entrypoint",
+             "tar", "freshrss", "-C", "/var/www/FreshRSS", "-czf", "-", "data", "extensions"],
+            stdout=output, stderr=subprocess.PIPE, check=True, timeout=180, env=project.env,
+        )
+    project.compose("start", "freshrss")
+    project.exec("freshrss", "sh", "-c", f"printf 'after backup\\n' > {marker}")
+
+    directory = project.directory / "restore"
+    directory.mkdir()
+    restored = Project("freshrss", directory)
+    try:
+        with archive.open("rb") as source:
+            subprocess.run(
+                [*restored.command, "run", "--rm", "-T", "--no-deps", "--entrypoint",
+                 "tar", "freshrss", "-C", "/var/www/FreshRSS", "-xzf", "-"],
+                stdin=source, capture_output=True, check=True, timeout=180, env=restored.env,
+            )
+        restored.compose("up", "-d")
+        url = restored.url("freshrss", 80)
+        wait_for("restored FreshRSS", lambda: "FreshRSS" in request(url)[1])
+        assert "reader" in restored.exec("freshrss", "cli/list-users.php").stdout
+        assert restored.exec("freshrss", "cat", marker).stdout == "before backup\n"
+        assert project.exec("freshrss", "cat", marker).stdout == "after backup\n"
+    finally:
+        restored.compose("down", "--volumes", "--remove-orphans")
+
+
+def jellyfin(project):
+    url = project.url("jellyfin", 8096)
+    wait_for("Jellyfin health", lambda: request(url + "/health") == (200, "Healthy"))
+    status, body = request(url + "/System/Info/Public")
+    assert status == 200 and json.loads(body)["StartupWizardCompleted"] is False
+    assert project.exec("jellyfin", "id", "-u").stdout.strip() == str(os.getuid())
+    project.exec(
+        "jellyfin", "/usr/lib/jellyfin-ffmpeg/ffmpeg", "-hide_banner", "-loglevel", "error",
+        "-f", "lavfi", "-i", "color=c=blue:s=160x120:r=1", "-t", "1", "-c:v", "mpeg4",
+        "/cache/example.mp4",
+    )
+    shutil.copyfile(project.directory / "cache/example.mp4",
+                    project.directory / "media/example.mp4")
+    project.exec(
+        "jellyfin", "sh", "-c",
+        "test -r /media/example.mp4 && test ! -w /media/example.mp4 && "
+        "test -w /config && test -w /cache",
+    )
+    project.exec("jellyfin", "/usr/lib/jellyfin-ffmpeg/ffprobe", "-v", "error",
+                 "-show_format", "/media/example.mp4")
+
+
 def caddy(project):
     url = project.url("proxy", 8080)
     headers = {"Host": "app.example.com"}
@@ -239,7 +333,10 @@ def smoke(name):
         project = Project(name, Path(directory))
         try:
             project.compose("up", "-d", "--pull", "missing")
-            checks = {"syncthing": syncthing, "caddy": caddy, "host-metrics": host_metrics}
+            checks = {
+                "syncthing": syncthing, "freshrss": freshrss, "jellyfin": jellyfin,
+                "caddy": caddy, "host-metrics": host_metrics,
+            }
             checks[name](project)
             print(f"PASS: {name} startup and behavior", flush=True)
         finally:

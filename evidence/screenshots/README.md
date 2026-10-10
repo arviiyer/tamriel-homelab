@@ -50,6 +50,24 @@ Git-history scans run separately.
 <details>
 <summary>Adding screenshots</summary>
 
+### Next captures
+
+These views would help show the everyday side of the lab. Add each reviewed
+image beside its app or guide, as well as here.
+
+| View | What to show | Where it belongs |
+|---|---|---|
+| Homarr | Service cards and a reading-brief excerpt | [Apps](../../apps/README.md#homarr) |
+| Immich | A small album using photos chosen for sharing | [Immich](../../apps/immich/README.md) |
+| FreshRSS | Feed categories and an article | [FreshRSS](../../apps/freshrss/README.md) |
+| Jellyfin or Seerr | Library browsing or the request interface | [Media](../../media/README.md) |
+| Grafana | Host CPU, memory, and storage panels | [Monitoring](../../monitoring/README.md) |
+| TrueNAS or PBS | Pool layout or a completed backup task | [Storage](../../storage/README.md) |
+
+For app captures, also check photos, album names, feed titles, avatars, and device
+labels for personal details. For infrastructure captures, crop out host, pool,
+dataset, and VM identifiers. Originals and working copies stay outside this repo.
+
 ### Adding an image
 
 This directory accepts only final, reviewed screenshots. Original captures and

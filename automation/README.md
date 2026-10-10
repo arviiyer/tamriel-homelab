@@ -69,6 +69,8 @@ Each component has setup instructions and test commands:
 | [Falco](falco/README.md) | Detect suspicious runtime activity and route events |
 | [Grafana](monitoring/README.md) | Display scan results and Falco events |
 | [Syncthing](../apps/syncthing/README.md) | Run file sync with a local management interface |
+| [FreshRSS](../apps/freshrss/README.md) | Run a feed reader with SQLite and restore its data |
+| [Jellyfin](../media/jellyfin/README.md) | Play a read-only media library, with optional GPU transcoding |
 | [Caddy](../networking/caddy/README.md) | Route a hostname to an internal upstream |
 | [Host metrics](../monitoring/host-metrics/README.md) | Scrape metrics and load a Grafana dashboard |
 

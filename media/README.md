@@ -31,23 +31,13 @@ The ROG Ally's integrated AMD GPU is passed from Proxmox to the media VM. The
 guest loads the AMD driver and firmware, and the Jellyfin container receives
 the render device. VA-API handles hardware transcoding.
 
-The setup has four layers to check:
-
-1. Proxmox assigns the GPU to the intended VM.
-2. Debian loads the driver and exposes a render device.
-3. Jellyfin's container can access that device with the correct group permissions.
-4. A playback session that requires transcoding actually uses VA-API.
-
-Direct play alone does not test transcoding. Use Jellyfin's playback information
-and transcoding logs when checking the fourth step. The handheld's built-in
-display is turned off after the guest initializes the GPU.
+The [Jellyfin guide](jellyfin/README.md) walks through installation, GPU
+passthrough, render-device permissions, and a forced-transcoding check. It also
+covers private access, sign-in, and updates.
 
 Jellyfin mounts the media library read-only. Library deletion goes through the
 media managers, followed by a Jellyfin library scan. Sign-in uses the Authentik
 SSO plugin.
-
-[Proxmox PCI passthrough](https://pve.proxmox.com/wiki/PCI_Passthrough) ·
-[Jellyfin AMD acceleration](https://jellyfin.org/docs/general/post-install/transcoding/hardware-acceleration/amd/)
 
 ## Requests and downloads
 

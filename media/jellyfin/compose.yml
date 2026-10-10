@@ -1,0 +1,20 @@
+services:
+  jellyfin:
+    image: jellyfin/jellyfin@sha256:aefb67e6a7ff1debdd154a78a7bbb780fd0c873d8639210a7f6a2016ad2b35db
+    user: "${JELLYFIN_UID:?set JELLYFIN_UID}:${JELLYFIN_GID:?set JELLYFIN_GID}"
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8096:8096"
+    volumes:
+      - ./config:/config
+      - ./cache:/cache
+      - type: bind
+        source: ./media
+        target: /media
+        read_only: true
+        bind:
+          create_host_path: false
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"

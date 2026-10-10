@@ -67,6 +67,38 @@ walk through the public example's archive checks and separate restore destinatio
 
 ## Try a restore
 
+### Restic files
+
+The [Restic walkthrough](restic/README.md) creates a repository, backs up example
+files, changes a note, and restores the earlier version into a new directory.
+It is a small way to try the tool before choosing real backup sources.
+
+### A VM from PBS
+
+In Proxmox, open the VM's **Backup** tab and select the PBS storage. Check the
+latest task result and the disks included in that backup. Guest-mounted NAS
+files still need their separate backup.
+
+To rehearse a restore:
+
+1. Select a completed backup and choose **Restore**.
+2. Choose a new, unused VM ID and storage with enough free space. Leave automatic
+   startup disabled.
+3. Before the first boot, disconnect its network interfaces or attach them to an
+   isolated test network. The restored guest contains the original hostname,
+   network settings, service credentials, and scheduled jobs.
+4. Boot from the console. Check the OS, local disks, and application data. For
+   services that need shared files, supply a copied test dataset on the isolated
+   network before starting them.
+5. Check the application itself: sign in, open saved data, and try a small write.
+   Keep the original VM running separately while evaluating the restored copy.
+
+For a single file, use Proxmox's **File Restore** action on the backup instead of
+restoring the whole VM. A database directory extracted this way still needs the
+application's consistency and restore checks.
+
+### Archive checks
+
 The included drill generates an archive, restores it to a new directory, checks
 the contents, and exercises corrupt and unsafe input. It cleans up its temporary
 files afterward.

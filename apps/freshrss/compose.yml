@@ -1,0 +1,20 @@
+services:
+  freshrss:
+    image: freshrss/freshrss:1.30.0@sha256:258b8edfc8a76a61f60d2d6a14d8f8d12495d78abf38646a2137612dfa264a21
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:80"
+    environment:
+      TZ: Etc/UTC
+      CRON_MIN: "*/30"
+    volumes:
+      - data:/var/www/FreshRSS/data
+      - extensions:/var/www/FreshRSS/extensions
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  data:
+  extensions:

@@ -58,7 +58,7 @@ Terraform state and credentials stay with the provisioner.
 ## GPU passthrough
 
 The ROG Ally passes its AMD GPU to the media VM for Jellyfin VA-API transcoding.
-The [Media page](../media/README.md#jellyfin-and-the-gpu) covers the host, guest,
+The [Jellyfin guide](../media/jellyfin/README.md#pass-the-gpu-to-the-vm) covers the host, guest,
 container, and playback checks. The GPU is assigned to that workload rather than
 shared between VMs.
 
