@@ -68,7 +68,8 @@ def validate() -> None:
             assert service["devices"][0]["target"] == "/dev/dri/renderD128"
             assert not service.get("privileged"), "GPU override enables privileged mode"
             media = next(v for v in service["volumes"] if v["target"] == "/media")
-            assert media["read_only"] and not media["bind"]["create_host_path"]
+            # Some Compose versions omit false fields from their JSON output.
+            assert media["read_only"] and not media.get("bind", {}).get("create_host_path", False)
         print(f"PASS: {name} Compose and local-access checks", flush=True)
 
 
