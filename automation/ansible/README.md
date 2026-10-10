@@ -1,5 +1,7 @@
 # SSH and updates
 
+[Home](../../README.md) · [Automation](../README.md)
+
 Ansible examples for key-only SSH, automatic security updates, and full upgrades
 one host at a time.
 

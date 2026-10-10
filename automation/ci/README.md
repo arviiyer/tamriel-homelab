@@ -1,5 +1,7 @@
 # Deployment and rollback
 
+[Home](../../README.md) · [Automation](../README.md)
+
 A Forgejo workflow and SSH helper that deploy the commit checked by CI, test
 service health, and roll back failures.
 

@@ -1,5 +1,8 @@
 # Falco runtime detection
 
+[Home](../../README.md) · [Security](../../security/README.md) ·
+[Automation](../README.md)
+
 An Ansible role for Falco's modern eBPF engine, two rule-tuning examples,
 and Falcosidekick event routing.
 

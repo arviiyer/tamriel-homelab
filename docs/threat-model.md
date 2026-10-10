@@ -1,5 +1,7 @@
 # Security notes
 
+[Home](../README.md) · [Security](../security/README.md)
+
 The lab holds personal data, application databases, source code, credentials,
 backups, and security logs. Protecting the hypervisors, network controls, identity
 provider, and administrative devices is especially important because compromise

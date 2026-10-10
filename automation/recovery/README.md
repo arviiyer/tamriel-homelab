@@ -1,5 +1,8 @@
 # Restore testing
 
+[Home](../../README.md) · [Storage](../../storage/README.md) ·
+[Automation](../README.md)
+
 A restore example that checks an archive and writes it to a new directory.
 Includes generated test archives and a systemd unit that checks storage before
 starting a service.

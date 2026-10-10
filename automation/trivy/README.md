@@ -1,5 +1,8 @@
 # Trivy scans
 
+[Home](../../README.md) · [Security](../../security/README.md) ·
+[Automation](../README.md)
+
 Scans repository files and images listed in Compose files, compares results with
 the last complete scan, and exports Prometheus metrics.
 

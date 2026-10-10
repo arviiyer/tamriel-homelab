@@ -1,5 +1,7 @@
 # Screenshots
 
+[Home](../../README.md) · [Apps and services](../../apps/README.md)
+
 Four captures from the lab. Click an image to open it at full resolution.
 
 ## Trivy dashboard
@@ -11,6 +13,8 @@ Four captures from the lab. Click an image to open it at full resolution.
 The dashboard's secret status comes from [Trivy file scans](../../automation/trivy/README.md#secret-scans).
 Git-history scans run separately.
 
+[Monitoring setup](../../monitoring/README.md)
+
 [Redaction and review details](grafana-security-dashboard.review.md)
 
 ## Forgejo CI
@@ -18,6 +22,8 @@ Git-history scans run separately.
 [![Successful Forgejo Compose validation](forgejo-validation-run.png)](forgejo-validation-run.png)
 
 *Compose checks passing on a dependency-update pull request.*
+
+[Git and update workflow](../../automation/README.md#git-and-updates)
 
 [Redaction and review details](forgejo-validation-run.review.md)
 
@@ -27,6 +33,8 @@ Git-history scans run separately.
 
 *Trivy alert delivered to Discord for eight new high-severity findings with available fixes.*
 
+[Alerting notes](../../docs/case-studies/actionable-vulnerability-management.md)
+
 [Redaction and review details](security-scan-alert.review.md)
 
 ## Proxmox cluster
@@ -34,6 +42,8 @@ Git-history scans run separately.
 [![Proxmox cluster showing three online nodes and quorum](proxmox-cluster-summary.png)](proxmox-cluster-summary.png)
 
 *Proxmox cluster health showing three nodes online and quorum established.*
+
+[Cluster setup](../../proxmox/README.md)
 
 [Redaction and review details](proxmox-cluster-summary.review.md)
 

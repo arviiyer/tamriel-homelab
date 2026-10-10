@@ -1,5 +1,7 @@
 # Networking and sign-in
 
+[Home](../README.md) · [Networking](../networking/README.md)
+
 The network separates administration, applications, and client devices by role.
 
 ## Network zones

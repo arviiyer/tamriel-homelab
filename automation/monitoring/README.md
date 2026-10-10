@@ -1,5 +1,8 @@
 # Grafana dashboard
 
+[Home](../../README.md) · [Monitoring](../../monitoring/README.md) ·
+[Automation](../README.md)
+
 A Grafana dashboard loaded from files, showing Trivy scan results and Falco events.
 
 ## What it shows

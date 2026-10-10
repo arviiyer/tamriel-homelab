@@ -1,69 +1,46 @@
 # The setup
 
+[Home](../README.md) · [Apps and services](../apps/README.md)
+
 Three Proxmox nodes host Debian VMs for applications, identity, monitoring,
-security tools, Git/CI, and backups. Most applications run with Docker Compose.
-Terraform and cloud-init handle VM provisioning and templates; Ansible handles
-host configuration.
+security tools, Git/CI, and backups. Most applications run with Docker Compose;
+TrueNAS provides shared bulk storage. The [Proxmox page](../proxmox/README.md)
+covers VM roles, provisioning tools, and supporting devices.
 
 [Overview diagram](../README.md#the-setup) · [Hardware](../README.md#hardware)
 
 ## Access and networking
 
-Tailscale provides private admin access. Hypervisor, gateway, and storage
-management stay off the public internet, and each service still requires its
-own login. This reduces exposure but makes admin access depend on Tailscale and
-trusted devices; recovery needs a separate access method.
-
-Trusted clients reach web applications through Caddy, with Authentik sign-in
-where supported. OPNsense and managed switches separate infrastructure, personal
-devices, work devices, guests, media, and sandbox workloads. The
-[networking notes](network-and-identity.md) cover which connections are allowed.
+OPNsense separates network zones. Tailscale provides private admin access, while
+trusted clients reach web applications through Caddy with Authentik sign-in
+where supported. See the [networking page](../networking/README.md) for the access
+diagram and [network-zone notes](network-and-identity.md) for allowed connections.
 
 ## Storage
 
-Databases stay on the VMs' own disks so a shared-storage outage does not also
-take away their database files. TrueNAS and ZFS hold bulk files and provide
-snapshots and integrity checks. Local and shared data need separate backups;
-this setup does not provide automatic database failover.
-
-A missing network mount can leave an ordinary directory in its place. The
-[systemd example](../automation/recovery/README.md#storage-checks) checks the mount
-and a dataset marker before starting a service, preventing writes to that empty
-local directory.
+Databases stay on the VMs' own disks; TrueNAS and ZFS hold shared files. The
+[storage page](../storage/README.md) explains that choice, the backup layers, and
+the example startup check for services that depend on a mount.
 
 ## Monitoring and security
 
-Prometheus collects metrics, Loki collects logs, Grafana displays both, and
-Alertmanager sends notifications. Trivy scans for vulnerabilities, configuration
-issues, and secrets. Falco watches runtime activity; CrowdSec and ClamAV handle
-network defense and malware scanning.
+Prometheus, Loki, Grafana, and Alertmanager handle metrics, logs, dashboards,
+and notifications. The [monitoring page](../monitoring/README.md) shows the
+dashboard and alert screenshots and how scan results and events flow between tools.
 
-The [Trivy example](../automation/trivy/README.md) tracks scanner health separately
-from findings so a failed scan cannot look like a clean result. See also the
-[Falco routing](../automation/falco/event-flow.md),
-[Grafana configuration](../automation/monitoring/README.md), and
-[security notes](threat-model.md).
+The [security page](../security/README.md) introduces Trivy, Falco, CrowdSec, and
+ClamAV. The [security notes](threat-model.md) cover threats and assumptions.
 
 ## Changes and deployment
 
-Configuration lives in private Forgejo repositories, with Renovate opening
-dependency-update pull requests. Credentials and application data stay outside
-Git. The [Ansible examples](../automation/ansible/README.md) configure SSH,
-security updates, and one-host-at-a-time upgrades.
-
-In the [deployment example](../automation/ci/README.md), CI checks one exact
-commit without deployment credentials. Deployment requires a separate manual
-request. The target checks that commit again, allows only an image change, and
-checks service health before recording success. These extra checks add
-complexity, but limit what a compromised CI runner can change. Database migrations
-need their own recovery plan.
+Forgejo holds private configuration repositories, Renovate opens update pull
+requests, and Ansible configures hosts. The
+[automation page](../automation/README.md) links the Git workflow, host maintenance,
+and deployment example to their implementation and test commands.
 
 ## Recovery
 
-The backup tools are Proxmox Backup Server and Restic, with VM snapshots and
-off-host copies for selected data.
-
-The [restore example](../automation/recovery/README.md) checks an archive's
-checksum and contents before writing to a new directory. It never overwrites an
-existing destination. This needs spare disk space and application-specific checks
-before replacing live data. The included drill runs offline with generated files.
+The backup tools are PBS and Restic. See the [backup notes](../storage/README.md#backups)
+and the [restore example](../automation/recovery/README.md), which checks generated
+archives and restores them to a new directory. Application-specific recovery
+needs its own checks before replacing live data.

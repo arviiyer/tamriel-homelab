@@ -30,7 +30,7 @@ jobs:
       - name: Check public content boundary
         run: bash scripts/check-public-safety.sh
 
-      - name: Run publication-safety tests
+      - name: Run repository tests
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
 
       - name: Check Markdown links

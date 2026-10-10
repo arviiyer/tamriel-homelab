@@ -9,6 +9,18 @@
 
 !.github/
 !.github/**
+!apps/
+!apps/**
+!proxmox/
+!proxmox/**
+!networking/
+!networking/**
+!storage/
+!storage/**
+!monitoring/
+!monitoring/**
+!security/
+!security/**
 !automation/
 !automation/**
 !diagrams/
