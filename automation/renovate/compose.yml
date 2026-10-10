@@ -1,0 +1,19 @@
+services:
+  renovate:
+    image: ghcr.io/renovatebot/renovate:44.149.2@sha256:4a93eba384999995555d48ff194d5013230fe44142260292cdaf9e7bd45ed949
+    restart: "no"
+    environment:
+      RENOVATE_TOKEN: ${RENOVATE_TOKEN:?Set the Forgejo bot token in .env}
+      RENOVATE_CONFIG_FILE: /usr/src/app/config.js
+      LOG_LEVEL: info
+    volumes:
+      - type: bind
+        source: ./config.js
+        target: /usr/src/app/config.js
+        read_only: true
+        bind:
+          create_host_path: false
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"

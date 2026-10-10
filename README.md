@@ -81,7 +81,7 @@ The NAS hard drives are arranged as two mirrored pairs.
 I use Syncthing for documents and notes, Immich for photos, FreshRSS for reading,
 and Jellyfin for media. Homarr brings the service links and reading brief together.
 
-[![Homarr service cards and reading brief](screenshots/homarr-home.webp)](apps/README.md#homarr)
+[![Homarr service cards and reading brief](screenshots/homarr-home.webp)](apps/homarr/README.md)
 
 | Job | Tools |
 |---|---|
@@ -99,6 +99,7 @@ portal, Discord actions for media requests, a reading brief, and a printer monit
 
 Setup guides: [Immich](apps/immich/README.md) ·
 [FreshRSS](apps/freshrss/README.md) · [Jellyfin](media/jellyfin/README.md) ·
+[Homarr](apps/homarr/README.md) · [Renovate](automation/renovate/README.md) ·
 [Restic backup and restore](storage/restic/README.md)
 
 ## Automation

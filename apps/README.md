@@ -69,6 +69,7 @@ Homarr brings my service links and widgets together. I also use it to read the
 excerpts and links back to FreshRSS. It uses a Custom API widget because the RSS
 widget cuts the text short. Homarr has its own local login.
 
+[Setup, Compose, and reading widget](homarr/README.md) ·
 [Homarr documentation](https://homarr.dev/docs/)
 
 ### Vaultwarden
@@ -195,7 +196,7 @@ which jobs run on each.
 Renovate opens dependency-update pull requests in the configuration repositories.
 Those changes go through the Git workflow described on the automation page.
 
-[Update notes](../automation/README.md#git-and-updates) ·
+[Setup and update walkthrough](../automation/renovate/README.md) ·
 [Renovate documentation](https://docs.renovatebot.com/)
 
 ### Ansible

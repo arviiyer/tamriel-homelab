@@ -54,6 +54,12 @@ jobs:
       - name: Exercise service examples
         run: python3 scripts/check-service-examples.py --smoke all
 
+      - name: Check Renovate configuration and dependency extraction
+        run: |
+          python3 automation/renovate/check.py
+          systemd-analyze verify --recursive-errors=no \
+            automation/renovate/renovate.service automation/renovate/renovate.timer
+
       - name: Check Debian apt policy compatibility
         run: |
           output="$RUNNER_TEMP/apt-policy"

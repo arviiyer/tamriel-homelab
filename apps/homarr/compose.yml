@@ -1,0 +1,19 @@
+services:
+  homarr:
+    image: ghcr.io/homarr-labs/homarr:v2.4.1@sha256:447267051fd7f3c76087498ad96c8b969f57c6762eaeb78717b69388ae1a781a
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:7575:7575"
+    environment:
+      TZ: Etc/UTC
+      AUTH_PROVIDERS: credentials
+      SECRET_ENCRYPTION_KEY: ${SECRET_ENCRYPTION_KEY:?Generate a key in .env before starting Homarr}
+    volumes:
+      - appdata:/appdata
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  appdata:

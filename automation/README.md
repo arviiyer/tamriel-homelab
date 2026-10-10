@@ -19,6 +19,9 @@ Renovate opens update pull requests for review. Compose and service-specific
 checks run before merge. Merging records the configuration change; applying it
 is a separate step.
 
+The [Renovate guide](renovate/README.md) covers the bot account, Docker
+configuration, daily timer, and the steps from an update PR to deployment.
+
 The [deployment example](ci/README.md) separates validation from deployment.
 A manual request selects one commit, validation checks that commit, and the
 target checks it again before allowing an image change. Service health checks
@@ -64,12 +67,14 @@ Each component has setup instructions and test commands:
 |---|---|
 | [Trivy](trivy/README.md) | Scan images and repositories, compare findings, alert on changes |
 | [Deployment](ci/README.md) | Deploy the commit checked by CI; roll back unhealthy changes |
+| [Renovate](renovate/README.md) | Open Docker image update PRs in Forgejo on a daily schedule |
 | [Recovery](recovery/README.md) | Check archives and restore into a new directory |
 | [Ansible](ansible/README.md) | Configure SSH and updates; upgrade one host at a time |
 | [Falco](falco/README.md) | Detect suspicious runtime activity and route events |
 | [Grafana](monitoring/README.md) | Display scan results and Falco events |
 | [Syncthing](../apps/syncthing/README.md) | Run file sync with a local management interface |
 | [FreshRSS](../apps/freshrss/README.md) | Run a feed reader with SQLite and restore its data |
+| [Homarr](../apps/homarr/README.md) | Build a service dashboard and display a reading brief |
 | [Jellyfin](../media/jellyfin/README.md) | Play a read-only media library, with optional GPU transcoding |
 | [Caddy](../networking/caddy/README.md) | Route a hostname to an internal upstream |
 | [Host metrics](../monitoring/host-metrics/README.md) | Scrape metrics and load a Grafana dashboard |

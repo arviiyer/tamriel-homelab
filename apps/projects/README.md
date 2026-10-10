@@ -22,6 +22,7 @@ starts the local model when needed, and a failed generation keeps the previous
 published brief. This is still a reading pilot.
 
 [FreshRSS notes](../freshrss/README.md) ·
+[Homarr widget setup](../homarr/README.md#morning-soc-briefing) ·
 [llama.cpp](https://github.com/ggml-org/llama.cpp)
 
 ## Forge VM provisioner

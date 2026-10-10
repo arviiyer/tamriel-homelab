@@ -7,6 +7,7 @@ import argparse
 import json
 import math
 import os
+import secrets
 import shutil
 import subprocess
 import tempfile
@@ -23,6 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 EXAMPLES = {
     "syncthing": ROOT / "apps/syncthing/compose.yml",
     "freshrss": ROOT / "apps/freshrss/compose.yml",
+    "homarr": ROOT / "apps/homarr/compose.yml",
     "jellyfin": ROOT / "media/jellyfin/compose.yml",
     "caddy": ROOT / "networking/caddy/compose.yml",
     "host-metrics": ROOT / "monitoring/host-metrics/compose.yml",
@@ -43,8 +45,12 @@ def render(*paths: Path, env=None) -> dict:
 
 
 def validate() -> None:
-    env = dict(os.environ, JELLYFIN_UID="1000", JELLYFIN_GID="1000", RENDER_GID="123")
-    for name, path in EXAMPLES.items():
+    env = dict(
+        os.environ, JELLYFIN_UID="1000", JELLYFIN_GID="1000", RENDER_GID="123",
+        SECRET_ENCRYPTION_KEY=secrets.token_hex(32), RENOVATE_TOKEN="configuration-check-only",
+    )
+    examples = {**EXAMPLES, "renovate": ROOT / "automation/renovate/compose.yml"}
+    for name, path in examples.items():
         config = render(path, env=env)
         for service in config["services"].values():
             assert "@sha256:" in service["image"], f"{name}: image must be pinned"
@@ -105,6 +111,8 @@ class Project:
         self.path = EXAMPLES[name]
         self.directory = directory
         self.env = dict(os.environ)
+        if name == "homarr":
+            self.env["SECRET_ENCRYPTION_KEY"] = secrets.token_hex(32)
         if name == "jellyfin":
             # Keep writable bind mounts and generated media outside the checkout.
             self.path = directory / "compose.yml"
@@ -257,6 +265,55 @@ def freshrss(project):
         restored.compose("down", "--volumes", "--remove-orphans")
 
 
+def homarr(project):
+    def onboarding(url):
+        status, body = request(url + "/init")
+        return status == 200 and "Homarr" in body
+
+    url = project.url("homarr", 7575)
+    wait_for("Homarr onboarding", lambda: onboarding(url), seconds=180)
+    database = "/appdata/db/db.sqlite"
+    project.exec("homarr", "test", "-s", database)
+    marker = "/appdata/example.txt"
+    project.exec("homarr", "sh", "-c", f"printf 'before backup\\n' > {marker}")
+    project.compose("stop", "homarr")
+    digest = project.compose(
+        "run", "--rm", "-T", "--no-deps", "--entrypoint", "sha256sum", "homarr", database,
+    ).stdout.strip()
+    archive = project.directory / "appdata.tar.gz"
+    with archive.open("wb") as output:
+        subprocess.run(
+            [*project.command, "run", "--rm", "-T", "--no-deps", "--entrypoint",
+             "tar", "homarr", "-C", "/appdata", "-czf", "-", "."],
+            stdout=output, stderr=subprocess.PIPE, check=True, timeout=180, env=project.env,
+        )
+    project.compose("start", "homarr")
+    project.exec("homarr", "sh", "-c", f"printf 'after backup\\n' > {marker}")
+
+    directory = project.directory / "restore"
+    directory.mkdir()
+    restored = Project("homarr", directory)
+    restored.env["SECRET_ENCRYPTION_KEY"] = project.env["SECRET_ENCRYPTION_KEY"]
+    try:
+        with archive.open("rb") as source:
+            subprocess.run(
+                [*restored.command, "run", "--rm", "-T", "--no-deps", "--entrypoint",
+                 "tar", "homarr", "-C", "/appdata", "-xzf", "-"],
+                stdin=source, capture_output=True, check=True, timeout=180, env=restored.env,
+            )
+        copied_digest = restored.compose(
+            "run", "--rm", "-T", "--no-deps", "--entrypoint", "sha256sum", "homarr", database,
+        ).stdout.strip()
+        assert digest == copied_digest, "restored SQLite differs from the stopped original"
+        restored.compose("up", "-d")
+        url = restored.url("homarr", 7575)
+        wait_for("restored Homarr", lambda: onboarding(url), seconds=180)
+        assert restored.exec("homarr", "cat", marker).stdout == "before backup\n"
+        assert project.exec("homarr", "cat", marker).stdout == "after backup\n"
+    finally:
+        restored.compose("down", "--volumes", "--remove-orphans")
+
+
 def jellyfin(project):
     url = project.url("jellyfin", 8096)
     wait_for("Jellyfin health", lambda: request(url + "/health") == (200, "Healthy"))
@@ -335,7 +392,8 @@ def smoke(name):
         try:
             project.compose("up", "-d", "--pull", "missing")
             checks = {
-                "syncthing": syncthing, "freshrss": freshrss, "jellyfin": jellyfin,
+                "syncthing": syncthing, "freshrss": freshrss, "homarr": homarr,
+                "jellyfin": jellyfin,
                 "caddy": caddy, "host-metrics": host_metrics,
             }
             checks[name](project)

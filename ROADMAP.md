@@ -6,8 +6,8 @@
 - Identify the exact Speedtest application and add its setup and project link.
 - Review the deployed Readarr and Promtail setups before writing installation
   guides for them.
-- Add small configuration examples for CrowdSec, ClamAV, Terraform provisioning,
-  and Renovate as their guides grow.
+- Add small configuration examples for CrowdSec, ClamAV, and Terraform
+  provisioning as their guides grow.
 
 ## Lab and automation
 
