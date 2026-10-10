@@ -43,11 +43,38 @@ GUI access private. The lab's Caddy route is for the GUI, not the sync protocol.
 
 The example keeps configuration, device keys, and files in its named volume.
 The lab instead mounts the NAS file share separately and makes Docker wait for
-that mount. See [storage startup ordering](../../storage/README.md#waiting-for-shared-storage).
+that mount. Follow the [NFS guide](../../storage/nfs/README.md) to prepare a share
+owned by UID/GID 1000 and make Docker wait for it.
+
+For that setup, copy [compose.yml](compose.yml) into your own working directory.
+Keep the existing configuration volume and add the NAS folder to the service's
+`volumes` list:
+
+```yaml
+      - type: bind
+        source: /mnt/nas/sync
+        target: /data/sync
+        bind:
+          create_host_path: false
+```
+
+Check the mount and numeric ownership, run `docker compose config --quiet`, and
+start with `docker compose up -d`. In Syncthing, add a folder under `/data/sync`
+and share it with the intended devices. Existing folders need their data moved
+and paths changed deliberately; adding the mount does not migrate them.
 
 Sync propagates deletions too. Keep snapshots or backups independently of the
 sync relationship, and back up configuration and device keys privately. When
 restoring, avoid running two instances with the same device identity.
+
+## Troubleshooting
+
+| Symptom | First thing to check |
+|---|---|
+| Devices stay disconnected | Approved device IDs, explicit TCP address, and the published sync port |
+| Folder reports permission denied | UID/GID 1000 write access on the mounted share |
+| GUI works but files do not sync | Caddy reaches the GUI only; TCP 22000 needs its own connection path |
+| Deletion appears on every device | Sync propagated it; recover from folder versioning or a separate snapshot |
 
 ## Updates and cleanup
 

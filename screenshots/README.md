@@ -88,9 +88,6 @@ A VM backup completed with status OK in 4 minutes 38 seconds.
 
 *Vulnerability totals, new critical findings, and new high-severity findings with fixes.*
 
-The dashboard's secret status comes from [Trivy file scans](../automation/trivy/README.md#secret-scans).
-Git-history scans run separately.
-
 [Monitoring setup](../monitoring/README.md)
 
 [Redaction and review details](grafana-security-dashboard.review.md)

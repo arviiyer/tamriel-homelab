@@ -7,6 +7,9 @@ I use Prometheus for metrics, Loki for logs, Grafana for dashboards, and
 Alertmanager for notifications. Uptime Kuma checks service reachability. Host
 metrics, application metrics, scan results, and runtime events feed these tools.
 
+Setup guides: [Host metrics and alerts](host-metrics/README.md) ·
+[Host logs](logs/README.md) · [Uptime Kuma](uptime-kuma/README.md)
+
 ## Grafana
 
 [![Node Exporter CPU, memory, network, and disk panels](../screenshots/grafana-host-metrics.webp)](../screenshots/README.md#host-monitoring)
@@ -22,10 +25,6 @@ The Trivy dashboard shows vulnerability totals and new findings. The secret
 panel reports file scans; Git-history scans run separately. The
 [public dashboard example](../automation/monitoring/README.md) also includes
 scanner health and Falco events.
-
-The example loads its dashboard and datasources from files. Its setup guide
-links to the JSON and provisioning configuration and explains the datasource
-UIDs and Loki labels used by the panels.
 
 The wider lab also has dashboards for host CPU, memory, disks, and uptime;
 Immich jobs; Forgejo activity; Falco events; and Prometheus/Alertmanager health.
@@ -50,7 +49,7 @@ flowchart LR
     sidekick --> alerts --> notifications[Notifications]
 ```
 
-| Tool | What to look at in the examples |
+| Tool | What I use it for |
 |---|---|
 | Prometheus | Scan attempts, successful scans, finding totals, and new findings |
 | Loki | Falco events with source, priority, host, and rule labels |
@@ -64,6 +63,8 @@ still needs a timestamp or health metric to tell whether it is stale.
 
 The documented host log shipper is Promtail, sending journal logs to Loki.
 Falcosidekick sends structured Falco events directly to Loki and Alertmanager.
+Promtail is now end-of-life; the [new log-collection guide](logs/README.md) uses
+Alloy, with migration of the existing hosts tracked on the roadmap.
 
 ## Uptime Kuma
 
@@ -93,17 +94,9 @@ routes. Critical security events also have an email route. Host-memory warnings
 use a recovery window to reduce repeated warning/recovery messages during short
 fluctuations.
 
-## Checking the dashboard
-
-The dashboard example distinguishes a successful scan with zero findings from
-missing health data. Its tests check dashboard structure, one failure-count
-query against generated Prometheus data, and Grafana loading through its API.
-
-[Setup and test commands](../automation/monitoring/README.md) ·
-[Remaining query tests](../ROADMAP.md#lab-and-automation)
-
 ## Notes
 
+- [Security dashboard configuration](../automation/monitoring/README.md)
 - [Grafana documentation](https://grafana.com/docs/grafana/latest/)
 - [Prometheus documentation](https://prometheus.io/docs/introduction/overview/)
 - [Loki documentation](https://grafana.com/docs/loki/latest/)

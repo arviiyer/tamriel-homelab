@@ -28,13 +28,19 @@ EXAMPLES = {
     "jellyfin": ROOT / "media/jellyfin/compose.yml",
     "caddy": ROOT / "networking/caddy/compose.yml",
     "host-metrics": ROOT / "monitoring/host-metrics/compose.yml",
+    "vaultwarden": ROOT / "apps/utilities/vaultwarden.yml",
+    "searxng": ROOT / "apps/utilities/searxng.yml",
+    "stirling-pdf": ROOT / "apps/utilities/stirling-pdf.yml",
+    "openspeedtest": ROOT / "apps/utilities/openspeedtest.yml",
+    "uptime-kuma": ROOT / "monitoring/uptime-kuma/compose.yml",
+    "logs": ROOT / "monitoring/logs/compose.yml",
 }
 HTTP = urllib.request.build_opener(urllib.request.ProxyHandler({}))
 
 
 def run(*args: str, check: bool = True, env=None) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        args, check=check, capture_output=True, text=True, timeout=180, env=env,
+        args, check=check, capture_output=True, text=True, timeout=600, env=env,
     )
 
 
@@ -48,6 +54,7 @@ def validate() -> None:
     env = dict(
         os.environ, JELLYFIN_UID="1000", JELLYFIN_GID="1000", RENDER_GID="123",
         SECRET_ENCRYPTION_KEY=secrets.token_hex(32), RENOVATE_TOKEN="configuration-check-only",
+        SEARXNG_SECRET=secrets.token_hex(32), PDF_INITIAL_PASSWORD=secrets.token_hex(24),
     )
     examples = {**EXAMPLES, "renovate": ROOT / "automation/renovate/compose.yml"}
     for name, path in examples.items():
@@ -111,6 +118,8 @@ class Project:
         self.path = EXAMPLES[name]
         self.directory = directory
         self.env = dict(os.environ)
+        self.env.update(SEARXNG_SECRET=secrets.token_hex(32),
+                        PDF_INITIAL_PASSWORD=secrets.token_hex(24))
         if name == "homarr":
             self.env["SECRET_ENCRYPTION_KEY"] = secrets.token_hex(32)
         if name == "jellyfin":
@@ -386,6 +395,54 @@ def host_metrics(project):
     wait_for("failed scrape recorded", lambda: query('up{job="node"} == 0'))
 
 
+def utility(project):
+    service, port, text = {
+        "vaultwarden": ("vaultwarden", 80, "Vaultwarden"),
+        "searxng": ("searxng", 8080, "SearXNG"),
+        "stirling-pdf": ("stirling-pdf", 8080, "Stirling"),
+        "openspeedtest": ("openspeedtest", 3000, "OpenSpeedTest"),
+        "uptime-kuma": ("uptime-kuma", 3001, "Uptime Kuma"),
+    }[project.name]
+    url = project.url(service, port)
+
+    def page():
+        status, body = request(url)
+        return status == 200 and text.lower() in body.lower()
+
+    wait_for(f"{service} web interface", page, seconds=180)
+    if service == "vaultwarden":
+        status, body = request(url + "/identity/accounts/register/send-verification-email", method="POST", data={
+            "email": "reader@example.com", "name": "Example",
+        })
+        assert status == 400 and "Registration not allowed" in body, "registration should be disabled"
+    elif service == "searxng":
+        assert request(url + "/healthz")[0] == 200
+    elif service == "stirling-pdf":
+        status, body = request(url + "/api/v1/general/merge-pdfs", method="POST")
+        assert status in (401, 403), f"PDF operation is not protected: {status} {body[:100]}"
+
+
+def logs(project):
+    url = project.url("loki", 3100)
+    wait_for("Loki readiness", lambda: request(url + "/ready")[0] == 200)
+    marker = "example-" + uuid.uuid4().hex
+    status, _ = request(url + "/loki/api/v1/push", method="POST", data={
+        "streams": [{"stream": {"job": "example"},
+                     "values": [[str(time.time_ns()), marker]]}],
+    })
+    assert status == 204, "Loki rejected generated entry"
+    query = urllib.parse.urlencode({"query": '{job="example"} |= "' + marker + '"'})
+
+    def found():
+        status, body = request(url + "/loki/api/v1/query_range?" + query)
+        return status == 200 and marker in body
+
+    wait_for("Loki query result", found)
+    project.compose("restart", "loki")
+    url = project.url("loki", 3100)
+    wait_for("Loki persisted entry", found)
+
+
 def smoke(name):
     with tempfile.TemporaryDirectory(prefix="tamriel-example-") as directory:
         project = Project(name, Path(directory))
@@ -395,6 +452,10 @@ def smoke(name):
                 "syncthing": syncthing, "freshrss": freshrss, "homarr": homarr,
                 "jellyfin": jellyfin,
                 "caddy": caddy, "host-metrics": host_metrics,
+                "logs": logs,
+                **{key: utility for key in (
+                    "vaultwarden", "searxng", "stirling-pdf", "openspeedtest", "uptime-kuma",
+                )},
             }
             checks[name](project)
             print(f"PASS: {name} startup and behavior", flush=True)

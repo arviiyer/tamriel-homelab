@@ -1,0 +1,128 @@
+x-app: &app
+  restart: unless-stopped
+  network_mode: service:gluetun
+  depends_on:
+    gluetun:
+      condition: service_healthy
+  environment: &environment
+    PUID: ${PUID:?Set PUID in .env}
+    PGID: ${PGID:?Set PGID in .env}
+    TZ: ${TZ:-Etc/UTC}
+  security_opt:
+    - no-new-privileges:true
+  logging:
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: "3"
+
+services:
+  gluetun:
+    image: qmcgaw/gluetun:v3.41.3@sha256:fa19cc76b2af13d57a8d3dc3066f2ada061b1c761b8aecf989b3877c0486e027
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      VPN_SERVICE_PROVIDER: mullvad
+      VPN_TYPE: wireguard
+      WIREGUARD_PRIVATE_KEY: ${WIREGUARD_PRIVATE_KEY:?Set the WireGuard private key}
+      WIREGUARD_ADDRESSES: ${WIREGUARD_ADDRESSES:?Set the address from the provider configuration}
+      SERVER_COUNTRIES: ${SERVER_COUNTRIES:?Choose a Mullvad server country}
+      FIREWALL_INPUT_PORTS: 8080,8989,7878,9696,8686,6789
+      TZ: ${TZ:-Etc/UTC}
+    ports:
+      - "127.0.0.1:8180:8080"
+      - "127.0.0.1:8989:8989"
+      - "127.0.0.1:7878:7878"
+      - "127.0.0.1:9696:9696"
+      - "127.0.0.1:8686:8686"
+      - "127.0.0.1:6789:6789"
+
+  qbittorrent:
+    <<: *app
+    image: lscr.io/linuxserver/qbittorrent@sha256:b024436f8ca665d16d9a997d26fd27fdf867ee5566ba09f32764e7b2976d3e02
+    environment:
+      <<: *environment
+      WEBUI_PORT: "8080"
+    volumes:
+      - ./config/qbittorrent:/config
+      - type: bind
+        source: ${DOWNLOADS_PATH:?Set DOWNLOADS_PATH}
+        target: /data/downloads
+        bind:
+          create_host_path: false
+
+  sonarr:
+    <<: *app
+    image: lscr.io/linuxserver/sonarr@sha256:f247545d23ba8b233d6604575347e48a623fe6ad75dda02348bf81917f3b5c06
+    volumes:
+      - ./config/sonarr:/config
+      - &downloads
+        type: bind
+        source: ${DOWNLOADS_PATH:?Set DOWNLOADS_PATH}
+        target: /data/downloads
+        bind:
+          create_host_path: false
+      - &media
+        type: bind
+        source: ${MEDIA_PATH:?Set MEDIA_PATH}
+        target: /data/media
+        bind:
+          create_host_path: false
+
+  radarr:
+    <<: *app
+    image: lscr.io/linuxserver/radarr@sha256:adb6c09d6b729ea5e642c99cea35af72702ef476bf4763f153299ac5db9f0b4f
+    volumes:
+      - ./config/radarr:/config
+      - *downloads
+      - *media
+
+  prowlarr:
+    <<: *app
+    image: lscr.io/linuxserver/prowlarr@sha256:f2b26429893d4c4cb71941b7ee50b1bdecd9d5f9f9e02d5410615e9f4f7c8d95
+    volumes:
+      - ./config/prowlarr:/config
+
+  lidarr:
+    <<: *app
+    image: lscr.io/linuxserver/lidarr@sha256:044d616beb43c5e7810991242c6a9c42b93ff238c8c0850684939634ea751208
+    profiles: [music]
+    volumes:
+      - ./config/lidarr:/config
+      - *downloads
+      - *media
+
+  nzbget:
+    <<: *app
+    image: lscr.io/linuxserver/nzbget@sha256:ac88c1293bec960e287bdaaca174020fab4c0f179f739e26f500d3def8015ed7
+    profiles: [usenet]
+    volumes:
+      - ./config/nzbget:/config
+      - *downloads
+
+  flaresolverr:
+    <<: *app
+    image: ghcr.io/flaresolverr/flaresolverr@sha256:139dfee1c6f89249c8d665d1333a42e8ec74ec0a86bc6bb1c8461e10d3a66a47
+    profiles: [indexer-helper]
+    environment:
+      TZ: ${TZ:-Etc/UTC}
+    ulimits:
+      core: 0
+
+  seerr:
+    image: ghcr.io/seerr-team/seerr:v3.4.1@sha256:f4768de5f616248d723e05891f3345a1402123775d03bf0890dbfedc0831bda1
+    init: true
+    user: "1000:1000"
+    restart: unless-stopped
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      TZ: ${TZ:-Etc/UTC}
+    ports:
+      - "127.0.0.1:5055:5055"
+    volumes:
+      - ./config/seerr:/app/config

@@ -13,7 +13,12 @@ on:
       - '!networking/**/*.md'
       - 'monitoring/**'
       - '!monitoring/**/*.md'
+      - 'security/**'
+      - '!security/**/*.md'
+      - 'proxmox/terraform/**'
+      - '!proxmox/terraform/**/*.md'
       - 'scripts/check-service-examples.py'
+      - 'scripts/check-stack-examples.py'
       - '.github/workflows/examples.yml'
   push:
     branches:
@@ -29,7 +34,12 @@ on:
       - '!networking/**/*.md'
       - 'monitoring/**'
       - '!monitoring/**/*.md'
+      - 'security/**'
+      - '!security/**/*.md'
+      - 'proxmox/terraform/**'
+      - '!proxmox/terraform/**/*.md'
       - 'scripts/check-service-examples.py'
+      - 'scripts/check-stack-examples.py'
       - '.github/workflows/examples.yml'
   workflow_dispatch:
 
@@ -37,6 +47,20 @@ permissions:
   contents: read
 
 jobs:
+  terraform:
+    name: Terraform clone plans
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+        with:
+          terraform_version: "1.15.9"
+          terraform_wrapper: false
+      - run: bash proxmox/terraform/check.sh
+
   service-examples:
     name: Service example configuration
     runs-on: ubuntu-latest
@@ -46,7 +70,10 @@ jobs:
         with:
           persist-credentials: false
       - name: Check Compose and local-access settings
-        run: python3 scripts/check-service-examples.py --validate
+        run: |
+          python3 scripts/check-service-examples.py --validate
+          python3 scripts/check-stack-examples.py --validate
+          docker compose --env-file security/clamav/environment.example -f security/clamav/compose.yml config --quiet
 
   changes:
     name: Select changed examples

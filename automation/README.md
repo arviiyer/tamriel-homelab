@@ -71,21 +71,26 @@ Each component has setup instructions and test commands:
 | [Recovery](recovery/README.md) | Check archives and restore into a new directory |
 | [Ansible](ansible/README.md) | Configure SSH and updates; upgrade one host at a time |
 | [Falco](falco/README.md) | Detect suspicious runtime activity and route events |
+| [ClamAV](../security/clamav/README.md) | Scan downloads and distinguish findings from scan errors |
+| [Terraform](../proxmox/terraform/README.md) | Clone one Debian VM with cloud-init and an SSH public key |
 | [Grafana](monitoring/README.md) | Display scan results and Falco events |
 | [Syncthing](../apps/syncthing/README.md) | Run file sync with a local management interface |
 | [FreshRSS](../apps/freshrss/README.md) | Run a feed reader with SQLite and restore its data |
 | [Homarr](../apps/homarr/README.md) | Build a service dashboard and display a reading brief |
 | [Jellyfin](../media/jellyfin/README.md) | Play a read-only media library, with optional GPU transcoding |
+| [Media stack](../media/servarr/README.md) | Connect requests, indexers, download clients, and library managers through Gluetun |
 | [Caddy](../networking/caddy/README.md) | Route a hostname to an internal upstream |
+| [Private HTTPS](../networking/private-access/README.md) | Add DNS certificates, Tailscale access, and Authentik sign-in |
 | [Host metrics](../monitoring/host-metrics/README.md) | Scrape metrics and load a Grafana dashboard |
+| [Host logs](../monitoring/logs/README.md) | Send journal entries through Alloy to Loki |
 
 ## Checks in this repository
 
 | Workflow | When it runs | What it checks |
 |---|---|---|
 | [Repository checks](../.github/workflows/validate.yml) | Pull requests, pushes to `main`, or manual runs | Publication rules, Markdown links, validation scripts, and Git-history secrets |
-| [Automation examples](../.github/workflows/examples.yml) | Relevant automation or service-example changes, or manual runs | Component tests and configuration validation |
-| [Integration checks](../.github/workflows/integration.yml) | Manual runs | Service-example smoke tests, container checks, Grafana loading, PromQL, and the delivery drill image build |
+| [Automation examples](../.github/workflows/examples.yml) | Relevant automation or service-example changes, or manual runs | Component tests, Terraform plans, and configuration validation |
+| [Integration checks](../.github/workflows/integration.yml) | Manual runs | App stacks, DNS, browser sign-in, alerts, Grafana, PromQL, and the delivery drill image build |
 
 The complete delivery drill has its own
 [disposable-host requirements](ci/README.md#tests). The integration workflow

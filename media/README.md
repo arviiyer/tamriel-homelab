@@ -6,6 +6,10 @@ Jellyfin plays the media library, Seerr handles requests, and the Servarr stack
 manages downloads and library organization. They run in a Debian VM on the ROG
 Ally, with its AMD GPU passed through for transcoding.
 
+Setup guides: [Requests, downloads, and Gluetun](servarr/README.md) ·
+[Jellyfin and GPU transcoding](jellyfin/README.md) ·
+[NAS mounts](../storage/nfs/README.md)
+
 ## The setup
 
 ```mermaid
@@ -47,8 +51,13 @@ SSO plugin.
 
 Seerr sends requests to Sonarr and Radarr. Prowlarr manages indexers, qBittorrent
 handles torrents, and NZBGet handles Usenet. Lidarr and Readarr handle music and
-books, respectively. See the [app catalogue](../apps/README.md#media-and-games).
+books, respectively. Readarr is still installed, although its upstream project
+has retired. See the [app catalogue](../apps/README.md#media-and-games).
 FlareSolverr supplies the browser helper used by some indexer requests.
+
+The [download-stack walkthrough](servarr/README.md) includes Compose files,
+directory permissions, VPN setup, and the addresses and settings used to connect
+these applications.
 
 The [Discord approver](../apps/projects/README.md#seerr-discord-approver) adds
 request actions to Discord. It rechecks the request in Seerr before applying an

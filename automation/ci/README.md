@@ -39,6 +39,68 @@ Only a digest-pinned image from `registry.example.com/example-api` may change.
 Mounts, devices, capabilities, commands, environment, and extra services cannot
 be changed by the request.
 
+## From a reviewed update to deployment
+
+First run the [disposable-host exercise](#tests) on a suitable test machine. It
+creates the initial healthy revision, restricted SSH account, registry, and
+target state, then exercises promotion and rollback. The
+[setup script](tests/disposable_host_drill.sh) shows that bootstrap sequence.
+
+To adapt the workflow to a private Forgejo repository, configure these pieces
+together:
+
+| Setting | Where it belongs |
+|---|---|
+| Forgejo URL and Compose path | Both fetch steps and the validation command in `promote.yml` |
+| `validation` runner label | A runner with Bash, Git, and Compose, without a deployment key |
+| `promotion` runner label | A dedicated, short-lived runner with Bash, Git, and OpenSSH |
+| `RESTRICTED_DEPLOY_KEY` secret | Private key for the target's restricted `deploy-request` account |
+| `DEPLOY_HOST_KEY` variable | Target host-key type and base64 public key, verified through its console |
+| Target hostname and runner source address | Workflow SSH command, known-hosts entry, and target key restriction |
+| Service, image allowlist, paths, and health URL | Root-owned helper's constants and `DEFAULT_SETTINGS` |
+
+On the target, install Python 3, Git, Docker with Compose, and the root-owned
+helper at `/usr/local/sbin/restricted-deploy`. Install the account-wide SSH
+policy, restricted authorized key, and sudoers rule from `target/`. Validate
+with `sshd -t` and `visudo -c` before reloading SSH. The request account should
+not belong to the Docker group.
+
+Initialize the root-controlled bare repository and its protected-main ref, then
+start one reviewed, healthy revision administratively. Its exact Compose file
+must be at the configured live path, and the state file must record that commit
+as `current` with `previous: null`. Use the
+[drill bootstrap](tests/disposable_host_drill.sh) as the worked example. A new
+target needs this initial state; the helper does not guess it from running
+containers. Keep Git/registry authentication available to the helper's restricted
+environment, whose `HOME` is `/var/empty`.
+
+In Forgejo, enable Actions, protect `main`, restrict who can change the workflow
+and request a deployment, and install the adapted file under
+`.forgejo/workflows/promote.yml`. Then:
+
+1. Review and merge an image-only update, such as a Renovate PR. Record the full
+   40-character commit SHA on `main`.
+2. Open **Actions → Validate and promote an exact revision → Run workflow**.
+   Select `main`, operation `deploy`, and that SHA.
+3. Confirm both jobs used that revision. Check the application's health endpoint,
+   a normal user operation, and the target's recorded `current` revision.
+4. If the health check fails, inspect the job result and verify the old service
+   is healthy again. The failed image should not become the recorded current one.
+5. To request a later rollback, run the workflow with operation `rollback` and
+   the currently deployed SHA. The target chooses its saved previous revision.
+
+Back up the target's configuration, repository, revision state, and application
+data together between transactions. Retain image digests in the registry long
+enough to pull the saved previous revision. A database migration needs its own
+backup and restore procedure before an image rollback is useful.
+
+| Failure | What to inspect |
+|---|---|
+| Requested commit rejected | Full SHA, protected-main ancestry, and current revision |
+| SSH request denied | Runner source address, host key, restricted key, and account policy |
+| Image-only check rejected | Compose changes beyond the allowlisted service's image |
+| Pending transaction blocks progress | Interrupted transaction and live service state; retain the metadata for recovery |
+
 ## Tests
 
 Run from the repository root with Python dependencies from [requirements.txt](requirements.txt).

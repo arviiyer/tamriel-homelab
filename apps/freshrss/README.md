@@ -54,7 +54,7 @@ Open <http://127.0.0.1:8080> and complete the wizard:
 
 On a remote VM, use `ssh -L 8080:127.0.0.1:8080 operator@apps-01` to reach the
 wizard from your browser. For regular access, configure a private HTTPS route
-using the [networking notes](../../networking/README.md#caddy-and-authentik).
+using the [private HTTPS guide](../../networking/private-access/README.md).
 If Caddy runs on another host, bind the web port to the intended private
 interface and allow that proxy through the firewall.
 

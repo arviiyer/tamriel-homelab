@@ -21,23 +21,58 @@ The role rejects password connection variables.
 
 ## Run
 
-Inspect the example inventory:
+On your control machine, copy this example into a private working directory and
+install its Python dependencies. Debian controllers also need `python3-venv`.
+From the repository root:
 
 ```bash
-cd automation/ansible
-ansible-inventory --list
+mkdir -p "$HOME/homelab-examples"
+mkdir "$HOME/homelab-examples/ansible"
+cp -R automation/ansible/roles automation/ansible/playbooks \
+  automation/ansible/ansible.cfg automation/ansible/inventory.example.yml \
+  automation/ansible/requirements.txt "$HOME/homelab-examples/ansible/"
+cd "$HOME/homelab-examples/ansible"
+python3 -m venv .venv
+. .venv/bin/activate
+python3 -m pip install -r requirements.txt
+cp inventory.example.yml inventory.yml
 ```
 
-To use the roles, copy them into your own Ansible project and supply an inventory.
-Run from that project's Ansible directory:
+Edit `inventory.yml` to include only your intended hosts and their real addresses.
+Set the admin source address and allowed users before using the SSH role. Start
+with a disposable VM prepared using the [Debian guide](../../proxmox/debian-vm/README.md).
+Verify its SSH fingerprint through the Proxmox console and accept that host key
+on the controller before running Ansible.
+
+Check connectivity and sudo on that one VM, then apply the roles to it:
 
 ```bash
-ansible-playbook -i /path/to/private/inventory.yml playbooks/site.yml
-ansible-playbook -i /path/to/private/inventory.yml playbooks/controlled-upgrade.yml
+ansible -i inventory.yml apps-01 -K -m ansible.builtin.ping
+ansible -i inventory.yml apps-01 -b -K -m ansible.builtin.command -a 'id -u'
+ansible-playbook -i inventory.yml playbooks/site.yml --limit apps-01 -K
 ```
+
+`-K` prompts for the sudo password; omit it for an account already configured
+for passwordless sudo. The become check should return `0`. After the playbook,
+open a fresh SSH connection and check `sudo sshd -T`,
+`systemctl status unattended-upgrades`, and an application on the VM. Broaden
+the inventory only after those checks succeed.
+
+For a full upgrade:
+
+```bash
+ansible-playbook -i inventory.yml playbooks/controlled-upgrade.yml --limit apps-01 -K
+```
+
+Review its reboot-required result and plan the reboot separately. Check the
+application again before upgrading the next workload.
 
 Both roles reject check mode because they need to run service checks and test
 reconnections and rollback. Full upgrades are excluded from `site.yml`.
+
+Keep the inventory and roles in your private configuration repository. Back up
+the VM before changing the SSH policy or OS packages. When updating these roles,
+repeat the one-host run and compare the effective SSH and apt configuration.
 
 ## Tests
 

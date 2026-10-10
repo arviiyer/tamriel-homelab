@@ -7,10 +7,66 @@ permissions:
   contents: read
 
 jobs:
+  services:
+    name: Service (${{ matrix.example }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        example: [syncthing, freshrss, homarr, jellyfin, caddy, host-metrics, vaultwarden, searxng, stirling-pdf, openspeedtest, uptime-kuma, logs]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - run: python3 scripts/check-service-examples.py --smoke "${{ matrix.example }}"
+
+  stacks:
+    name: Connected stack (${{ matrix.example }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        example: [media, access, alerts, alloy]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - run: python3 scripts/check-stack-examples.py --smoke "${{ matrix.example }}"
+
+  dns:
+    name: Pi-hole and Unbound
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - run: python3 networking/dns/check.py
+
+  sign-in:
+    name: Authentik browser sign-in
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+      - name: Install browser test dependencies
+        run: |
+          python3 -m pip install -r networking/private-access/requirements-test.txt
+          python3 -m playwright install --with-deps chromium
+      - run: python3 networking/private-access/check_authentik.py
+
   integration:
     name: Container and integration checks
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - name: Check out complete history
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -51,8 +107,8 @@ jobs:
       - name: Check Grafana provisioning and dashboard loading
         run: python3 automation/monitoring/tests/validate_grafana.py
 
-      - name: Exercise service examples
-        run: python3 scripts/check-service-examples.py --smoke all
+      - name: Exercise ClamAV detection and error handling
+        run: python3 security/clamav/check.py
 
       - name: Check Renovate configuration and dependency extraction
         run: |

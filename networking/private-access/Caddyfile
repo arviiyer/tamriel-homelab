@@ -1,0 +1,36 @@
+{
+	admin localhost:2019
+}
+
+(private_site) {
+	bind {$PROXY_LISTEN_ADDRESSES}
+	tls {
+		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+	}
+}
+
+(private_clients) {
+	@untrusted not remote_ip {$TRUSTED_CIDRS}
+	respond @untrusted "Private application" 403
+}
+
+{$AUTH_DOMAIN} {
+	import private_site
+	route {
+		import private_clients
+		reverse_proxy {$AUTH_UPSTREAM}
+	}
+}
+
+{$APP_DOMAIN} {
+	import private_site
+	route {
+		import private_clients
+		reverse_proxy /outpost.goauthentik.io/* {$AUTH_UPSTREAM}
+		forward_auth {$AUTH_UPSTREAM} {
+			uri /outpost.goauthentik.io/auth/caddy
+			copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Email X-Authentik-Name X-Authentik-Uid
+		}
+		reverse_proxy {$APP_UPSTREAM}
+	}
+}

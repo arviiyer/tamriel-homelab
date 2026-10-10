@@ -88,7 +88,7 @@ For access from other devices, configure the private HTTPS hostname before
 setting up phone backups. A host-installed Caddy on the same machine can reach
 the loopback port. A proxy on another machine needs a port bound to the intended
 private interface and a firewall rule allowing that proxy. See
-[networking](../../networking/README.md#caddy-and-authentik) and Immich's
+[private HTTPS setup](../../networking/private-access/README.md) and Immich's
 [reverse-proxy requirements](https://docs.immich.app/administration/reverse-proxy/).
 
 ## Phone backups

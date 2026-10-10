@@ -1,0 +1,19 @@
+services:
+  stirling-pdf:
+    image: stirlingtools/stirling-pdf:3.0.2@sha256:c195925341aa35ee5932d9c225edef48a92e46a1280963180d79619cb5f29e6e
+    restart: unless-stopped
+    environment:
+      SECURITY_ENABLELOGIN: "true"
+      SECURITY_INITIALLOGIN_USERNAME: operator
+      SECURITY_INITIALLOGIN_PASSWORD: ${PDF_INITIAL_PASSWORD:?Generate PDF_INITIAL_PASSWORD in .env}
+    volumes:
+      - pdf-config:/configs
+    ports:
+      - "127.0.0.1:8087:8080"
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+volumes:
+  pdf-config:

@@ -55,7 +55,7 @@ The example pins Homarr v2.4.1, stores SQLite and configuration in the `appdata`
 volume, and uses local credentials. The screenshot is from the lab's v1 setup;
 v2's onboarding, layout, and Custom Widget editor differ.
 
-For regular access, use the [Caddy and DNS notes](../../networking/README.md#caddy-and-authentik).
+For regular access, use the [private HTTPS guide](../../networking/private-access/README.md).
 If Caddy runs on another host, bind the port to the intended private interface
 and allow that proxy through the firewall. Keep Homarr's local login enabled.
 

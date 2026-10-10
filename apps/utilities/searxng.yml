@@ -1,0 +1,15 @@
+services:
+  searxng:
+    image: searxng/searxng@sha256:85492ba800a861e3e8ff6014c430e81369fe6ca766a9990595f616d1ce95b272
+    restart: unless-stopped
+    environment:
+      SEARXNG_SECRET: ${SEARXNG_SECRET:?Generate SEARXNG_SECRET in .env}
+      SEARXNG_BASE_URL: ${SEARCH_URL:-http://localhost:8082/}
+    volumes:
+      - search-config:/etc/searxng
+      - search-cache:/var/cache/searxng
+    ports:
+      - "127.0.0.1:8082:8080"
+volumes:
+  search-config:
+  search-cache:

@@ -1,0 +1,16 @@
+[Unit]
+Description=Scan downloaded files with ClamAV
+Requires=docker.service
+After=docker.service
+RequiresMountsFor=/mnt/nas/downloads
+
+[Service]
+Type=oneshot
+WorkingDirectory=/srv/clamav
+ExecStartPre=/usr/bin/findmnt --target /mnt/nas/downloads --types nfs,nfs4
+ExecStartPre=/usr/bin/docker compose exec -T clamav clamdscan --ping 30:2
+ExecStart=/usr/bin/docker compose exec -T clamav clamdscan --infected /scan
+TimeoutStartSec=6h
+# Exit 1 means a finding, rather than an incomplete scan. It remains visible
+# as ExecMainStatus=1 and in the journal. Exit 2 is a service failure.
+SuccessExitStatus=1

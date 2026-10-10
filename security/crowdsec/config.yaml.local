@@ -1,0 +1,5 @@
+prometheus:
+  enabled: true
+  level: full
+  listen_addr: 192.0.2.1
+  listen_port: 6060

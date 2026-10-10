@@ -6,6 +6,9 @@
 TrueNAS SCALE provides shared storage on the UGREEN NAS. Its four 4 TB hard
 drives are arranged as two mirrored pairs. PBS and Restic are the backup tools.
 
+Setup guides: [TrueNAS shares and VM mounts](nfs/README.md) ·
+[Proxmox Backup Server](pbs/README.md) · [Restic](restic/README.md)
+
 [![TrueNAS storage layout and health](../screenshots/truenas-storage.webp)](../screenshots/README.md#truenas-storage)
 
 ## Where data lives
@@ -85,6 +88,9 @@ In Proxmox, open the VM's **Backup** tab and select the PBS storage. Check the
 latest task result and the disks included in that backup. Guest-mounted NAS
 files still need their separate backup.
 
+If PBS is new to you, [connect the datastore and create a backup job](pbs/README.md)
+first.
+
 To rehearse a restore:
 
 1. Select a completed backup and choose **Restore**.
@@ -105,25 +111,18 @@ application's consistency and restore checks.
 
 ### Archive checks
 
-The included drill generates an archive, restores it to a new directory, checks
-the contents, and exercises corrupt and unsafe input. It cleans up its temporary
-files afterward.
-
-On Linux with Python 3, procfs, and `renameat2` support, run from the repository
-root:
-
-```bash
-python3 automation/recovery/tests/run_isolated_restore_drill.py
-```
-
-[Restore tool and archive format](../automation/recovery/README.md) ·
-[Restore test results](../docs/drills/2026-08-24-isolated-synthetic-restore.md)
+The [restore tool](../automation/recovery/README.md) checks archives before
+extracting them into a new directory. Its guide includes the archive format,
+commands, and a disposable restore exercise.
 
 ## Waiting for shared storage
 
 The application and media hosts wait for NFS availability before mounting their
 shares. Docker then requires the relevant mounts before starting. That ordering
 addresses the race where a VM boots before the NAS is ready.
+
+The [NFS guide](nfs/README.md#wait-for-mounts) shows the mount dependency to add
+on a Docker VM.
 
 A missing network mount can leave an ordinary local directory where the share
 should be. The [systemd example](../automation/recovery/README.md#storage-checks)

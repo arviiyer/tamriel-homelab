@@ -53,8 +53,8 @@ These tools sit alongside the access controls in the
 [networking notes](../networking/README.md) and host maintenance covered by
 [Ansible](../automation/ansible/README.md).
 
-[CrowdSec documentation](https://docs.crowdsec.net/) ·
-[ClamAV documentation](https://docs.clamav.net/)
+[CrowdSec setup and metrics](crowdsec/README.md) ·
+[ClamAV scans and scheduling](clamav/README.md)
 
 ## Tamriel Sandbox
 

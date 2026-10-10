@@ -6,6 +6,9 @@
 OPNsense handles routing and firewall rules. I use Tailscale for administration,
 Caddy for web applications, and Authentik for sign-in where supported.
 
+Setup guides: [Pi-hole and Unbound](dns/README.md) ·
+[Private HTTPS with Caddy, Tailscale, and Authentik](private-access/README.md)
+
 ## OPNsense and the network
 
 The ThinkCentre M720q runs OPNsense with an Intel i350-T4 NIC. A Ubiquiti
@@ -17,6 +20,12 @@ The network separates infrastructure, trusted clients, work devices, guests,
 media, and sandbox workloads. Connections between zones are allowed for specific
 needs. The [network-zone table](../docs/network-and-identity.md#network-zones)
 lists the roles and restrictions.
+
+The infrastructure machines still share the original LAN. The separate client
+VLANs and media segment are in use; splitting management and ordinary servers
+into their own VLANs remains future work. The
+[network migration notes](../docs/network-migration.md) explain what went wrong
+with the first attempt and why I narrowed the next change.
 
 ## DNS
 
@@ -74,9 +83,8 @@ The [FreshRSS notes](../apps/freshrss/README.md#sign-in) cover its callback and
 username mapping. These integrations are configured per application; adding a
 Caddy route does not automatically add Authentik.
 
-DNS resolution, routing, proxying, and application sign-in are separate parts
-of this path. A working hostname alone does not establish that a client can
-reach a service or is allowed to use it.
+The [private-access walkthrough](private-access/README.md) takes a sample app
+through each step, including certificate issuance and an Authentik group binding.
 
 ## Try a reverse proxy
 

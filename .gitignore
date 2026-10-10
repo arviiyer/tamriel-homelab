@@ -43,6 +43,10 @@ AGENTS.md
 *.py[cod]
 automation/trivy/repositories.tsv
 automation/trivy/var/
+**/.terraform/
+*.tfstate*
+*.tfplan
+proxmox/terraform/terraform.tfvars
 
 # Screenshots require an explicit force-add after review.
 screenshots/*

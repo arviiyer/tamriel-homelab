@@ -44,7 +44,7 @@ I use Stirling PDF for browser-based jobs such as rotating pages and merging
 documents. It has its own login. Updates go through a manually triggered Forgejo
 workflow that saves its configuration before changing the image.
 
-[Deployment workflow](../automation/README.md#git-and-updates) ·
+[Setup and updates](utilities/README.md#stirling-pdf) ·
 [Stirling PDF documentation](https://docs.stirlingpdf.com/)
 
 ## Reading and utilities
@@ -78,7 +78,7 @@ Vaultwarden holds my passwords, with Bitwarden clients connecting to it. It runs
 on the Raspberry Pi behind Caddy. I keep Restic backups locally and on another
 host, so the vault's only copy is not on the Pi.
 
-[Backup notes](../storage/README.md#backups) ·
+[Setup and client sync](utilities/README.md#vaultwarden) ·
 [Vaultwarden documentation](https://github.com/dani-garcia/vaultwarden/wiki)
 
 ### SearXNG
@@ -86,17 +86,23 @@ host, so the vault's only copy is not on the Pi.
 SearXNG is my private search page on the Raspberry Pi. The same hostname works
 through local DNS at home and Tailscale when away.
 
-[DNS and access](../networking/README.md#dns) ·
+[Setup and search engines](utilities/README.md#searxng) ·
 [SearXNG documentation](https://docs.searxng.org/)
 
-### Local chat and Speedtest
+### Local chat
 
 The llama.cpp web interface runs on my laptop when needed, reached through Caddy
 over Tailscale. It is separate from the reading brief's CPU model on the app VM.
-The Pi also hosts a Speedtest web service; its exact application and setup still
-need documenting.
 
 [llama.cpp server](https://github.com/ggml-org/llama.cpp/tree/master/tools/server)
+
+### OpenSpeedTest
+
+OpenSpeedTest runs on the Pi. It measures throughput between a browser and that
+server, useful for comparing a wired, Wi-Fi, or remote connection.
+
+[Setup](utilities/README.md#openspeedtest) ·
+[OpenSpeedTest project](https://github.com/openspeedtest/Speed-Test)
 
 ## Media and games
 
@@ -113,15 +119,15 @@ covers setup and GPU checks.
 | Service | Use | Project |
 |---|---|---|
 | Jellyfin | Media playback and hardware transcoding | [Setup](../media/jellyfin/README.md) · [Docs](https://jellyfin.org/docs/) |
-| Seerr | Media requests | [Docs](https://docs.seerr.dev/) |
-| Sonarr | TV library management | [Docs](https://wiki.servarr.com/sonarr) |
-| Radarr | Movie library management | [Docs](https://wiki.servarr.com/radarr) |
-| Lidarr | Music library management | [Docs](https://wiki.servarr.com/lidarr) |
-| Readarr | Book library management | [Project](https://github.com/Readarr/Readarr) |
-| Prowlarr | Indexer management | [Docs](https://wiki.servarr.com/prowlarr) |
-| qBittorrent | Torrent downloads | [Project](https://www.qbittorrent.org/) |
-| NZBGet | Usenet downloads | [Docs](https://nzbget.com/documentation/) |
-| Gluetun | VPN connection for the download stack | [Docs](https://github.com/qdm12/gluetun-wiki) |
+| Seerr | Media requests | [Setup](../media/servarr/README.md#jellyfin-and-seerr) · [Docs](https://docs.seerr.dev/) |
+| Sonarr | TV library management | [Setup](../media/servarr/README.md#sonarr-and-radarr) · [Docs](https://wiki.servarr.com/sonarr) |
+| Radarr | Movie library management | [Setup](../media/servarr/README.md#sonarr-and-radarr) · [Docs](https://wiki.servarr.com/radarr) |
+| Lidarr | Music library management | [Setup](../media/servarr/README.md#music-usenet-and-indexer-helpers) · [Docs](https://wiki.servarr.com/lidarr) |
+| Readarr | Existing book manager; upstream retired | [Retirement notice](https://github.com/Readarr/Readarr#announcement-retirement-of-readarr) |
+| Prowlarr | Indexer management | [Setup](../media/servarr/README.md#prowlarr) · [Docs](https://wiki.servarr.com/prowlarr) |
+| qBittorrent | Torrent downloads | [Setup](../media/servarr/README.md#qbittorrent) · [Project](https://www.qbittorrent.org/) |
+| NZBGet | Usenet downloads | [Setup](../media/servarr/README.md#music-usenet-and-indexer-helpers) · [Docs](https://nzbget.com/documentation/) |
+| Gluetun | VPN connection for the download stack | [Setup](../media/servarr/README.md#start-the-stack) · [Docs](https://github.com/qdm12/gluetun-wiki) |
 | FlareSolverr | Browser helper for indexer requests | [Project](https://github.com/FlareSolverr/FlareSolverr) |
 | deunhealth | Restart selected unhealthy containers | [Project](https://github.com/qdm12/deunhealth) |
 | Seerr Discord Approver | Approve or deny requests from Discord | [Notes](projects/README.md#seerr-discord-approver) |
@@ -173,6 +179,10 @@ host health and application checks.
 [Promtail](https://grafana.com/docs/loki/latest/send-data/promtail/) ·
 [Pushgateway](https://github.com/prometheus/pushgateway)
 
+[Kuma setup](../monitoring/uptime-kuma/README.md) ·
+[Host metrics and alerts](../monitoring/host-metrics/README.md) ·
+[Log collection and Promtail migration](../monitoring/logs/README.md)
+
 ## Git and updates
 
 ### Forgejo
@@ -213,8 +223,8 @@ automatic security updates, and full upgrades one host at a time.
 ### OPNsense
 
 OPNsense runs on the ThinkCentre router/firewall. Together with the managed
-switches, it separates administration, applications, and client devices into
-network zones.
+switch, it routes the client and workload VLANs and limits access to the
+infrastructure LAN.
 
 [Network layout](../networking/README.md#opnsense-and-the-network) ·
 [OPNsense documentation](https://docs.opnsense.org/)
@@ -326,5 +336,7 @@ CrowdSec and ClamAV cover network defense and malware scanning. The
 the lab.
 
 [Security overview](../security/README.md) ·
+[CrowdSec setup](../security/crowdsec/README.md) ·
+[ClamAV setup](../security/clamav/README.md) ·
 [CrowdSec documentation](https://docs.crowdsec.net/) ·
 [ClamAV documentation](https://docs.clamav.net/)

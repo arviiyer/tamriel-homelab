@@ -2,12 +2,15 @@
 
 [Home](../README.md) · [Networking](../networking/README.md)
 
-The network separates administration, applications, and client devices by role.
+The network separates client and workload zones. The existing infrastructure LAN
+still holds management services and most application VMs; management and server
+VLANs have not yet been split.
 
 ## Network zones
 
-Being on the local network does not grant access to everything. Connections
-between zones are blocked unless explicitly allowed.
+The table describes access roles. Management is an access role within the
+infrastructure LAN, rather than a separate deployed VLAN. Connections between
+the routed zones are blocked unless explicitly allowed.
 
 | Zone | Allowed use | Main restriction |
 |---|---|---|

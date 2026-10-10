@@ -97,25 +97,33 @@ and Jellyfin for media. Homarr brings the service links and reading brief togeth
 There are also a few [small projects](apps/projects/README.md): a VM provisioning
 portal, Discord actions for media requests, a reading brief, and a printer monitor.
 
-Setup guides: [Immich](apps/immich/README.md) ·
-[FreshRSS](apps/freshrss/README.md) · [Jellyfin](media/jellyfin/README.md) ·
-[Homarr](apps/homarr/README.md) · [Renovate](automation/renovate/README.md) ·
-[Restic backup and restore](storage/restic/README.md)
+## Setup guides
+
+Each guide lists its requirements and the files to use. If you already cloned
+this repo, copy the linked example files into your own working directory instead
+of downloading them again.
+
+| Start with | Guide |
+|---|---|
+| A VM for your containers | [Debian on Proxmox](proxmox/debian-vm/README.md), [Terraform clone](proxmox/terraform/README.md) |
+| Shared storage and backups | [TrueNAS and NFS](storage/nfs/README.md), [PBS](storage/pbs/README.md), [Restic](storage/restic/README.md) |
+| Private application access | [Pi-hole and Unbound](networking/dns/README.md), [Caddy, Tailscale, and Authentik](networking/private-access/README.md) |
+| Photos, reading, and a homepage | [Immich](apps/immich/README.md), [FreshRSS](apps/freshrss/README.md), [Homarr](apps/homarr/README.md) |
+| Media requests and playback | [Download stack](media/servarr/README.md), [Jellyfin and GPU transcoding](media/jellyfin/README.md) |
+| Passwords, search, and utilities | [Vaultwarden, SearXNG, Stirling PDF, OpenSpeedTest](apps/utilities/README.md) |
+| Dashboards and notifications | [Host metrics and alerts](monitoring/host-metrics/README.md), [Loki and Alloy](monitoring/logs/README.md), [Uptime Kuma](monitoring/uptime-kuma/README.md) |
+| Security tools | [CrowdSec](security/crowdsec/README.md), [ClamAV](security/clamav/README.md), [Trivy](automation/trivy/README.md), [Falco](automation/falco/README.md) |
 
 ## Automation
 
 Forgejo hosts the lab's private configuration repositories, and Renovate opens
-dependency-update pull requests. The [automation page](automation/README.md)
-connects that workflow to the deployment, host maintenance, scanning, and restore
-examples. Each example has its own setup and test commands.
+dependency-update pull requests. I review updates before applying them. Ansible
+handles host configuration, and scripts connect security scans to Grafana and
+notifications.
 
-For smaller starting points, try the [Syncthing example](apps/syncthing/README.md),
-[Caddy proxy](networking/caddy/README.md), or
-[host-monitoring stack](monitoring/host-metrics/README.md).
-
-GitHub Actions checks links, publication rules, and secrets on each push. Changes
-to automation also run the relevant tests. Container builds and integration
-checks run manually from [Actions](https://github.com/arviiyer/tamriel-homelab/actions/workflows/integration.yml).
+[Git and deployment workflow](automation/README.md) ·
+[Set up Renovate](automation/renovate/README.md) ·
+[Host maintenance](automation/ansible/README.md)
 
 ## Screenshots
 
@@ -130,4 +138,5 @@ Jellyfin, Seerr, Grafana, TrueNAS, and PBS.
 - [Making vulnerability alerts useful](docs/case-studies/actionable-vulnerability-management.md)
 - [Deploying the commit that passed CI](docs/case-studies/fail-closed-infrastructure-delivery.md)
 - [Restoring without overwriting live data](docs/case-studies/recovery-and-storage-dependencies.md)
+- [Setup guide checks](docs/drills/setup-guide-checks.md)
 - [Next steps](ROADMAP.md)

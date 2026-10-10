@@ -1,0 +1,13 @@
+services:
+  vaultwarden:
+    image: vaultwarden/server:1.37.1@sha256:ebdfe70701c60ac0c28c697e787cea767d7972940b786037b29fe0d507f821e8
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${VAULT_DOMAIN:-http://localhost:8081}
+      SIGNUPS_ALLOWED: ${VAULT_SIGNUPS_ALLOWED:-false}
+    volumes:
+      - vault-data:/data
+    ports:
+      - "127.0.0.1:8081:80"
+volumes:
+  vault-data:

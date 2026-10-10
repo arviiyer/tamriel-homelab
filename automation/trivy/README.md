@@ -11,13 +11,28 @@ the last complete scan, and exports Prometheus metrics.
 ## Setup
 
 Requirements: Bash 5+, Git, Python 3.11+, PyYAML 6.0.3, Trivy, curl, `flock`,
-and `sha256sum`.
+and `sha256sum`. Install Trivy using its
+[package instructions](https://trivy.dev/docs/latest/getting-started/installation/).
+The repository's CLI compatibility checks use Trivy 0.73.
 
-From the repository root, copy and edit the example repository list:
+On Debian, install `python3-venv` for the virtual environment. From the repository
+root, copy the scanner into a private working directory:
 
 ```bash
-cp automation/trivy/repositories.example.tsv automation/trivy/repositories.tsv
+mkdir -p "$HOME/homelab-examples"
+mkdir "$HOME/homelab-examples/trivy"
+cp automation/trivy/{scan.sh,delta.py,extract_images.py,requirements.txt,repositories.example.tsv,prometheus-rules.yml} \
+  "$HOME/homelab-examples/trivy/"
+cd "$HOME/homelab-examples/trivy"
+chmod 700 .
+python3 -m venv .venv
+. .venv/bin/activate
+python3 -m pip install -r requirements.txt
+cp repositories.example.tsv repositories.tsv
 ```
+
+Edit `repositories.tsv` to select your repositories and revisions. The private
+working directory also holds the scan baseline and any finding metadata.
 
 Each non-comment line contains three tab-separated fields:
 
@@ -31,24 +46,25 @@ credential helper for authentication. Absolute local paths work for offline use.
 
 | Variable | Purpose | Default |
 |---|---|---|
-| `REPOSITORIES_FILE` | Repository configuration | `automation/trivy/repositories.tsv` |
-| `BASELINE_DIR` | Last complete JSON baseline | `automation/trivy/var/baseline` |
+| `REPOSITORIES_FILE` | Repository configuration | `repositories.tsv` beside the script |
+| `BASELINE_DIR` | Last complete JSON baseline | `var/baseline` beside the script |
 | `PUSHGATEWAY_URL` | Optional Pushgateway URL | Metrics are not pushed |
 | `TMPDIR` | Temporary scan storage | `/tmp` |
 | `INITIALIZE_BASELINE` | Set to `1` for the first complete scan only | `0` |
 
 ## Run
 
-From the repository root, save the first complete scan as a baseline:
+In the copied directory with its virtual environment active, save the first
+complete scan as a baseline:
 
 ```bash
-INITIALIZE_BASELINE=1 bash automation/trivy/scan.sh
+INITIALIZE_BASELINE=1 bash scan.sh
 ```
 
 Then run subsequent scans:
 
 ```bash
-bash automation/trivy/scan.sh
+bash scan.sh
 ```
 
 Use initialization only once. Later runs check that the saved baseline matches
@@ -58,6 +74,76 @@ configuration issues without alerting on all of them.
 Each baseline includes `_delta-report.json` with new/absent vulnerabilities,
 metadata changes, new misconfigurations, and the current secret count. Store
 baseline files privately: they contain paths and secret-finding metadata.
+
+Check for `scan complete; baseline promoted` and inspect
+`var/baseline/_delta-report.json`. The manifest in `_baseline.json` should list
+the configured repositories. A nonzero exit leaves the earlier baseline in
+place; read the named repository's error before trying again.
+
+## Send metrics and run weekly
+
+Use an existing private [Pushgateway](https://github.com/prometheus/pushgateway),
+or install one on the monitoring host using its upstream instructions. Set
+`PUSHGATEWAY_URL` to an address reachable from the scanning host and run another
+scan. Prometheus needs a scrape job like this, using your actual address:
+
+```yaml
+  - job_name: pushgateway
+    honor_labels: true
+    static_configs:
+      - targets: [observability-01.example.com:9091]
+```
+
+Copy `prometheus-rules.yml` into Prometheus's mounted configuration directory and
+include that container path under `rule_files`. Validate with `promtool check
+config`, reload Prometheus, and query `trivy_scan_success` and
+`trivy_scan_last_success_timestamp_seconds`. Both the finding and health jobs
+must be present. Connect notifications using the
+[Alertmanager guide](../../monitoring/host-metrics/README.md#alerts-and-discord).
+
+For a weekly scan, save this as `~/.config/systemd/user/trivy-scan.service`,
+creating the directory first. Replace the Pushgateway URL, or omit that line
+when keeping results locally:
+
+```ini
+[Unit]
+Description=Scan homelab repositories and images
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/homelab-examples/trivy
+Environment=PATH=%h/homelab-examples/trivy/.venv/bin:/usr/local/bin:/usr/bin:/bin
+Environment=PUSHGATEWAY_URL=http://observability-01.example.com:9091
+UMask=0077
+ExecStart=/bin/bash %h/homelab-examples/trivy/scan.sh
+```
+
+Save the matching `trivy-scan.timer` beside it:
+
+```ini
+[Unit]
+Description=Weekly homelab scan
+
+[Timer]
+OnCalendar=weekly
+Persistent=true
+RandomizedDelaySec=30m
+
+[Install]
+WantedBy=timers.target
+```
+
+Run `systemctl --user daemon-reload`, then `systemctl --user start trivy-scan`.
+Read `journalctl --user -u trivy-scan` and confirm a fresh metric before enabling
+the timer with `systemctl --user enable --now trivy-scan.timer`. On an unattended
+host, `sudo loginctl enable-linger "$USER"` keeps the user manager running after
+logout. Check the next run with `systemctl --user list-timers trivy-scan.timer`.
+The service uses the same user's Git credential helper; no interactive password
+prompt is available to a scheduled scan.
+
+Back up the repository list and complete baseline together between scans. When
+updating the scanner or Trivy, stop the timer, keep that backup, run one scan by
+hand, and check the report and metrics before restarting the timer.
 
 ## Tests
 

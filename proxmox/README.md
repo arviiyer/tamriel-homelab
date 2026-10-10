@@ -6,6 +6,10 @@
 Tamriel runs on three Proxmox nodes. Debian VMs hold most services, with Docker
 Compose inside the VMs and a separate TrueNAS system for shared bulk files.
 
+[Prepare a Debian Docker VM](debian-vm/README.md) ·
+[Clone a VM with Terraform](terraform/README.md) ·
+[Set up VM backups](../storage/pbs/README.md)
+
 ## The cluster
 
 [![Three online Proxmox nodes with quorum](../screenshots/proxmox-cluster-summary.png)](../screenshots/README.md#proxmox-cluster)
@@ -55,6 +59,9 @@ Ansible handles SSH policy and updates after provisioning. The published
 [Ansible examples](../automation/ansible/README.md) cover that part of the setup.
 Terraform state and credentials stay with the provisioner.
 
+The [single-VM Terraform example](terraform/README.md) shows the clone and
+cloud-init configuration without the portal.
+
 ## GPU passthrough
 
 The ROG Ally passes its AMD GPU to the media VM for Jellyfin VA-API transcoding.
@@ -65,12 +72,15 @@ shared between VMs.
 ## Supporting devices
 
 The Raspberry Pi 5 runs Pi-hole, Unbound, Caddy, Tailscale, Vaultwarden, SearXNG,
-and Speedtest. It also supplies the cluster's quorum-device vote. The quorum
+and OpenSpeedTest. It also supplies the cluster's quorum-device vote. The quorum
 device participates in voting; it does not host VMs or provide another copy of
 their disks.
 OPNsense runs on a separate ThinkCentre, and TrueNAS SCALE runs on the UGREEN NAS.
 The [hardware list](../README.md#supporting-devices) also includes UPS power
 protection.
+
+The UPS currently supplies power only. Its USB monitoring connection and
+automatic low-battery shutdown are still on the [roadmap](../ROADMAP.md).
 
 Administration goes through [Tailscale](../networking/README.md#tailscale).
 For application data and VM backups, see the
@@ -81,4 +91,4 @@ For application data and VM backups, see the
 - [Lab overview](../docs/architecture.md)
 - [Proxmox administration guide](https://pve.proxmox.com/pve-docs/pve-admin-guide.html)
 - [Proxmox PCI passthrough reference](https://pve.proxmox.com/wiki/PCI_Passthrough)
-- [Next documentation work](../ROADMAP.md#documentation)
+- [Next steps](../ROADMAP.md)

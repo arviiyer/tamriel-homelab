@@ -132,6 +132,8 @@ only accepts connections on its own host.
 Set Jellyfin's known proxies to the proxy you actually use. See the
 [Jellyfin networking guide](https://jellyfin.org/docs/general/post-install/networking/)
 and the [lab's access layout](../../networking/README.md#caddy-and-authentik).
+The [private HTTPS guide](../../networking/private-access/README.md) includes the
+DNS and certificate setup. Use Jellyfin's own authentication on its route.
 
 I use the [SSO plugin](https://github.com/9p4/jellyfin-plugin-sso) with Authentik
 for browser sign-in. Configure the provider and exact callback from the plugin's
