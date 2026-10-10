@@ -45,6 +45,6 @@ AGENTS.md
 automation/trivy/repositories.tsv
 automation/trivy/var/
 
-# Screenshots require an explicit force-add after redaction and review.
+# Screenshots require an explicit force-add after review.
 evidence/screenshots/*
 !evidence/screenshots/README.md

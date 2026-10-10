@@ -28,6 +28,8 @@ lab copy lives on the NAS. It replaced Nextcloud for this job.
 
 ### Immich
 
+[![Landscape album in Immich](../evidence/screenshots/immich-album.webp)](immich/README.md)
+
 I keep my photo library in Immich, with the photos on TrueNAS and the database
 on the application VM. It uses Authentik for sign-in. Backing it up means keeping
 both the library and database, since neither is useful as a complete restore
@@ -49,6 +51,8 @@ workflow that saves its configuration before changing the image.
 
 ### FreshRSS
 
+[![FreshRSS feed categories and articles](../evidence/screenshots/freshrss-reader.webp)](freshrss/README.md)
+
 FreshRSS is my browser-based feed reader, with security news and technical
 articles. Selected feeds fetch full article text. A custom extension caches
 article images so the reading view can load them locally behind sign-in.
@@ -57,6 +61,8 @@ article images so the reading view can load them locally behind sign-in.
 [FreshRSS documentation](https://freshrss.github.io/FreshRSS/)
 
 ### Homarr
+
+[![Homarr service cards and reading brief](../evidence/screenshots/homarr-home.webp)](../evidence/screenshots/README.md#homarr)
 
 Homarr brings my service links and widgets together. I also use it to read the
 [Morning SOC Briefing](projects/README.md#morning-soc-briefing), with source
@@ -99,6 +105,10 @@ through to the media VM for transcoding. The [Media page](../media/README.md)
 shows how the pieces connect, and the [Jellyfin guide](../media/jellyfin/README.md)
 covers setup and GPU checks.
 
+[![Jellyfin library and Continue Watching](../evidence/screenshots/jellyfin-library.webp)](../media/jellyfin/README.md)
+
+[![Seerr discovery view](../evidence/screenshots/seerr-discover.webp)](../media/README.md#requests-and-downloads)
+
 | Service | Use | Project |
 |---|---|---|
 | Jellyfin | Media playback and hardware transcoding | [Setup](../media/jellyfin/README.md) · [Docs](https://jellyfin.org/docs/) |
@@ -127,11 +137,12 @@ project.
 
 ### Grafana
 
-[![Trivy summary in Grafana](../evidence/screenshots/grafana-security-dashboard.png)](../evidence/screenshots/README.md#trivy-dashboard)
+[![CPU, memory, network, and disk panels in Grafana](../evidence/screenshots/grafana-host-metrics.webp)](../monitoring/README.md)
 
-I use Grafana to view metrics and logs. The Trivy dashboard above shows finding
-totals and new findings with available fixes. Its secret panel reports file
-scans; Git-history scanning runs separately. The public dashboard example also
+I use Grafana to view metrics and logs. The Node Exporter dashboard above shows
+host CPU, memory, network traffic, and disk usage. A separate
+[Trivy dashboard](../evidence/screenshots/README.md#trivy-dashboard) shows finding
+totals and new findings with available fixes. The public dashboard example also
 includes Falco events.
 
 [Monitoring](../monitoring/README.md) ·
@@ -240,6 +251,8 @@ the ordinary web apps use private Caddy routes.
 
 ### TrueNAS and ZFS
 
+[![TrueNAS storage layout and health](../evidence/screenshots/truenas-storage.webp)](../storage/README.md)
+
 TrueNAS SCALE runs on the UGREEN NAS and holds shared bulk files. The four hard
 drives form two mirrored pairs. Application databases stay on the VMs' own disks;
 the [storage notes](../storage/README.md#where-data-lives) explain that choice.
@@ -248,6 +261,8 @@ the [storage notes](../storage/README.md#where-data-lives) explain that choice.
 [TrueNAS documentation](https://www.truenas.com/docs/scale/)
 
 ### Proxmox Backup Server and Restic
+
+[![PBS backup task completed successfully](../evidence/screenshots/pbs-backup.webp)](../storage/README.md#backups)
 
 PBS and Restic are the lab's backup tools, alongside VM snapshots and off-host
 copies for selected data. The storage page introduces the different backup

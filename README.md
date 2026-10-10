@@ -81,6 +81,8 @@ The NAS hard drives are arranged as two mirrored pairs.
 I use Syncthing for documents and notes, Immich for photos, FreshRSS for reading,
 and Jellyfin for media. Homarr brings the service links and reading brief together.
 
+[![Homarr service cards and reading brief](evidence/screenshots/homarr-home.webp)](apps/README.md#homarr)
+
 | Job | Tools |
 |---|---|
 | Files, photos, and documents | [Syncthing, Immich, Stirling PDF](apps/README.md#files-photos-and-documents) |
@@ -116,15 +118,11 @@ checks run manually from [Actions](https://github.com/arviiyer/tamriel-homelab/a
 
 ## Screenshots
 
-[![Proxmox cluster health](evidence/screenshots/proxmox-cluster-summary.png)](proxmox/README.md#the-cluster)
+[![Landscape album in Immich](evidence/screenshots/immich-album.webp)](apps/immich/README.md)
 
-Three Proxmox nodes online with quorum established.
-
-[![Trivy dashboard in Grafana](evidence/screenshots/grafana-security-dashboard.png)](evidence/screenshots/README.md#trivy-dashboard)
-
-The lab's Trivy dashboard. The secret panel reports file scans; Git history is
-checked separately. [Monitoring setup](monitoring/README.md) ·
-[More screenshots](evidence/screenshots/README.md)
+A landscape album in Immich. More captures are beside the app descriptions and
+in the [screenshot gallery](evidence/screenshots/README.md), including FreshRSS,
+Jellyfin, Seerr, Grafana, TrueNAS, and PBS.
 
 ## Notes
 

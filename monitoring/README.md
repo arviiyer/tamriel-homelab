@@ -9,6 +9,13 @@ metrics, application metrics, scan results, and runtime events feed these tools.
 
 ## Grafana
 
+[![Node Exporter CPU, memory, network, and disk panels](../evidence/screenshots/grafana-host-metrics.webp)](../evidence/screenshots/README.md#host-monitoring)
+
+The Node Exporter dashboard gives me a view of host CPU, memory, network traffic,
+and disk usage over time.
+
+### Security scans
+
 [![Trivy dashboard summary](../evidence/screenshots/grafana-security-dashboard.png)](../evidence/screenshots/README.md#trivy-dashboard)
 
 The Trivy dashboard shows vulnerability totals and new findings. The secret

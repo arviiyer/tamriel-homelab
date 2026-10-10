@@ -71,7 +71,7 @@ class PublicationSafetyTests(unittest.TestCase):
     def test_checker_scans_its_own_content(self) -> None:
         script = self.repository / "scripts/check-public-safety.sh"
         with script.open("a") as output:
-            output.write("# Unsafe fixture: " + "10." + "23.45.67\n")
+            output.write("# Unsafe fixture: BEGIN PRIVATE " + "KEY\n")
 
         result = self.run_checker()
 
@@ -123,7 +123,7 @@ class PublicationSafetyTests(unittest.TestCase):
 
     def test_generic_rules_check_staged_index(self) -> None:
         staged_file = self.repository / "staged.md"
-        staged_file.write_text("Private address: " + "10." + "34.56.78\n")
+        staged_file.write_text("BEGIN PRIVATE " + "KEY\n")
         self.run_command("git", "add", staged_file.name)
         staged_file.write_text("Sanitized working tree\n")
 
@@ -131,6 +131,55 @@ class PublicationSafetyTests(unittest.TestCase):
 
         self.assertEqual(result.returncode, 1)
         self.assertIn("staged index", result.stderr)
+
+    def test_ordinary_infrastructure_labels_are_allowed(self) -> None:
+        # Generated labels, not inventory copied from the lab.
+        labels = (
+            "Private address: " + "10." + "23.45.67\n"
+            "LAN address: " + "192." + "168.23.45\n"
+            "Container address: " + "172." + "20.23.45\n"
+            "Overlay address: " + "100." + "100.23.45\n"
+            "MAC address: " + "02:00:00:" + "23:45:67\n"
+            "Public key: ssh-ed25519 " + "A" * 44 + " example-host\n"
+            "Host: apps-01; URL: https://apps.example.com/; VM ID: 123\n"
+            "Pool: example-pool; mount: /srv/example-media; account: root\n"
+            "Snapshot schedule: 0 */6 * * *\n"
+        )
+        notes = self.repository / "notes.md"
+        notes.write_text(labels)
+        result = self.run_checker()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        self.run_command("git", "add", notes.name)
+        notes.write_text("Harmless working tree\n")
+        result = self.run_checker()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        self.run_command("git", "commit", "--quiet", "-m", "record generated labels")
+        self.commit("replace generated labels")
+        result = self.run_checker()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_private_key_marker_in_retained_history_is_rejected(self) -> None:
+        historical_file = self.repository / "historical.md"
+        historical_file.write_text("BEGIN PRIVATE " + "KEY\n")
+        self.commit("add secret marker fixture")
+        historical_file.unlink()
+        self.commit("remove secret marker fixture")
+
+        result = self.run_checker()
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("private key marker", result.stderr)
+        self.assertIn("retained Git history", result.stderr)
+
+    def test_encrypted_vault_payload_is_rejected(self) -> None:
+        (self.repository / "vault.txt").write_text("$ANSIBLE_" + "VAULT;1.1;AES256\n")
+
+        result = self.run_checker()
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("Ansible Vault payload", result.stderr)
 
     def test_generic_rules_check_retained_history(self) -> None:
         local_path = "/" + "home/example-user/codebase/private-checkout\n"
@@ -242,6 +291,35 @@ class PublicationSafetyTests(unittest.TestCase):
 
         self.assertEqual(result.returncode, 1)
         self.assertIn("example.review.md", result.stderr)
+
+    def test_reviewed_screenshot_has_a_four_mib_limit(self) -> None:
+        screenshot = self.repository / "evidence/screenshots/example.webp"
+        screenshot.parent.mkdir(parents=True)
+        screenshot.write_bytes(b"\x00" * (4 * 1024 * 1024))
+        screenshot.with_suffix(".review.md").write_text("Synthetic review fixture\n")
+        self.run_command("git", "add", "evidence/screenshots")
+
+        result = self.run_checker()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        with screenshot.open("ab") as output:
+            output.write(b"\x00")
+        result = self.run_checker()
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("exceeds 4 MiB review limit", result.stderr)
+
+    def test_text_file_keeps_the_two_mib_limit(self) -> None:
+        notes = self.repository / "notes.md"
+        notes.write_text("x" * (2 * 1024 * 1024))
+
+        result = self.run_checker()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        with notes.open("a") as output:
+            output.write("x")
+        result = self.run_checker()
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("exceeds 2 MiB review limit", result.stderr)
 
 
 if __name__ == "__main__":

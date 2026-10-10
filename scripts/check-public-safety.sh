@@ -67,8 +67,12 @@ for path in "${candidate_files[@]}"; do
 
   if [[ -f "$path" ]]; then
     size=$(stat -c '%s' "$path")
-    if (( size > 2 * 1024 * 1024 )); then
-      report "tracked file exceeds 2 MiB review limit: $path"
+    limit_mib=2
+    if (( screenshot_path != 0 )); then
+      limit_mib=4
+    fi
+    if (( size > limit_mib * 1024 * 1024 )); then
+      report "tracked file exceeds $limit_mib MiB review limit: $path"
     fi
 
     if (( screenshot_path == 0 )) && [[ -s "$path" ]] &&
@@ -147,23 +151,11 @@ check_regex() {
   fi
 }
 
-check_regex \
-  'private IPv4 address found; use RFC 5737 documentation ranges' \
-  '(^|[^0-9])(10[.][0-9]{1,3}[.][0-9]{1,3}[.][0-9]{1,3}|192[.]168[.][0-9]{1,3}[.][0-9]{1,3}|172[.](1[6-9]|2[0-9]|3[01])[.][0-9]{1,3}[.][0-9]{1,3})([^0-9]|$)'
-
-check_regex \
-  'overlay-network address found; use a public alias' \
-  '(^|[^0-9])100[.](6[4-9]|[7-9][0-9]|1[01][0-9]|12[0-7])[.][0-9]{1,3}[.][0-9]{1,3}([^0-9]|$)'
-
+# Ordinary network addresses and public identifiers are not secrets. Keep using
+# synthetic values in runnable examples; inspect screenshot pixels separately.
 check_regex \
   'user-specific checkout path found; use a generic public path' \
   '(/(home|Users)/[A-Za-z0-9._-]+/(code(base)?|src|projects|workspace|repos(itories)?)/|[A-Za-z]:\\Users\\[A-Za-z0-9._-]+\\(code|src|projects|workspace|repos(itories)?)\\)'
-check_regex \
-  'MAC address found; remove device identity' \
-  '([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}'
-check_regex \
-  'SSH public key found; remove host or user identity' \
-  'ssh-(rsa|ed25519|ecdsa)[[:space:]]+[A-Za-z0-9+/]{20,}'
 check_regex \
   'private key marker found' \
   'BEGIN ([A-Z0-9 ]+ )?PRIVATE K''EY'

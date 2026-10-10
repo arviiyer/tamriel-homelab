@@ -2,9 +2,6 @@
 
 ## Documentation
 
-- Add reviewed screenshots of Homarr, Immich, FreshRSS, Jellyfin or Seerr,
-  general Grafana monitoring, and TrueNAS or PBS beside their descriptions. The
-  [screenshot notes](evidence/screenshots/README.md#next-captures) list useful views.
 - Replace the Trivy dashboard capture after correcting its file-scan panel label.
 - Identify the exact Speedtest application and add its setup and project link.
 - Review the deployed Readarr and Promtail setups before writing installation

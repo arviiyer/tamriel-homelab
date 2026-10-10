@@ -5,6 +5,8 @@
 I use Immich for my photo library. The photos live on TrueNAS, while the database
 and the rest of the application run on the application VM. Sign-in uses Authentik.
 
+[![Landscape photos and videos in an Immich album](../../evidence/screenshots/immich-album.webp)](../../evidence/screenshots/README.md#immich)
+
 - [Install](#install)
 - [Phone backups](#phone-backups)
 - [Authentik sign-in](#authentik-sign-in)

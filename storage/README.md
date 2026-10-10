@@ -6,6 +6,8 @@
 TrueNAS SCALE provides shared storage on the UGREEN NAS. Its four 4 TB hard
 drives are arranged as two mirrored pairs. PBS and Restic are the backup tools.
 
+[![TrueNAS storage layout and health](../evidence/screenshots/truenas-storage.webp)](../evidence/screenshots/README.md#truenas-storage)
+
 ## Where data lives
 
 | Data | Location |
@@ -41,9 +43,13 @@ configuration. Guest-mounted NFS files are outside those VM disk backups. The
 datastore is itself on the NAS, so a PBS backup there shares the NAS's failure
 boundary. It is not an off-site copy.
 
+[![A completed PBS backup task](../evidence/screenshots/pbs-backup.webp)](../evidence/screenshots/README.md#pbs-backup)
+
 ZFS snapshots cover selected file and photo datasets. Vaultwarden has a local
 Restic repository and a copy on another host, with repository checks. Keeping
 another copy on the same device would not cover losing that device.
+
+[![Finished periodic snapshot tasks in TrueNAS](../evidence/screenshots/truenas-snapshots.webp)](../evidence/screenshots/README.md#truenas-snapshots)
 
 | Application | What needs to be recoverable together |
 |---|---|

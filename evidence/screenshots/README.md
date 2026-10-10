@@ -2,7 +2,85 @@
 
 [Home](../../README.md) · [Apps and services](../../apps/README.md)
 
-Four captures from the lab. Click an image to open it at full resolution.
+Captures from the lab. Click an image to open it at full resolution.
+
+## Homarr
+
+[![Homarr service cards and reading brief](homarr-home.webp)](homarr-home.webp)
+
+Service links, Pi-hole statistics, and the Morning SOC Briefing.
+
+[Homarr notes](../../apps/README.md#homarr) · [Review details](homarr-home.review.md)
+
+## Immich
+
+[![Landscape album in Immich](immich-album.webp)](immich-album.webp)
+
+Landscape photos and videos in an album.
+
+[Immich setup](../../apps/immich/README.md) · [Review details](immich-album.review.md)
+
+## FreshRSS
+
+[![FreshRSS feed categories and articles](freshrss-reader.webp)](freshrss-reader.webp)
+
+Security feeds grouped by topic.
+
+[Feed-view review](freshrss-reader.review.md)
+
+[![An article open in FreshRSS](freshrss-article.webp)](freshrss-article.webp)
+
+An expanded article with its text and image.
+
+[FreshRSS setup](../../apps/freshrss/README.md) · [Article-view review](freshrss-article.review.md)
+
+## Jellyfin
+
+[![Jellyfin library and Continue Watching](jellyfin-library.webp)](jellyfin-library.webp)
+
+Media categories and the Continue Watching row.
+
+[Jellyfin setup](../../media/jellyfin/README.md) · [Review details](jellyfin-library.review.md)
+
+## Seerr
+
+[![Trending and popular titles in Seerr](seerr-discover.webp)](seerr-discover.webp)
+
+Browsing trending and popular titles in Seerr.
+
+[Media setup](../../media/README.md) · [Review details](seerr-discover.review.md)
+
+## Host monitoring
+
+[![CPU, memory, network, and disk panels in Grafana](grafana-host-metrics.webp)](grafana-host-metrics.webp)
+
+The Node Exporter dashboard in Grafana.
+
+[Monitoring setup](../../monitoring/README.md) · [Review details](grafana-host-metrics.review.md)
+
+## TrueNAS storage
+
+[![TrueNAS storage layout and health](truenas-storage.webp)](truenas-storage.webp)
+
+Two mirrored data VDEVs, storage usage, and disk health.
+
+[Storage setup](../../storage/README.md) · [Review details](truenas-storage.review.md)
+
+## TrueNAS snapshots
+
+[![Periodic snapshot tasks in TrueNAS](truenas-snapshots.webp)](truenas-snapshots.webp)
+
+Enabled snapshot tasks with finished status.
+
+[Backup notes](../../storage/README.md#backups) · [Review details](truenas-snapshots.review.md)
+
+## PBS backup
+
+[![PBS backup task completed successfully](pbs-backup.webp)](pbs-backup.webp)
+
+A VM backup completed with status OK in 4 minutes 38 seconds.
+
+[PBS restore notes](../../storage/README.md#a-vm-from-pbs) · [Review details](pbs-backup.review.md)
 
 ## Trivy dashboard
 
@@ -50,23 +128,9 @@ Git-history scans run separately.
 <details>
 <summary>Adding screenshots</summary>
 
-### Next captures
-
-These views would help show the everyday side of the lab. Add each reviewed
-image beside its app or guide, as well as here.
-
-| View | What to show | Where it belongs |
-|---|---|---|
-| Homarr | Service cards and a reading-brief excerpt | [Apps](../../apps/README.md#homarr) |
-| Immich | A small album using photos chosen for sharing | [Immich](../../apps/immich/README.md) |
-| FreshRSS | Feed categories and an article | [FreshRSS](../../apps/freshrss/README.md) |
-| Jellyfin or Seerr | Library browsing or the request interface | [Media](../../media/README.md) |
-| Grafana | Host CPU, memory, and storage panels | [Monitoring](../../monitoring/README.md) |
-| TrueNAS or PBS | Pool layout or a completed backup task | [Storage](../../storage/README.md) |
-
-For app captures, also check photos, album names, feed titles, avatars, and device
-labels for personal details. For infrastructure captures, crop out host, pool,
-dataset, and VM identifiers. Originals and working copies stay outside this repo.
+For app captures, check photos, album names, feed titles, avatars, and device
+labels for private personal details. Ordinary infrastructure labels, statistics,
+and browser bars can stay. Originals and working copies stay outside this repo.
 
 ### Adding an image
 
@@ -90,34 +154,33 @@ grafana-security-dashboard.review.md
 - Capture month: YYYY-MM
 - What it shows: <feature or result>
 - Source: Real operated environment / synthetic fixture
-- Cropped to minimum evidence: Yes
-- Opaque redactions applied: Yes
-- Browser URL removed: Yes / Not present
-- Hostnames and addresses removed: Yes
-- Usernames, emails, and IDs removed: Yes
-- Hashes, tokens, and fingerprints removed: Yes
-- Owner-approved retained values: None / <specific values and rationale>
-- Metadata stripped: Yes
+- Edits: None needed / <specific crops or opaque masks and why>
+- Secrets and private personal information: Not present / <what was removed>
+- Browser chrome and URLs checked: Yes
+- Metadata checked: No sensitive fields / <what was removed>
 - OCR output reviewed: Yes
+- Reviewer: <name or handle>
 - Second reviewer: <name or handle>
-- Notes: <what remains visible and why it is safe>
+- Notes: <useful context, if needed>
 ```
 
 ### What to capture
 
-Capture only the area described below. Browser chrome, navigation,
-sidebars, notifications, and unrelated rows should remain outside the capture
-rather than being redacted afterward.
+Keep enough of the interface to show the feature clearly. Browser chrome,
+navigation, sidebars, and surrounding panels can remain when they contain no
+secrets or private personal information. Crop for composition when useful.
 
 | Filename | What to show | What to crop or redact |
 |---|---|---|
-| `grafana-security-dashboard.png` | Severity totals and new critical/fixable HIGH findings; original Last Scan timestamp retained with owner approval | Surrounding tables, navigation, repository/image references, and user identity |
-| `forgejo-validation-run.png` | Workflow and job names, successful checkout and Compose-validation steps; not proof of required-check enforcement | Repository and organization names, actor identity, commit hash, pull-request number, image/version details, and surrounding navigation |
-| `security-scan-alert.png` | One delivered notification showing severity, new fixable findings, firing status, and an update instruction; not proof of scan completeness or remediation | Repository, image reference/version/digest, sender header, and message timestamp |
-| `proxmox-cluster-summary.png` | Cluster health, quorum state, and aggregate online/offline node counts; project-aligned cluster name retained with owner approval | Node tree, addresses, VM or storage IDs, guest names, account header, task history, exact versions, and resource totals |
+| `grafana-security-dashboard.png` | Severity totals and new critical/fixable HIGH findings | Tokens in URLs, private account details, or sensitive log excerpts |
+| `forgejo-validation-run.png` | Workflow and job names, successful checkout and Compose-validation steps | Credentials in output and private actor details |
+| `security-scan-alert.png` | A delivered notification with severity, finding counts, and an update instruction | Webhook tokens, private messages, or personal account details |
+| `proxmox-cluster-summary.png` | Cluster health, node inventory, quorum, and resource usage | Credentials or private personal information in labels and account details |
 
-Public CVE identifiers and generic product labels may remain visible. Opaque
-redaction must fully cover each private value; do not replace real labels with
-fabricated labels inside the image.
+Ordinary technical values do not need redaction: hostnames, IP addresses, VM IDs,
+pool names, versions, timestamps, schedules, resource totals, public CVEs, commit
+hashes, and image digests can stay. Check the content, not just the field name.
+When a value really is sensitive, fully cover it with an opaque mask; do not
+replace it with a fabricated label.
 
 </details>
