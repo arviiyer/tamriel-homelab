@@ -15,10 +15,11 @@ This directory contains a runnable **workflow demo** with generated events.
 It demonstrates collection, reset, and quarantine decisions from the project.
 The full analyst application and Windows execution system remain private.
 
-![Generated Sandbox lifecycle with partial evidence](../../screenshots/sandbox-demo.webp)
+![Sandbox analyst overview with a completed benign run](../../screenshots/sandbox-overview.webp)
 
-The local workflow demo, showing why a worker remains quarantined after missing
-evidence. [Screenshot review](../../screenshots/sandbox-demo.review.md).
+The private analyst UI, filtered to a completed benign qualification run. The
+worker's current quarantine is visible above the historical result.
+[Screenshot review](../../screenshots/sandbox-overview.review.md).
 
 ## The setup
 
@@ -64,7 +65,18 @@ lifecycle-bound noVNC console. Authentik signs analysts in; the API enforces the
 analyst group and session rules. The console closes when the run or analyst
 session is no longer eligible. These integrations are not part of the local demo.
 
+![Benign run with process events and collected artifacts](../../screenshots/sandbox-run.webp)
+
+The run detail shows process events and collected screenshots. This historical
+run completed on September 29; opening it did not resume the paused worker.
+[Screenshot review](../../screenshots/sandbox-run.review.md).
+
 ## Run the walkthrough
+
+![Generated Sandbox lifecycle with partial evidence](../../screenshots/sandbox-demo.webp)
+
+The public walkthrough shows why a worker remains quarantined after missing
+evidence. [Screenshot review](../../screenshots/sandbox-demo.review.md).
 
 Requirements: Python 3.10+ and Git. No hypervisor, Windows VM, API key, or model
 is needed:

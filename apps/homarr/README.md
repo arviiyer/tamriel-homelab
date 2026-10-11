@@ -143,10 +143,12 @@ Use this JSX in the template editor:
 ```
 
 Run **Test and preview**, check the complete text and article links, and save.
-Add a **Custom API** widget to the board, select this definition, and set its
-refresh interval to 300 seconds. Keep article content in text bindings rather
-than interpreting it as HTML or JSX. The reading worker only publishes JSON;
-it does not need a Homarr credential.
+In board edit mode, choose **Add widget → Custom widgets → Morning SOC Briefing**.
+Set the refresh-interval slider to 300 seconds, save the widget, then save the
+board. Use **Move / resize item** to give the excerpts enough room; the widget
+scrolls when its content is taller than its panel. Keep article content in text
+bindings rather than interpreting it as HTML or JSX. The reading worker only
+publishes JSON; it does not need a Homarr credential.
 
 ## Backups and restore
 

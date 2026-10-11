@@ -124,20 +124,35 @@ A VM backup completed with status OK in 4 minutes 38 seconds.
 
 ## Project examples
 
-[![Forge sample portal](forge-demo.webp)](../projects/forge/README.md)
+[![Live reading brief in Homarr](reading-live.webp)](../projects/reading-brief/README.md)
 
-Forge's public portal with generated VM inventory.
-[Review](forge-demo.review.md).
+The public reading worker's live output on a fresh Homarr installation, using
+two public advisories and a synthetic restore article.
+[Review](reading-live.review.md).
+
+[![Forge managing two disposable VMs](forge-live.webp)](../projects/forge/README.md)
+
+Forge's public portal managing two real test VMs with different resource sizes.
+[Review](forge-live.review.md).
 
 [![Printer Monitor sample window](printer-demo.webp)](../projects/printer-monitor/README.md)
 
 Printer Monitor's GTK window using sample data.
 [Review](printer-demo.review.md).
 
-[![Sandbox workflow demo](sandbox-demo.webp)](../projects/sandbox/README.md)
+[![Sandbox analyst overview](sandbox-overview.webp)](../projects/sandbox/README.md)
 
-Sandbox's generated lifecycle walkthrough, showing a missing-evidence result.
-[Review](sandbox-demo.review.md).
+The private Sandbox UI with a completed benign run and the currently paused
+worker. [Overview review](sandbox-overview.review.md).
+
+[![Sandbox benign run detail](sandbox-run.webp)](../projects/sandbox/README.md)
+
+Process events and collected screenshots from the same run.
+[Run-detail review](sandbox-run.review.md).
+
+The guides also include the [Forge sample portal](forge-demo.webp) and
+[Sandbox workflow demo](sandbox-demo.webp).
+[Forge review](forge-demo.review.md) · [Sandbox demo review](sandbox-demo.review.md).
 
 <details>
 <summary>Adding screenshots</summary>

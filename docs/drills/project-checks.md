@@ -2,7 +2,8 @@
 
 [Projects](../../projects/README.md) · [Setup guide checks](setup-guide-checks.md)
 
-Checked on October 10, 2026. The examples ran locally or in disposable containers.
+Checked on October 10, 2026. The examples ran locally, in disposable containers,
+or against disposable Proxmox VMs.
 Generated files, models, and test data stayed outside the repository.
 
 ## Results
@@ -10,10 +11,10 @@ Generated files, models, and test data stayed outside the repository.
 | Project | Checked |
 |---|---|
 | Printer Monitor | Three Python tests, installation into an empty home directory, JSON sample output, and the GTK sample window. The local CUPS queue was available while its printer was offline. |
-| Reading brief | Seven Python tests, sample publication, read-only JSON/RSS routes, unavailable-first-brief handling, and retaining the previous brief after inference failure. Export ran against a disposable FreshRSS account. The pinned GGUF downloaded with the expected SHA-256; the actual llama.cpp container tokenized both sample articles and returned valid sentence IDs. |
+| Reading brief | Eight Python tests and a live FreshRSS → Jev → local Qwen → JSON/RSS → Homarr check. Exact source comparisons, duplicate filtering, same-day reruns, failure preservation, and the FreshRSS article link passed. Details below. |
 | Seerr approver | Eight Go tests with the race detector and `go vet`; Docker build. Fake Seerr/Discord transports checked permissions, CSRF, webhook authentication, owner/location checks, signed actions, approval replay, denial/cancellation, stale requests, and avoiding blind write retries. |
-| Forge | Five Go tests with the race detector and `go vet`; Terraform formatting, provider validation, and a two-VM mocked plan. Browser checks launched a second sample VM, retained the protected first VM, toggled protection, and destroyed only the new VM. |
-| Sandbox | Four Python tests and all four generated browser scenarios: completed, stopped, missing evidence, and failed reset. |
+| Forge | Five Go tests with the race detector and `go vet`; Terraform formatting, provider validation, and a two-VM mocked plan. Live browser checks created two VMs, preserved the first one's configuration, checked SSH login and protection, exercised power controls, and removed both VMs. |
+| Sandbox | Four Python tests and all four generated browser scenarios: completed, stopped, missing evidence, and failed reset. Reviewed captures of a historical benign run in the private analyst UI. |
 
 The project index and all five guides passed local Markdown link checks and
 Chromium rendering at 1280-pixel and 390-pixel widths, including diagrams and
@@ -23,16 +24,74 @@ The model-container smoke test caught an unquoted YAML flow-list entry in the
 temporary mount options. Quoting the complete mount fixed startup; the actual
 model check then passed.
 
+## Reading brief
+
+A fresh FreshRSS reader imported seven controlled entries: two public Debian
+advisories, a synthetic SQLite restore article and its paraphrase, a promotional
+article, and URL/content duplicates. Jev selected one restore article and both
+advisories. The paraphrase, exact duplicates, and promotional entry were omitted.
+This used the existing API account with fresh worker state, not a new TypeSafe
+account. The complete check used 16 ranking/comparison API attempts, including
+an intentional authentication failure.
+
+The first source comparison caught a text-cleaning bug: newlines used to wrap
+HTML source became separate sentences. The fix collapses those spaces while
+retaining paragraph, list, and line-break boundaries. A regression test and the
+repeated live run passed; both advisory excerpts now include their complete
+sentences. All published excerpts matched the cleaned source text.
+
+A same-day rerun made no API calls and retained identical output. An actual API
+authentication failure and an unavailable local model preserved the last good
+publication. Featured-article history and JSON/RSS output also passed.
+
+The documented widget rendered the public worker's JSON in a fresh Homarr 2.4.1
+installation, with a 300-second refresh interval. Its article link opened the
+correct entry after FreshRSS login. The board fit a 390-pixel viewport.
+[Screenshot](../../screenshots/reading-live.webp) and
+[review](../../screenshots/reading-live.review.md).
+
+This checks the complete integration on known inputs. It is not a multi-day
+assessment of reading quality across the normal subscription set.
+
+## Forge
+
+The public portal ran in a new Terraform directory against Proxmox with verified
+TLS. It cloned two Debian 13 VMs, using 1 CPU / 1 GiB and 2 CPUs / 1.5 GiB. The
+complete first-VM configuration remained identical while the second was added.
+Protection was reflected in Proxmox and disabled the portal's destroy action.
+
+The first guest-login check found that Debian's existing `operator` system group
+prevented cloud-init from creating the same-named user. Both Terraform examples
+now use `labuser`. The repeated live check confirmed DHCP, the QEMU guest agent,
+SSH public-key login, and completed cloud-init configuration.
+
+An initial shutdown timed out during first-boot work. After that work finished,
+the portal's graceful shutdown and start both reached the requested hypervisor
+state. The corrected walkthrough waits for cloud-init before power checks.
+Protection removal and both deletions passed; the original VM inventory was
+unchanged and the test Terraform state was empty afterward.
+[Screenshot](../../screenshots/forge-live.webp) and
+[review](../../screenshots/forge-live.review.md).
+
+## Sandbox
+
+The private UI was opened through its normal analyst sign-in and filtered to a
+completed September 29 benign execution-fixture run. The captures show its
+overview, process timeline, and collected screenshots: 139 events and 20
+artifacts. The worker remained quarantined, its Windows VM stayed powered off,
+and the scheduler/worker container stayed stopped.
+
+[Overview](../../screenshots/sandbox-overview.webp) ·
+[Run detail](../../screenshots/sandbox-run.webp) ·
+[Screenshot reviews](../../screenshots/sandbox-run.review.md)
+
 ## Scope of these results
 
-- Jev's live ranking API was not called. The model check covers local sentence
-  selection, not the quality of a complete ranked daily brief.
 - Discord Gateway delivery and real Seerr decisions need a configured bot and
   test requests. The tests exercise the REST interaction handlers with fixtures.
-- Forge's plan checks used a mocked provider. They did not create, power, or
-  destroy a VM on the lab cluster.
 - Sandbox's public viewer replays generated events. It does not validate a
-  Windows agent, hypervisor reset, console relay, or network isolation.
+  Windows agent, hypervisor reset, console relay, or network isolation. The private
+  UI captures document an existing run, not a new execution qualification.
 
 ## Repeat the checks
 

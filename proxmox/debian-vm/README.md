@@ -25,7 +25,7 @@ In **Create VM**:
 | Network | VirtIO on the intended bridge, with the appropriate VLAN tag if used |
 
 Install Debian with **SSH server** and **standard system utilities**, without a
-desktop. Create a regular user, called `operator` in these examples, and give it
+desktop. Create a regular user, called `labuser` below, and give it
 administrative access. Use a DHCP reservation for the VM's MAC address or a static
 address outside the DHCP pool. Check the gateway and DNS server before proceeding.
 
@@ -34,12 +34,12 @@ Inside the VM, as root (or through `sudo` if already configured):
 ```bash
 apt update
 apt install sudo qemu-guest-agent curl ca-certificates gnupg nfs-common
-usermod -aG sudo operator
+usermod -aG sudo labuser
 systemctl start qemu-guest-agent
 ```
 
 Install your SSH public key from your workstation with
-`ssh-copy-id operator@apps-01`. Confirm a fresh SSH login and `sudo -v` before
+`ssh-copy-id labuser@apps-01`. Confirm a fresh SSH login and `sudo -v` before
 closing the console. Proxmox should now display the guest address and be able to
 shut down the guest through the agent.
 
@@ -67,7 +67,7 @@ The service guides use `docker` without `sudo`. To follow that convention, add
 your administration account to the Docker group and reconnect:
 
 ```bash
-sudo usermod -aG docker operator
+sudo usermod -aG docker labuser
 ```
 
 Docker-group membership grants control of the host. Use it for the account

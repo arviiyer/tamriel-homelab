@@ -54,7 +54,8 @@ class Text(HTMLParser):
 
     def handle_data(self, data):
         if not self.hidden:
-            self.parts.append(data)
+            # HTML source wrapping is whitespace, not a paragraph boundary.
+            self.parts.append(re.sub(r"\s+", " ", data))
 
 
 def clean_html(content):

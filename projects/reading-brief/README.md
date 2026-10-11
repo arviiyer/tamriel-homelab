@@ -6,10 +6,11 @@ I use FreshRSS to collect articles and Homarr to see a short morning reading
 list. This worker ranks unread articles, picks a few useful ones, and copies
 source excerpts into a daily brief. Links open the full article in FreshRSS.
 
-![Reading brief on the Homarr board](../../screenshots/homarr-home.webp)
+![Live reading worker output on a fresh Homarr board](../../screenshots/reading-live.webp)
 
-The brief is on the right of my Homarr board.
-[Screenshot review](../../screenshots/homarr-home.review.md).
+The public worker's output on a fresh Homarr installation, using two Debian
+advisories and a synthetic restore article.
+[Screenshot review](../../screenshots/reading-live.review.md).
 
 ## How it works
 
@@ -38,6 +39,10 @@ skips read entries, repeated URLs and content, and already-featured stories.
 Limits per source and topic keep one feed from filling the whole list. A failed
 ranking or excerpt step keeps the last completed brief. An empty successful
 selection publishes an empty list for that day.
+
+The [live check](../../docs/drills/project-checks.md#reading-brief) covers Jev,
+local Qwen, FreshRSS links, and the Homarr display. HTML source line wrapping is
+collapsed before sentence selection so excerpts retain complete sentences.
 
 ## Try it with sample articles
 

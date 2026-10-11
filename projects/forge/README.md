@@ -6,10 +6,12 @@ Forge is a small Go web interface for creating Proxmox VMs from templates. I use
 Terraform for provisioning and direct Proxmox API calls for start and shutdown.
 Forge is separate from Forgejo, the Git service.
 
-![Forge sample portal with two VMs](../../screenshots/forge-demo.webp)
+![Forge managing two disposable Proxmox VMs](../../screenshots/forge-live.webp)
 
-The public portal running with sample data.
-[Screenshot review](../../screenshots/forge-demo.review.md).
+The public portal managing two real test VMs with different CPU and memory
+settings. Both were removed after the check.
+[Screenshot review](../../screenshots/forge-live.review.md) ·
+[Live test results](../../docs/drills/project-checks.md#forge).
 
 ## The important part
 
@@ -67,7 +69,8 @@ Use a new workspace for Forge. Its state checks expect the supplied root module,
 not an existing Terraform project. Do not add an `endpoint` override in tfvars:
 the portal passes the same environment endpoint to Terraform and its API client.
 The provider and API client both verify TLS. Install your Proxmox CA into the
-host's trust store rather than disabling verification.
+host's trust store rather than disabling verification. The endpoint's hostname
+or address must also appear in the server certificate.
 
 Set the endpoint and read your private token without putting it into shell history:
 
@@ -100,14 +103,18 @@ ssh -N -L 8088:127.0.0.1:8088 operator@192.0.2.40
 2. Select the configured node, template, and size, then launch it.
 3. Wait for the completed message. In Proxmox, check the clone task, cloud-init
    settings, and guest-agent address. Sign in with the configured SSH key as
-   `operator`.
+   `labuser`. Wait for `cloud-init status --wait` to finish before testing power
+   controls; first-boot package updates can delay shutdown.
 4. Launch a second VM with another ID. Check that the first VM's settings remain
    unchanged.
-5. Use **Shut down** to request an ACPI shutdown, then check its Proxmox task.
+5. Use **Shut down** to request a graceful shutdown, then check its Proxmox task.
 
 Provisioning runs asynchronously and the page refreshes while busy. Power
 controls report that Proxmox accepted the task, not that the guest has finished
 booting or shutting down. Shutdown uses `forceStop=0`.
+
+The cloud-init user is `labuser`. Avoid `operator` on Debian cloud images: its
+existing system group prevents cloud-init from creating a same-named user.
 
 **Protect** sets Proxmox's protection flag through Terraform. A protected VM
 cannot be destroyed from the portal until protection is removed. Destruction
@@ -161,7 +168,7 @@ after reviewing that plan. Start the portal again once state and inventory agree
 | Clone fails | Template ID/node, datastore permissions, bridge, and unused VM ID |
 | State and inventory disagree | A failed apply, manual Terraform change, or incomplete backup restore |
 | TLS error | Proxmox endpoint and trusted CA on the portal host |
-| Shutdown remains pending | Guest ACPI support and the Proxmox task result |
+| Shutdown remains pending | First-boot updates, guest-agent/ACPI support, and the Proxmox task result |
 | Browser refuses an action | Use the loopback URL; reopen the page after restarting the portal |
 
 ```bash

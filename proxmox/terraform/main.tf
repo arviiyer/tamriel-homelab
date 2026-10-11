@@ -53,7 +53,7 @@ resource "proxmox_virtual_environment_vm" "example" {
   initialization {
     datastore_id = var.datastore
     user_account {
-      username = "operator"
+      username = "labuser"
       keys     = [trimspace(file(var.ssh_public_key_file))]
     }
     ip_config {

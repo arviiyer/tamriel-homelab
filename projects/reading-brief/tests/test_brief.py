@@ -69,6 +69,21 @@ class BriefTests(unittest.TestCase):
         text = "CVE-2026-12345 Example service authentication bypass\nCVE-2026-12346"
         self.assertEqual(len(brief.source_sentences(text)), 1)
 
+    def test_wrapped_html_keeps_complete_sentences_and_structural_breaks(self):
+        content = ("<p>A malformed document could cause denial of\n"
+                   "service when the application processes its embedded images.</p>"
+                   "<p>Install the <strong>security update</strong> before opening\n"
+                   "documents received from an untrusted source.<br>"
+                   "CVE-2026-12345 Example parser denial of service</p>"
+                   "<script>Hidden content must not enter the excerpt.</script>")
+        text = brief.clean_html(content)
+        self.assertEqual(text.splitlines(), [
+            "A malformed document could cause denial of service when the application processes its embedded images.",
+            "Install the security update before opening documents received from an untrusted source.",
+            "CVE-2026-12345 Example parser denial of service",
+        ])
+        self.assertEqual([s["text"] for s in brief.source_sentences(text)], text.splitlines())
+
     def test_exact_duplicates_and_read_entries_skipped(self):
         self.articles.append(dict(self.articles[0], id="3"))
         self.articles[1]["is_read"] = True

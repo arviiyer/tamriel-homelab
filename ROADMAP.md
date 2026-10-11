@@ -18,9 +18,8 @@
 
 ## Projects
 
-- Qualify the public reading worker's ranking with a fresh TypeSafe account,
-  then compare complete daily briefs against their sources.
-- Check the public Seerr bot's live Discord buttons and Forge's complete VM
-  lifecycle on disposable installations.
-- Add reviewed captures of Discord approval actions and the private Sandbox UI.
+- Review reading quality over several complete daily briefs; the bounded live
+  ranking, source-fidelity, and Homarr integration check has passed.
+- Check the public Seerr bot's live Discord buttons on a disposable installation
+  and add reviewed captures of the approval actions.
 - Continue Sandbox's browser-linked DNS telemetry work before resuming analysis.

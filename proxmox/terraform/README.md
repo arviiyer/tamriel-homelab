@@ -4,7 +4,7 @@
 
 My [Forge portal](../../projects/forge/README.md) uses Terraform to clone Debian templates. This smaller example
 creates one VM directly: two CPU cores, 4 GiB RAM, a 64 GiB local disk, DHCP, and
-an operator account with your SSH public key. It uses the same `bpg/proxmox`
+a `labuser` account with your SSH public key. It uses the same `bpg/proxmox`
 provider and full-clone approach.
 
 ## Before starting
@@ -67,9 +67,12 @@ unset PROXMOX_VE_API_TOKEN
 ```
 
 Check the VM's cloud-init task and guest-agent address in Proxmox. SSH in as
-`operator`, check `hostnamectl` and `cloud-init status --wait`, and continue with
+`labuser`, check `hostnamectl` and `cloud-init status --wait`, and continue with
 the [Docker setup](../debian-vm/README.md#install-docker). If the template needs
 sudo installed or configured, complete that through its console first.
+
+Avoid `operator` as the cloud-init username on Debian: the image already has an
+`operator` system group, which prevents automatic creation of that user.
 
 ## Updates and deletion
 
