@@ -89,8 +89,8 @@ The application and media hosts wait for NFS availability before mounting their
 shares. Docker then requires the relevant mounts before starting. That ordering
 addresses the race where a VM boots before the NAS is ready.
 
-The [NFS guide](nfs/README.md#wait-for-mounts) shows the mount dependency to add
-on a Docker VM.
+The [NFS guide](nfs/README.md#wait-for-mounts) has the systemd files and commands
+for this startup order.
 
 ## Notes
 

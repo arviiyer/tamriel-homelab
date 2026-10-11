@@ -44,7 +44,7 @@ The addresses below are documentation examples. Replace `192.0.2.20` with your
 NAS address and the dataset paths with your actual exports.
 
 ```bash
-sudo apt install nfs-common
+sudo apt install nfs-common curl
 sudo mkdir -p /mnt/nas/downloads /mnt/nas/media
 ```
 
@@ -76,32 +76,89 @@ the ownership of files already stored there.
 
 ## Wait for mounts
 
-On a VM dedicated to these stacks, make Docker require its shared storage:
+My app and media VMs sometimes start before the NAS. A small systemd service
+waits for TCP 2049, then the shares mount and Docker starts:
+
+`NAS listening → NFS mounts → Docker → containers`
+
+Download the three files on the Docker VM:
 
 ```bash
-sudo systemctl edit docker.service
+mkdir -p "$HOME/homelab/nfs"
+cd "$HOME/homelab/nfs"
+(
+  set -eu
+  for file in nas-ready.service wait-for-nas.conf docker-mounts.conf; do
+    curl -fLo "$file" \
+      "https://raw.githubusercontent.com/arviiyer/tamriel-homelab/main/storage/nfs/$file"
+  done
+)
 ```
 
-Enter:
+Set your NAS address in [nas-ready.service](nas-ready.service). It waits two
+seconds between attempts, with no overall timeout. If the NAS is offline at boot,
+the VM stays accessible and Docker waits.
 
-```ini
-[Unit]
-RequiresMountsFor=/mnt/nas/downloads /mnt/nas/media
-After=network-online.target
-Wants=network-online.target
+The [mount drop-in](wait-for-nas.conf) makes each share wait for that service.
+The [Docker drop-in](docker-mounts.conf) requires both mounts. Install them:
+
+```bash
+sudo install -m 644 nas-ready.service /etc/systemd/system/nas-ready.service
+for share in downloads media; do
+  sudo install -D -m 644 wait-for-nas.conf \
+    "/etc/systemd/system/mnt-nas-${share}.mount.d/wait-for-nas.conf"
+done
+sudo install -D -m 644 docker-mounts.conf \
+  /etc/systemd/system/docker.service.d/nfs-mounts.conf
+sudo systemctl daemon-reload
 ```
 
-Save and run `sudo systemctl daemon-reload`. Apply this during a maintenance
-window by stopping the Compose stacks, then restarting Docker and starting the
-stacks again. Use only this VM's actual NAS paths in the drop-in.
+For the app VM, use `photos` and `sync` in the loop and the matching paths in
+`docker-mounts.conf`. For another path, get its unit name with
+`systemd-escape --path --suffix=mount /mnt/nas/media`. The mount units start
+`nas-ready.service` themselves, so it does not need `systemctl enable`.
 
-Check `systemctl show docker -p RequiresMountsFor`, `findmnt`, and application
-access after a reboot. If the NAS arrives after a mount timeout, restore NFS
-connectivity, start the mount units, and then start Docker and the stacks.
+Reboot the VM when ready to restart its services, then check:
 
-My lab additionally waits for the NAS's NFS listener before trying the mounts.
-After changing an export, check `findmnt -no SOURCE,FSTYPE,TARGET` against the
-intended NAS and dataset before starting the applications.
+```bash
+systemctl status nas-ready.service docker.service
+findmnt -t nfs,nfs4 -o SOURCE,TARGET,OPTIONS
+docker ps
+```
+
+Keep an `/etc/fstab` entry for every path in the Docker drop-in. Without one,
+Docker can use the local directory instead. It will also start with the wrong
+export if that export mounts successfully. Check `SOURCE` against the intended
+NAS and dataset before starting apps.
+
+## If storage does not come up
+
+```bash
+systemctl list-jobs
+sudo journalctl -b -u nas-ready.service -u mnt-nas-downloads.mount -u mnt-nas-media.mount
+```
+
+| What you see | What to check |
+|---|---|
+| `nas-ready` stays activating | NAS power, NFS service, and TCP 2049 between the VM and NAS |
+| Mount fails after the listener is ready | Export path, allowed client address, and the mount journal |
+| Files are missing or the source is wrong | Stop the apps and check the export in `/etc/fstab` |
+
+After fixing a failed mount, retry it and start Docker:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl reset-failed mnt-nas-downloads.mount mnt-nas-media.mount docker.service
+sudo systemctl start mnt-nas-downloads.mount mnt-nas-media.mount
+findmnt -t nfs,nfs4 -o SOURCE,TARGET,OPTIONS
+sudo systemctl start docker.service
+```
+
+If an incorrect share is already mounted, stop the stacks, then
+`docker.service` and `docker.socket`. Stop the share's `.mount` and `.automount`
+units, correct `/etc/fstab`, and use the retry commands above. Run
+`docker compose up -d` in each stack directory if its containers were stopped
+manually.
 
 ## Snapshots and file recovery
 
@@ -124,7 +181,5 @@ and disk-health checks enabled and review their results.
   are next to each other inside the container.
 - A VM backup excludes guest-mounted NFS files. Back up the application database
   and shared library as complementary parts of the restore.
-- Avoid starting an app against an empty local mount directory. The media Compose
-  file rejects missing bind paths, but only the mount dependency establishes NFS.
 
 [TrueNAS NFS guide](https://www.truenas.com/docs/scale/scaletutorials/shares/addingnfsshares/)
