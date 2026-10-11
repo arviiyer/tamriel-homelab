@@ -20,6 +20,5 @@
 
 - Review reading quality over several complete daily briefs; the bounded live
   ranking, source-fidelity, and Homarr integration check has passed.
-- Check the public Seerr bot's live Discord buttons on a disposable installation
-  and add reviewed captures of the approval actions.
+- Check the public Seerr bot's live Discord buttons on a disposable installation.
 - Continue Sandbox's browser-linked DNS telemetry work before resuming analysis.

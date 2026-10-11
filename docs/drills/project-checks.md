@@ -12,7 +12,7 @@ Generated files, models, and test data stayed outside the repository.
 |---|---|
 | Printer Monitor | Three Python tests, installation into an empty home directory, JSON sample output, and the GTK sample window. The local CUPS queue was available while its printer was offline. |
 | Reading brief | Eight Python tests and a live FreshRSS → Jev → local Qwen → JSON/RSS → Homarr check. Exact source comparisons, duplicate filtering, same-day reruns, failure preservation, and the FreshRSS article link passed. Details below. |
-| Seerr approver | Eight Go tests with the race detector and `go vet`; Docker build. Fake Seerr/Discord transports checked permissions, CSRF, webhook authentication, owner/location checks, signed actions, approval replay, denial/cancellation, stale requests, and avoiding blind write retries. |
+| Seerr approver | Eight Go tests with the race detector and `go vet`; Docker build. Fixture checks cover permission and interaction handling. The public client passed read-only integration checks against fresh Seerr. Reviewed screenshots show a real approval through the existing lab bot. |
 | Forge | Five Go tests with the race detector and `go vet`; Terraform formatting, provider validation, and a two-VM mocked plan. Live browser checks created two VMs, preserved the first one's configuration, checked SSH login and protection, exercised power controls, and removed both VMs. |
 | Sandbox | Four Python tests and all four generated browser scenarios: completed, stopped, missing evidence, and failed reset. Reviewed captures of a historical benign run in the private analyst UI. |
 
@@ -53,6 +53,28 @@ correct entry after FreshRSS login. The board fit a 390-pixel viewport.
 This checks the complete integration on known inputs. It is not a multi-day
 assessment of reading quality across the normal subscription set.
 
+## Seerr Discord Approver
+
+The public client's local-account login, exact Manage Requests permission check,
+pending-request listing, per-request lookup, and title lookup passed against a
+fresh Seerr 3.4.1 installation. Four pending requests used Blender open films.
+The disposable Jellyfin, Seerr, and Radarr containers were removed afterward.
+
+The eight Go tests use fake Seerr/Discord transports to check permissions, CSRF,
+webhook authentication, owner/location checks, signed actions, approval replay,
+denial/cancellation, stale requests, and avoiding blind write retries.
+
+The owner supplied screenshots of a *Big Buck Bunny* request and its approval
+through the existing lab bot. They show the pending buttons, the bot's approval
+confirmation, and Seerr's processing status. The screenshots demonstrate the
+running lab version, which includes posters and richer details; the public
+example uses compact text messages. The public example's Discord Gateway and
+live decision checks remain on the [roadmap](../../ROADMAP.md#projects).
+
+[Pending request](../../screenshots/seerr-approval-pending.webp) ·
+[Approved request](../../screenshots/seerr-approved.webp) ·
+[Screenshot reviews](../../screenshots/seerr-approved.review.md)
+
 ## Forge
 
 The public portal ran in a new Terraform directory against Proxmox with verified
@@ -87,8 +109,8 @@ and the scheduler/worker container stayed stopped.
 
 ## Scope of these results
 
-- Discord Gateway delivery and real Seerr decisions need a configured bot and
-  test requests. The tests exercise the REST interaction handlers with fixtures.
+- The public Discord example's live button delivery and decisions remain untested.
+  The lab-bot screenshots and fresh-Seerr read checks cover the steps above.
 - Sandbox's public viewer replays generated events. It does not validate a
   Windows agent, hypervisor reset, console relay, or network isolation. The private
   UI captures document an existing run, not a new execution qualification.

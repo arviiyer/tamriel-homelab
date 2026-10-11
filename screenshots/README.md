@@ -135,6 +135,17 @@ two public advisories and a synthetic restore article.
 Forge's public portal managing two real test VMs with different resource sizes.
 [Review](forge-live.review.md).
 
+[![Pending Discord approval request](seerr-approval-pending.webp)](../projects/seerr-discord-approver/README.md)
+
+The lab bot's approval workflow using *Big Buck Bunny*, an
+[openly licensed Blender Foundation film](https://peach.blender.org/about/).
+[Pending-request review](seerr-approval-pending.review.md).
+
+[![Discord approval confirmation](seerr-approved.webp)](../projects/seerr-discord-approver/README.md)
+
+The bot confirms approval and Seerr reports the request as processing.
+[Approval review](seerr-approved.review.md).
+
 [![Printer Monitor sample window](printer-demo.webp)](../projects/printer-monitor/README.md)
 
 Printer Monitor's GTK window using sample data.

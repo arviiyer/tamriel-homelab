@@ -7,6 +7,23 @@ message with **Approve** and **Deny** buttons. Only my configured Discord accoun
 can use them, in the configured server and channel. Denial opens a private
 confirmation before changing the request.
 
+## Screenshots
+
+An approval demonstration using *Big Buck Bunny* (2008), an
+[openly licensed film by the Blender Foundation](https://peach.blender.org/about/).
+These captures show my running lab bot, which includes posters and richer request
+details. The public example below uses compact text messages.
+
+![Big Buck Bunny request with Approve and Deny buttons](../../screenshots/seerr-approval-pending.webp)
+
+A pending request in Discord.
+[Screenshot review](../../screenshots/seerr-approval-pending.review.md).
+
+![Bot confirmation and approved Big Buck Bunny request](../../screenshots/seerr-approved.webp)
+
+After approval, the bot confirms the action and Seerr reports the request as
+processing. [Screenshot review](../../screenshots/seerr-approved.review.md).
+
 ## How it works
 
 ```mermaid
@@ -25,8 +42,7 @@ port into the lab.
 
 The [public implementation](bot.go) includes signed, expiring buttons,
 owner/server/channel checks, persistent message records, and a once-per-minute
-reconciliation pass. It uses compact text messages. The lab version also adds
-poster images and richer request details.
+reconciliation pass.
 
 ## Get the files
 
@@ -182,7 +198,10 @@ go vet ./...
 
 The tests use a local fake Seerr API to check permissions, CSRF, write retry
 behavior, stale decisions, webhook authentication, and signed actions. They
-need no Discord or Seerr credentials. Live button delivery needs the first-request
+need no Discord or Seerr credentials. The public client also passed login,
+pending-request, and title lookups against a fresh Seerr installation.
+[Test results](../../docs/drills/project-checks.md#seerr-discord-approver).
+Live button delivery for the public example still needs the first-request
 walkthrough above.
 
 [Seerr client](seerr.go) · [Interaction handler](bot.go) · [Tests](bot_test.go)

@@ -80,6 +80,7 @@ Application configuration lives beside its [setup guide](../README.md#setup-guid
 |---|---|---|
 | [Repository checks](../.github/workflows/validate.yml) | Pull requests, pushes to `main`, or manual runs | Publication rules, Markdown links, validation scripts, and Git-history secrets |
 | [Automation examples](../.github/workflows/examples.yml) | Relevant automation or service-example changes, or manual runs | Component tests, Terraform plans, and configuration validation |
+| [Project examples](../.github/workflows/projects.yml) | Relevant project changes, or manual runs | Python and Go tests, race checks, sample runs, and mocked multi-VM Terraform plans |
 | [Integration checks](../.github/workflows/integration.yml) | Manual runs | App stacks, DNS, browser sign-in, alerts, Grafana, PromQL, and the delivery drill image build |
 
 See the [setup guide check results](../docs/drills/setup-guide-checks.md) for the
