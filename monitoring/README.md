@@ -11,6 +11,8 @@ Start with [host metrics and alerts](host-metrics/README.md), then add
 [host logs](logs/README.md) and [Uptime Kuma](uptime-kuma/README.md) checks for the
 applications you care about.
 
+The [UPS guide](ups/README.md) covers power monitoring and host shutdown with NUT.
+
 ## Grafana
 
 [![Node Exporter CPU, memory, network, and disk panels](../screenshots/grafana-host-metrics.webp)](../screenshots/README.md#host-monitoring)

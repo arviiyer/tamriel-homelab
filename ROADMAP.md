@@ -7,7 +7,7 @@
 - Migrate existing Promtail hosts to Alloy.
 - Review alternatives to Readarr now that its upstream project is retired.
 - Plan the management/server VLAN split separately from the existing client zones.
-- Connect UPS USB monitoring and configure low-battery shutdown through NUT.
+- Connect the UPS USB cable and test NUT shutdown and power recovery on the lab hosts.
 - Check Forgejo branch protections and deployment-runner permissions.
 - Test routed VLAN and tailnet access with disposable clients.
 - Try Ansible SSH/update changes and Falco deployment, including rollback, on

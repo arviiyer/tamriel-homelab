@@ -75,7 +75,7 @@ The NAS hard drives are arranged as two mirrored pairs.
 | Hardware | Specs | Use |
 |---|---|---|
 | Raspberry Pi 5 | 16 GB RAM, 128 GB microSD | DNS, reverse proxy, and cluster quorum device |
-| CyberPower CP1500PFCLCD | 1500 VA / 1000 W | UPS power protection |
+| CyberPower CP1500PFCLCD | 1500 VA / 1000 W | [UPS power protection](monitoring/ups/README.md) |
 
 ## What's running
 

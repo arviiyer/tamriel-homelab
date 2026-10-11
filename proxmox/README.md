@@ -79,8 +79,8 @@ OPNsense runs on a separate ThinkCentre, and TrueNAS SCALE runs on the UGREEN NA
 The [hardware list](../README.md#supporting-devices) also includes UPS power
 protection.
 
-The UPS currently supplies power only. Its USB monitoring connection and
-automatic low-battery shutdown are still on the [roadmap](../ROADMAP.md).
+The [UPS guide](../monitoring/ups/README.md) covers TrueNAS monitoring and the
+Proxmox shutdown clients.
 
 Administration goes through [Tailscale](../networking/README.md#tailscale).
 For application data and VM backups, see the
