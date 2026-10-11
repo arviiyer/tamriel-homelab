@@ -2,200 +2,105 @@
 
 [Home](../../README.md) · [Projects](../README.md) · [FreshRSS](../../apps/freshrss/README.md)
 
-I use FreshRSS to collect articles and Homarr to see a short morning reading
-list. This worker ranks unread articles, picks a few useful ones, and copies
-source excerpts into a daily brief. Links open the full article in FreshRSS.
+I use FreshRSS to collect articles and a Morning SOC Briefing widget in Homarr
+to pick what to read. The `reading-digest` service ranks unread articles and
+publishes a short list of source excerpts, with links back to each FreshRSS entry.
 
-![Live reading worker output on a fresh Homarr board](../../screenshots/reading-live.webp)
+The worker source and deployment live in the private application-service
+repository. These notes describe the scheduled service running in the lab.
 
-The brief in Homarr, using two Debian advisories and a sample restore article.
+[![The lab's Homarr dashboard with its Morning SOC Briefing](../../screenshots/homarr-home.webp)](../../screenshots/homarr-home.webp)
+
+The October 10 brief on my Homarr dashboard, showing a BleepingComputer article
+selected from my FreshRSS subscriptions.
 
 ## How it works
 
 ```mermaid
 flowchart LR
-  F[FreshRSS] --> E[Read-only export]
+  F[FreshRSS] --> E[Read-only PHP export]
   E --> J[TypeSafe Jev ranking]
   J --> Q[Local Qwen sentence selection]
-  Q --> S[SQLite and published JSON]
-  S --> H[Homarr / RSS reader]
+  Q --> D[(SQLite history and cache)]
+  D --> P[Published JSON and RSS]
+  P --> H[Homarr Custom API widget]
+  H -->|Article links| F
 ```
 
-TypeSafe Jev scores relevance, practicality, and depth, then compares shortlisted
-articles for duplicate stories. This step sends article text and the configured
-reader interests to an external API. A local Qwen3.5 4B model, served by
-llama.cpp on the CPU, selects sentence IDs. Python copies those sentences from
-the article and publishes JSON; the feed server derives RSS from the same file.
+1. A systemd timer starts the host-side wrapper at **06:20 America/Toronto**.
+   It exports unread entries through FreshRSS's PHP data-access classes without
+   changing subscriptions or marking articles read.
+2. The worker removes repeated URLs/content and previously featured articles,
+   then considers up to 150 candidates from the last seven days.
+3. TypeSafe Jev scores relevance, practicality, and depth. A separate scope
+   judgment excludes industrial-only coverage from the enterprise-security and
+   homelab reading profile. Pairwise comparisons remove overlapping stories
+   within the shortlist.
+4. Local Qwen selects source sentence IDs. Python validates those IDs and copies
+   the original sentences into the brief.
+5. The worker saves the completed digest in SQLite, then publishes JSON and RSS.
+   Homarr fetches the JSON every five minutes through its Custom API widget.
 
-I switched from generated summaries to excerpts after the small model added
-unsupported details. Sentence selection prevents invented prose, but it can
-still omit useful context. The reading pilot is active; the latest tuning
-preserves short CVE entries and gives them priority in advisory excerpts.
+Jev receives article text and the configured reading interests through an
+external API. Excerpt selection runs locally on the application VM's CPU.
 
-SQLite caches model responses and remembers featured articles. The worker
-skips read entries, repeated URLs and content, and already-featured stories.
-Limits per source and topic keep one feed from filling the whole list. A failed
-ranking or excerpt step keeps the last completed brief. An empty successful
-selection publishes an empty list for that day.
+## Selection and excerpts
 
-## Install
+The current profile weights relevance at 50%, practicality at 30%, and depth at
+20%, with a minimum combined score of 0.55. It selects up to five articles, with
+at most two from one source or topic. Quiet days can produce a shorter list or
+a dated empty brief.
 
-Requirements: Python 3.11+ and Git. Copy the project into your working directory:
+I switched from generated summaries to source excerpts after the small model
+added unsupported details. Qwen now returns ranked sentence IDs and a topic
+from a fixed list. The application copies the source wording and adds a fixed
+topic-relevance line. The display labels the text as source excerpts.
 
-```bash
-git clone https://github.com/arviiyer/tamriel-homelab.git
-mkdir -p "$HOME/homelab-projects"
-cp -R tamriel-homelab/projects/reading-brief "$HOME/homelab-projects/"
-cd "$HOME/homelab-projects/reading-brief"
-cp profile.example.json profile.json
-```
+Long articles are processed in bounded groups of source sentences. Short
+CVE/product entries are retained, and advisory assembly prioritizes distinct
+CVE coverage within the excerpt budget. Selection can still miss useful
+context, so I open the linked article for the full report.
 
-## Connect FreshRSS and the models
+## The setup
 
-The scheduled example runs on the same Linux host as FreshRSS, with Docker
-Compose v2, `flock`, a TypeSafe API account, and permission to run Docker.
-Allow about 3 GB for the model download and at least 6 GB of available RAM.
-The pinned llama.cpp build is CPU-only, Linux amd64. FreshRSS export paths
-match the upstream image used in the [FreshRSS guide](../../apps/freshrss/README.md).
-
-Edit `profile.json`:
-
-| Setting | What to change |
+| Component | Running configuration |
 |---|---|
-| `freshrss_url` | Browser-facing reader URL, for article links |
-| `homepage_url` | Browser-facing dashboard URL, used in RSS |
-| `timezone` | Your IANA time zone, such as `Etc/UTC` |
-| `interests`, `excluded` | Subjects to rank and subjects to omit |
-| `weights`, `minimum_score` | Ranking weights, totaling 1, and selection threshold |
-| `max_candidates`, `max_articles` | Bounds on ranking calls and the daily list |
-| `max_per_source`, `max_per_topic` | Diversity limits |
-| `model_url` | Local llama.cpp URL; keep the default with this Compose file |
+| Ranking | TypeSafe Jev 1.13.0 |
+| Local model | Qwen3.5-4B Q4_K_M, thinking disabled |
+| Inference | llama.cpp b11347, CPU-only, four threads, 8,192-token context |
+| Model resources | Four-CPU quota, 4.5 GiB memory limit, no swap |
+| Schedule | System-level `reading-digest.timer`, daily at 06:20 Toronto time |
+| State | `/srv/reading-digest/data/digest.sqlite` on the VM's local disk |
+| Model storage | A separate 16 GiB disk mounted at `/srv/reading-digest/models` |
+| Display | Homarr v1.77.2 Custom API widget, refreshed every 300 seconds |
 
-The source exporter reads seven days of unread entries. If you change
-`lookback_days`, also change `--days` in `run-brief.sh`. Jev model IDs and API
-availability depend on your TypeSafe account. The API adapter is in
-[`Models`](brief.py); it expects the System One question/answer schema.
+The wrapper starts the model only when inference is needed and stops it after
+the run. The feed container stays up with a read-only mount of published files.
+It is reachable by Homarr on the private `reading_digest` Docker network, with
+no published host port. [The Homarr guide](../../apps/homarr/README.md#daily-reading-brief)
+has the widget definition and network setup.
 
-Create a private environment file using your editor:
+## Keeping it running
 
-```bash
-install -d -m 0700 "$HOME/.config/reading-brief"
-install -m 0600 /dev/null "$HOME/.config/reading-brief/environment"
-```
-
-Set these three values in it, without `export` prefixes:
-
-```text
-FRESHRSS_CONTAINER=freshrss
-FRESHRSS_USER=reader
-TYPESAFE_API_KEY=replace-with-your-key
-```
-
-The FreshRSS username is the reader account whose subscriptions you want to use.
-The export reads entries without marking them read. On an installation using a
-different container web user or CLI path, adjust `run-brief.sh` and `export.php`.
-
-Download the pinned model, then run once:
+On the application VM, these commands check the schedule, latest run, and
+published date without generating another brief:
 
 ```bash
-python3 download-model.py
-mkdir -p data/public
-chmod 0755 data data/public
-set -a
-. "$HOME/.config/reading-brief/environment"
-set +a
-bash run-brief.sh
-docker compose up -d feed
-curl --fail http://127.0.0.1:8094/status.json
+systemctl list-timers reading-digest.timer
+sudo journalctl -u reading-digest.service -n 80 --no-pager
+docker exec reading-digest-feed python3 -c \
+  'import urllib.request; print(urllib.request.urlopen("http://127.0.0.1:8080/status.json").read().decode())'
 ```
 
-The model download checks both size and SHA-256. The run starts llama.cpp only
-after ranking selects articles, and stops it on exit. `status.json` should show
-today's date, `mode: live`, and the article count. Read the excerpts alongside
-their sources before adjusting your profile. A second run on the same day
-republishes the completed brief rather than selecting another list.
+SQLite stores cached model responses, usage, featured history, and completed
+days. A same-day rerun republishes the saved digest without new model calls.
+Failed generation keeps the last successful, dated publication visible.
 
-The containers run as UID 1000. If your working files belong to another UID,
-adjust `user` in `compose.yml`. The feed needs read access to `data/public`;
-the model needs read access to `models`.
+The service has a 25-minute timeout and targets delivery by 06:50. The timer
+catches up after downtime. The VM backup includes article exports, SQLite,
+and published files; model weights are excluded because the pinned download
+can be recreated. Keep the reading profile and runtime credentials with the
+private service backup.
 
-## Add it to Homarr
-
-Attach Homarr to the reading project's `briefing` network in its own Compose
-file. With the default directory name, Docker creates
-`reading-brief_briefing`; confirm it with `docker network ls`. Use an external
-network declaration in Homarr's Compose file:
-
-```yaml
-services:
-  homarr:
-    networks: [default, briefing]
-networks:
-  briefing:
-    external: true
-    name: reading-brief_briefing
-```
-
-Recreate Homarr, then follow the
-[Custom API widget instructions](../../apps/homarr/README.md#daily-reading-brief)
-with `http://feed:8080` as the source base URL. The JSON shape matches that
-widget. Use `/feed.xml` for an RSS reader instead.
-
-## Schedule it
-
-The supplied user units assume `~/homelab-projects/reading-brief`. Edit
-`WorkingDirectory` and `ExecStart` if you chose another directory:
-
-```bash
-mkdir -p "$HOME/.config/systemd/user"
-cp reading-brief.service reading-brief.timer "$HOME/.config/systemd/user/"
-systemctl --user daemon-reload
-systemctl --user enable --now reading-brief.timer
-systemctl --user list-timers reading-brief.timer
-```
-
-The timer runs at 06:20 in the host's time zone; `profile.json` determines the
-brief's date. Set them consistently. For a user service that runs while logged
-out, enable lingering with `sudo loginctl enable-linger "$USER"`.
-
-## Maintenance and troubleshooting
-
-Stop the timer and wait for the current run before backing up `data/brief.sqlite`,
-`data/public`, and `profile.json`. Keep the environment file in your private
-backup. The model can be downloaded again. Restore into a separate directory
-and serve its last brief locally before replacing a working instance.
-
-| Symptom | Check |
-|---|---|
-| Old brief remains | `journalctl --user -u reading-brief.service`; a failed run intentionally retains it |
-| No articles today | Unread entries, age limit, featured history, score, and per-topic limits |
-| Jev request fails | API account, credit, model ID, and current System One API schema |
-| Local model not ready | Memory availability, model checksum, and `docker compose --profile inference logs model` |
-| Long article fails | The worker bounds section size and count instead of publishing a truncated excerpt |
-| Feed returns 503 | No completed run or unreadable `data/public/briefing.json` |
-| Homarr cannot connect | Shared Docker network and `http://feed:8080`, not the host loopback address |
-
-Changing the excerpt algorithm or model should also change the cache version or
-`model_sha256` in the profile. Existing briefs stay historical; a new profile
-does not rewrite a completed day's list.
-
-```bash
-python3 -m unittest discover -s tests -v
-docker compose config --quiet
-```
-
-## Try it locally
-
-To try the feed without FreshRSS or models, run from the project directory:
-
-```bash
-python3 brief.py demo --input articles.example.ndjson --data /tmp/reading-brief-demo
-python3 serve.py --directory /tmp/reading-brief-demo/public
-```
-
-Open <http://127.0.0.1:8094/briefing.json> or <http://127.0.0.1:8094/feed.xml>.
-Demo mode publishes two sample articles with fixed selections. Stop with Ctrl+C.
-
-[Worker](brief.py) · [Tests](tests/test_brief.py) ·
-[llama.cpp](https://github.com/ggml-org/llama.cpp) ·
-[TypeSafe](https://typesafe.ai/)
+Article selection and excerpt quality are still being tuned through daily use.
+The remaining work is on the [roadmap](../../ROADMAP.md#projects).

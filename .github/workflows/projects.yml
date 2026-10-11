@@ -25,17 +25,14 @@ jobs:
       - name: Test Python projects
         run: |
           python3 -m unittest discover -s projects/printer-monitor/tests -v
-          python3 -m unittest discover -s projects/reading-brief/tests -v
           python3 projects/printer-monitor/printer_monitor.py --demo --status
-          python3 projects/reading-brief/brief.py demo --profile projects/reading-brief/profile.example.json --input projects/reading-brief/articles.example.ndjson --data "$RUNNER_TEMP/brief-demo"
-          shellcheck projects/printer-monitor/install.sh projects/reading-brief/run-brief.sh
-          docker compose -f projects/reading-brief/compose.yml config --quiet
+          shellcheck projects/printer-monitor/install.sh
   go:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
       matrix:
-        project: [forge, seerr-discord-approver]
+        project: [seerr-discord-approver]
     defaults:
       run:
         working-directory: projects/${{ matrix.project }}
@@ -47,20 +44,8 @@ jobs:
         with:
           go-version: '1.26.6'
           cache-dependency-path: projects/${{ matrix.project }}/go.sum
-          cache: ${{ matrix.project != 'forge' }}
+          cache: true
       - run: |
           go test -race ./...
           go vet ./...
           test -z "$(gofmt -l ./*.go)"
-  terraform:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
-      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
-        with:
-          terraform_version: '1.15.9'
-          terraform_wrapper: false
-      - run: bash projects/forge/check-terraform.sh

@@ -27,12 +27,6 @@ projects/**/config.json
 projects/**/profile.json
 projects/**/environment
 projects/**/secrets/
-projects/forge/infra/terraform.tfvars
-projects/forge/infra/desired.auto.tfvars.json
-projects/forge/infra/candidate.tfvars.json
-projects/forge/infra/forge.plan
-projects/forge/infra/last-error.txt
-projects/forge/forge
 projects/seerr-discord-approver/approver
 
 # Screenshots require an explicit force-add after review.

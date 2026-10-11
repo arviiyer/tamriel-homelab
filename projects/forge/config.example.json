@@ -1,6 +1,0 @@
-{
-  "terraform_dir": "infra",
-  "nodes": ["pve-01"],
-  "templates": {"debian": {"id": 9000, "node": "pve-01"}},
-  "sizes": {"small": {"cores": 2, "memory": 4096}, "medium": {"cores": 4, "memory": 8192}}
-}

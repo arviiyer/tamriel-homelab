@@ -113,16 +113,17 @@ The September cluster view, with three nodes online and the VM inventory.
 
 [Cluster setup](../proxmox/README.md)
 
-## Project examples
+## Projects
 
-[![Reading brief in Homarr](reading-live.webp)](reading-live.webp)
+[![Morning SOC Briefing on the lab's Homarr dashboard](homarr-home.webp)](homarr-home.webp)
 
-The reading worker's output in Homarr v2, using two Debian advisories and a
-sample restore article. [Reading brief setup](../projects/reading-brief/README.md).
+The October 10 reading brief on my Homarr dashboard, using my FreshRSS
+subscriptions. [How the reading brief works](../projects/reading-brief/README.md).
 
-[![Forge managing two test VMs](forge-live.webp)](forge-live.webp)
+[![Forge's instance list and launch form](forge-production.webp)](forge-production.webp)
 
-Two test VMs with different CPU and memory settings. [Forge setup](../projects/forge/README.md).
+The running Forge portal with an empty instance list and its Debian template
+launch form. [Forge](../projects/forge/README.md).
 
 [![Pending Discord approval request](seerr-approval-pending.webp)](seerr-approval-pending.webp)
 
@@ -146,8 +147,6 @@ The lab's Sandbox UI showing a completed benign test run.
 
 Process events and collected screenshots from the same run.
 [Sandbox notes](../projects/sandbox/README.md).
-
-The Forge guide also has an optional [sample portal](../projects/forge/README.md#try-it-locally).
 
 ## Adding screenshots
 

@@ -51,9 +51,10 @@ the administrator, and follow onboarding to create a board. Optional integration
 can be added later. Keep the board restricted to your user or group, then check
 that a signed-out browser cannot open it.
 
-The example pins Homarr v2.4.1, stores SQLite and configuration in the `appdata`
-volume, and uses local credentials. The screenshot is from the lab's v1 setup;
-v2's onboarding, layout, and Custom Widget editor differ.
+The example pins Homarr v1.77.2, the version running in the lab and shown in the
+screenshot. It stores SQLite and configuration in the `appdata` volume and uses
+local credentials. The lab uses a bind mount for appdata and also mounts the
+Docker socket for its Docker integration.
 
 For regular access, use the [private HTTPS guide](../../networking/private-access/README.md).
 If Caddy runs on another host, bind the port to the intended private interface
@@ -64,8 +65,9 @@ and allow that proxy through the firewall. Keep Homarr's local login enabled.
 1. In **Management → Apps**, add a name, browser URL, and icon for each service.
    Example URLs are `https://photos.example.com`, `https://rss.example.com`, and
    `https://grafana.example.com`.
-2. Edit the board, choose **Add board content**, and add App tiles for those apps.
-3. Group related cards in Containers, save the layout, and open each link.
+2. Edit the board and add the saved apps using the **+** menu.
+3. Group related cards with categories or dynamic sections, save the layout,
+   and open each link.
 
 App links open in the browser. Integrations and server-side status checks need
 URLs reachable from the Homarr container, which may be different from those
@@ -81,9 +83,9 @@ as JSON. Homarr fetches that file every five minutes through a Custom API widget
 The RSS widget in the deployed v1 setup truncated the text, so I switched to
 the custom display.
 
-The [reading-brief guide](../../projects/reading-brief/README.md) includes the
-worker and feed server. To build a similar display in v2, use a read-only JSON endpoint
-that returns this shape (the values here are invented):
+The [reading-brief page](../../projects/reading-brief/README.md) describes the
+private worker and feed server. To reuse the display with your own feed, provide
+a read-only JSON endpoint with this shape (the values here are invented):
 
 ```json
 {
@@ -100,41 +102,51 @@ that returns this shape (the values here are invented):
 }
 ```
 
-Under **Management → Custom Widgets**, create a definition in the v2 workbench:
+In the lab, the feed service creates the private `reading_digest` network.
+Homarr joins it through these additions to its Compose file:
+
+```yaml
+services:
+  homarr:
+    networks: [default, reading_digest]
+networks:
+  reading_digest:
+    external: true
+```
+
+Start your feed and its network before recreating Homarr. Both containers must
+share that network, and the feed must listen on port 8080 with the Docker name
+`reading-digest-feed` for the URL below. Substitute your own endpoint if different.
+
+Under **Management → Custom Widgets**, create a definition with these v1 settings:
 
 | Setting | Value |
 |---|---|
-| Name | Daily reading brief |
-| HTTP source ID | `default` |
-| Source base URL | Your feed server, for example `http://reading-digest-feed:8080` |
-| Network scope | `private` for a Docker/private-network feed |
+| Name | Morning SOC Briefing |
+| URL | `http://reading-digest-feed:8080/briefing.json` |
+| Method | `GET` |
 | Authentication | `none` for a feed reachable only on its private Docker network |
-| Request ID | `briefing` |
-| Request | Load query, `GET /briefing.json` |
-| Permission | View |
+| Display type | Custom JSX |
 
-Both containers must share a Docker network for that example hostname to work.
-The lab's feed is private to that network; its port is not published. The basic
-Compose file above runs Homarr on its own, so attach your feed before testing
-the request. Store any required feed credential in Homarr's source settings.
+The lab's feed has no published host port. The Docker URL is fetched server-side
+by Homarr, so it does not need to resolve in the browser. Store any required feed
+credential in the widget's authentication settings.
 
-Use this JSX in the template editor:
+This is the deployed widget's display template, formatted for readability:
 
 ```jsx
 <ScrollArea h="100%">
   <Stack p="sm" gap="md">
-    {status.briefing?.loading && <Text>Loading briefing...</Text>}
-    {status.briefing?.error && <Text>Could not load the briefing.</Text>}
-    {data.briefing && <Text>Briefing date: {data.briefing.day}</Text>}
-    {data.briefing?.articles?.length === 0 && <Text>No articles today.</Text>}
-    {(data.briefing?.articles ?? []).map((article) => (
+    <Text size="sm" c="dimmed">Briefing date: {data.day}</Text>
+    {data.articles.length === 0 && <Text>No qualifying unread articles today.</Text>}
+    {data.articles.map((article) => (
       <Card key={article.id} withBorder p="md">
         <Stack gap="xs">
-          <Anchor href={article.freshrss_url} target="_blank" rel="noopener noreferrer">
+          <Anchor href={article.freshrss_url} target="_blank" rel="noopener noreferrer" fw={600}>
             {article.title}
           </Anchor>
           <Text size="xs" c="dimmed">{article.source}</Text>
-          <Text style={{whiteSpace: 'pre-wrap'}}>{article.summary}</Text>
+          <Text size="sm" style={{whiteSpace: 'pre-wrap'}}>{article.summary}</Text>
         </Stack>
       </Card>
     ))}
@@ -142,13 +154,13 @@ Use this JSX in the template editor:
 </ScrollArea>
 ```
 
-Run **Test and preview**, check the complete text and article links, and save.
-In board edit mode, choose **Add widget → Custom widgets → Daily reading brief**.
-Set the refresh-interval slider to 300 seconds, save the widget, then save the
-board. Use **Move / resize item** to give the excerpts enough room; the widget
-scrolls when its content is taller than its panel. Keep article content in text
-bindings rather than interpreting it as HTML or JSX. The reading worker only
-publishes JSON; it does not need a Homarr credential.
+Test the request, check the rendered text and article links, and save the
+definition. In board edit mode, add a **Custom API** widget, select **Morning SOC
+Briefing**, and set its refresh interval to 300 seconds. Save the widget and
+board, then resize the panel for readable excerpts. The widget scrolls when its
+content is taller than its panel. Article content stays in text bindings rather
+than being interpreted as HTML or JSX. The daily worker only publishes files;
+it does not need a Homarr credential.
 
 ## Backups and restore
 
@@ -206,8 +218,8 @@ docker compose logs --tail=50 homarr
 Keep `/appdata` and the encryption key unchanged. Check login, layout, service
 links, and the reading brief after updating. A v1-to-v2 upgrade migrates SQLite
 in place, so rolling back needs the pre-upgrade data backup and its matching
-image. Switching only the image back is insufficient. Legacy Custom Widgets
-also need migration to v2 definitions in the editor.
+image. Switching only the image back is insufficient. The widget instructions
+above are for v1; v2 uses a different definition and template interface.
 
 ## Notes
 
@@ -223,5 +235,4 @@ editing and private service integrations need their own checks in the browser.
 
 - [Docker installation and upgrades](https://homarr.dev/docs/getting-started/installation/docker/)
 - [Onboarding](https://homarr.dev/docs/getting-started/after-the-installation/)
-- [Custom Widgets](https://homarr.dev/docs/management/custom-widgets/)
-- [Requests and network settings](https://homarr.dev/docs/management/custom-widgets/requests-and-security/)
+- [Custom API widget in v1.77.2](https://github.com/homarr-labs/homarr/blob/v1.77.2/apps/docs/docs/widgets/custom-api/index.mdx)
