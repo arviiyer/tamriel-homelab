@@ -164,6 +164,7 @@ Forgejo hosts my private configuration repositories. Its Actions runners check
 changes on a separate VM. The screenshot shows Compose checks passing on a
 dependency-update pull request.
 
+[Forgejo setup and backups](../automation/forgejo/README.md) ·
 [Git and update workflow](../automation/README.md#git-and-updates) ·
 [Forgejo documentation](https://forgejo.org/docs/latest/)
 

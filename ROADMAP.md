@@ -4,6 +4,7 @@
 
 ## Lab and automation
 
+- Document the NAS-readiness service used before the NFS mounts.
 - Migrate existing Promtail hosts to Alloy.
 - Review alternatives to Readarr now that its upstream project is retired.
 - Plan the management/server VLAN split separately from the existing client zones.

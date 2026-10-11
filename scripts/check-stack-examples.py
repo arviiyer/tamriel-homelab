@@ -113,7 +113,10 @@ def validate():
         proxy.compose("config", "--quiet")
         services.render(ROOT / "monitoring/host-metrics/compose.yml",
                         ROOT / "monitoring/host-metrics/alerts.override.yml")
-    print("PASS: media namespaces, storage mappings, private proxy, and alert Compose configuration")
+        services.render(ROOT / "automation/forgejo/compose.yml", env=dict(
+            os.environ, DOMAIN="git.example.com", ROOT_URL="https://git.example.com/",
+            POSTGRES_PASSWORD=secrets.token_hex(24), SECRET_KEY=secrets.token_hex(32)))
+    print("PASS: media namespaces, storage mappings, private proxy, alerts, and Forgejo configuration")
 
 
 def media(project):

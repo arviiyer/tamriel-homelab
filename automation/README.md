@@ -23,8 +23,10 @@ For a typical application update:
 4. Apply the checked commit on its host and recreate the affected containers.
 5. Check sign-in and an ordinary task in the app, then record the result.
 
-The [Renovate guide](renovate/README.md) covers the bot account, Docker
-configuration, daily timer, and the steps from an update PR to deployment.
+The [Forgejo guide](forgejo/README.md) covers installation, private access,
+Authentik sign-in, and backups. The [Renovate guide](renovate/README.md) covers
+the bot account, Docker configuration, daily timer, and the steps from an update
+PR to deployment.
 
 ## Runners and deployment
 
@@ -59,6 +61,7 @@ Each component has setup instructions and test commands:
 
 | Component | What it does |
 |---|---|
+| [Forgejo](forgejo/README.md) | Host Git repositories, pull requests, and Actions workflows |
 | [Trivy](trivy/README.md) | Scan images and repositories, compare findings, alert on changes |
 | [Deployment](ci/README.md) | Deploy the commit checked by CI; roll back unhealthy changes |
 | [Renovate](renovate/README.md) | Open Docker image update PRs in Forgejo on a daily schedule |

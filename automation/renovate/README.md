@@ -19,7 +19,7 @@ Docker digests, groups patch updates, and leaves automerge disabled.
 
 ## Set up the bot account
 
-In Forgejo, create a dedicated Renovate account with a display name and email.
+In [Forgejo](../forgejo/README.md), create a dedicated Renovate account with a display name and email.
 Give it write access to the configuration repositories it should update, then
 create a personal access token for that account with these scopes:
 

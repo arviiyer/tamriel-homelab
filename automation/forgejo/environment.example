@@ -1,0 +1,7 @@
+DOMAIN=git.example.com
+ROOT_URL=https://git.example.com/
+FORGEJO_BIND_IP=192.0.2.83
+TZ=Etc/UTC
+POSTGRES_PASSWORD=
+SECRET_KEY=
+OIDC_AUTO_REGISTRATION=false
