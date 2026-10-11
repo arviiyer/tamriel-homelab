@@ -1,0 +1,15 @@
+media.example.com {
+	import private_site
+	route {
+		import private_clients
+		reverse_proxy 192.0.2.84:8096
+	}
+}
+
+requests.example.com {
+	import private_site
+	route {
+		import private_clients
+		reverse_proxy 192.0.2.84:5055
+	}
+}

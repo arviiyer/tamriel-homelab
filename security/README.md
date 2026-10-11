@@ -16,7 +16,7 @@ Setup guides: [Trivy](../automation/trivy/README.md) ·
 
 Repeated scans can produce a lot of the same findings. I compare complete
 results so alerts can focus on new findings, severity changes, and available
-fixes. The [alerting notes](../docs/case-studies/actionable-vulnerability-management.md)
+fixes. The [alerting notes](../docs/trivy-alerts.md)
 explain that choice and the notification rules.
 
 The [scanner example](../automation/trivy/README.md) reads image references from
@@ -66,24 +66,12 @@ a C# agent in a disposable Windows VM. Proxmox snapshots provide a clean baselin
 between runs. The UI brings together run state, telemetry, screenshots, and
 console access.
 
-Analysis is currently paused: the Windows worker and scheduler are stopped,
-while the private API, UI, and database remain available. Broader reliability
-and browser-telemetry work is unfinished.
-
 The worker has separate network access from ordinary applications, and analysis
 data has its own storage. The [project guide](../projects/sandbox/README.md)
-explains the architecture and includes a generated lifecycle walkthrough.
-
-## Repository checks
-
-GitHub Actions checks publication rules and local Markdown links and scans Git
-history for secrets. Changes to automation run the relevant component tests;
-container and integration checks run manually. The
-[workflow overview](../automation/README.md#checks-in-this-repository) links to
-those jobs.
+explains the architecture, screenshots, and current development.
 
 ## Notes
 
 - [Threats and assumptions](../docs/threat-model.md)
-- [Making vulnerability alerts useful](../docs/case-studies/actionable-vulnerability-management.md)
+- [Making vulnerability alerts useful](../docs/trivy-alerts.md)
 - [Reporting a repository security issue](../SECURITY.md)

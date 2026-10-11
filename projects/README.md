@@ -3,16 +3,15 @@
 [Home](../README.md) · [Apps](../apps/README.md)
 
 Tools I've built around the lab: a morning reading list, VM provisioning, media
-request approvals, printer status, and an analysis sandbox. Each guide explains
-how I use it and includes a runnable example.
+request approvals, printer status, and an analysis sandbox.
 
-| Project | What it does | Start here |
-|---|---|---|
-| [Morning SOC Briefing](reading-brief/) | Ranks FreshRSS articles and publishes source excerpts to Homarr | Run with two sample articles |
-| [Forge](forge/) | Creates Proxmox VMs from templates and manages their power | Open the sample portal |
-| [Seerr Discord Approver](seerr-discord-approver/) | Adds owner-only approval buttons to media requests | Connect a bot and dedicated Seerr user |
-| [Printer Monitor](printer-monitor/) | Shows CUPS jobs, IPP supplies, and printer status | Open the sample GTK window |
-| [Tamriel Sandbox](sandbox/) | Brings analysis runs, telemetry, and worker recovery into one UI | Replay a generated worker lifecycle |
+| Project | What I use it for |
+|---|---|
+| [Daily reading brief](reading-brief/) | Picking articles from FreshRSS to read in Homarr |
+| [Forge](forge/) | Creating Proxmox VMs from templates and managing their power |
+| [Seerr Discord Approver](seerr-discord-approver/) | Approving media requests from Discord |
+| [Printer Monitor](printer-monitor/) | Checking CUPS jobs, ink levels, and printer status on my laptop |
+| [Tamriel Sandbox](sandbox/) | Bringing analysis runs, telemetry, and worker recovery into one UI |
 
 ## How they fit together
 
@@ -22,8 +21,3 @@ beside the [media stack](../media/). [Forge](forge/) provisions VMs on
 [Proxmox](../proxmox/), while [Sandbox](sandbox/) has a separate control plane
 and disposable Windows worker. [Printer Monitor](printer-monitor/) runs on the
 laptop connected to the USB printer.
-
-Start with a project's local example, then follow its configuration and first
-task. Keep your installation and its data in a separate working directory.
-
-[Test results](../docs/drills/project-checks.md)

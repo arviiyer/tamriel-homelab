@@ -2,11 +2,14 @@
 
 [Home](../../README.md) · [Automation](../README.md)
 
-A Forgejo workflow and SSH helper that deploy the commit checked by CI, test
-service health, and roll back failures.
+I use manually triggered Forgejo workflows for Stirling PDF and Sandbox. The
+runner requests a commit; the application host fetches it, applies the update,
+and checks health. Most other services are updated manually after CI and merge.
 
-[Design notes](../../docs/case-studies/fail-closed-infrastructure-delivery.md) ·
-[Rollback drill](../../docs/drills/2026-08-24-fail-closed-delivery-rollback.md)
+This example implements the SSH request and image rollback for a small API.
+The lab's Stirling PDF helper also saves and restores application configuration;
+Sandbox handles PostgreSQL backups and migrations. Those data-recovery steps
+depend on the application.
 
 ## Setup
 
@@ -39,7 +42,7 @@ Only a digest-pinned image from `registry.example.com/example-api` may change.
 Mounts, devices, capabilities, commands, environment, and extra services cannot
 be changed by the request.
 
-## From a reviewed update to deployment
+## Deploy an update
 
 First run the [disposable-host exercise](#tests) on a suitable test machine. It
 creates the initial healthy revision, restricted SSH account, registry, and
@@ -66,7 +69,7 @@ with `sshd -t` and `visudo -c` before reloading SSH. The request account should
 not belong to the Docker group.
 
 Initialize the root-controlled bare repository and its protected-main ref, then
-start one reviewed, healthy revision administratively. Its exact Compose file
+start one healthy revision administratively. Its exact Compose file
 must be at the configured live path, and the state file must record that commit
 as `current` with `previous: null`. Use the
 [drill bootstrap](tests/disposable_host_drill.sh) as the worked example. A new
@@ -128,13 +131,30 @@ The launcher builds a temporary target without a default network route. Generate
 Git history, a loopback TLS registry, and an SSH endpoint let the drill test real
 deployments, rejected requests, failed health checks, rollback, and cleanup.
 
-The full drill takes about a minute for the intentional health failure. The manual
+The full drill takes about a minute for the intentional health failure. The
 [integration workflow](../../.github/workflows/integration.yml) builds the image.
-Its pinned packages allow dependencies from the base image to upgrade within the
-same Alpine release. Privileged containers do not isolate the host securely;
-the full drill must not run on a production, shared, or credential-bearing host.
 
 ## How deployment works
+
+```mermaid
+sequenceDiagram
+    actor Operator
+    participant CI as Validation job
+    participant Deploy as Deployment job
+    participant Host as Application host
+    Operator->>CI: Request full commit SHA
+    CI->>CI: Check exact revision without deployment key
+    CI-->>Deploy: Validated SHA
+    Deploy->>Host: Restricted SSH request
+    Host->>Host: Check commit and allowed image change
+    Host->>Host: Apply and check health
+    alt Healthy
+        Host-->>Deploy: Save current/previous revisions
+    else Apply or health check fails
+        Host->>Host: Restore previous working image
+        Host-->>Deploy: Report failed update
+    end
+```
 
 The target stores its own credentials, Compose file, commit history, lock, and
 health endpoint. For deployment, it:

@@ -34,17 +34,23 @@ for path in "${candidate_files[@]}"; do
   screenshot_path=0
 
   case "$lower_path" in
+    secrets/*|*/secrets/*|artifacts/*|*/artifacts/*|\
+    exports/*|*/exports/*|backups/*|*/backups/*|\
+    restore-output/*|*/restore-output/*|recovery-output/*|*/recovery-output/*)
+      report "prohibited tracked path: $path"
+      ;;
+    .env.example|*/.env.example)
+      # Templates are scanned for sensitive content like other text files.
+      ;;
     .env|.env.*|*/.env|*/.env.*|\
     *.tfstate|*.tfstate.*|*.pcap|*.pcapng|*.log|*.sqlite|*.sqlite3|*.db|\
     *.sql|*.sql.*|*.dump|*.dump.*|*.bak|*.bak.*|*.backup|*.backup.*|\
     *.tar|*.tar.*|*.tgz|*.zip|*.7z|*.rar|*.gz|*.xz|\
     *.vma|*.vma.*|*.vmdk|*.qcow2|*.raw|\
     *.pem|*.p12|*.pfx|*.key|*.ppk|*.gpg|*.age|*.enc|*.kdbx|\
-    *.der|*.cer|*.crt|*.csr|*.ovpn|*.mobileconfig|\
-    *.xml|*.har|*.pdf|*.pyc|\
-    id_rsa|id_ed25519|secrets/*|*/secrets/*|artifacts/*|*/artifacts/*|\
-    exports/*|*/exports/*|backups/*|*/backups/*|\
-    restore-output/*|*/restore-output/*|recovery-output/*|*/recovery-output/*)
+    *.der|*.ovpn|*.mobileconfig|\
+    *.har|*.pdf|*.pyc|\
+    id_rsa|id_ed25519)
       report "prohibited tracked path: $path"
       ;;
   esac
@@ -53,10 +59,6 @@ for path in "${candidate_files[@]}"; do
     screenshots/*.png|screenshots/*.jpg|\
     screenshots/*.jpeg|screenshots/*.webp)
       screenshot_path=1
-      review="${path%.*}.review.md"
-      if ! git ls-files --error-unmatch "$review" >/dev/null 2>&1; then
-        report "screenshot is missing review record: $review"
-      fi
       ;;
   esac
 

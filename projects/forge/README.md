@@ -8,25 +8,20 @@ Forge is separate from Forgejo, the Git service.
 
 ![Forge managing two disposable Proxmox VMs](../../screenshots/forge-live.webp)
 
-The public portal managing two real test VMs with different CPU and memory
-settings. Both were removed after the check.
-[Screenshot review](../../screenshots/forge-live.review.md) ·
-[Live test results](../../docs/drills/project-checks.md#forge).
+Forge managing two test VMs with different CPU and memory settings.
 
-## The important part
+## How it works
 
-Launching a second VM must preserve the first one's configuration. The portal
-loads its complete desired inventory, checks it against Terraform state, and
-adds the new VM. Each VM retains its own template, CPU, memory, and protection
-settings. A saved plan is applied only when it changes the requested VM in the
-expected way.
+Choose a node, template, CPU count, and memory size in the portal. Forge adds the
+VM to its Terraform inventory and applies a saved plan. It checks that the plan
+changes only the requested VM, preserving the other VMs' settings.
 
 The [merge and plan checks](engine.go) reject name/ID conflicts, unexpected
-updates, replacements, and unrelated deletions. The public portal uses a
+updates, replacements, and unrelated deletions. The portal uses a
 dedicated Terraform workspace and one VM per launch. It includes a local sample
 mode so the interface can be tried without a Proxmox connection.
 
-## Try the portal
+## Install
 
 Requirements: Go 1.26+ and Git.
 
@@ -36,17 +31,11 @@ mkdir -p "$HOME/homelab-projects"
 cp -R tamriel-homelab/projects/forge "$HOME/homelab-projects/"
 cd "$HOME/homelab-projects/forge"
 go build -o forge .
-./forge -demo -config config.example.json
 ```
-
-Open <http://127.0.0.1:8088>. Launch `test-01` with VM ID `301`, then check that
-the sample `apps-01` is still present with protection enabled. Protect the new
-VM, remove its protection, and destroy it by entering its name. Sample changes
-are held in memory and reset when you stop the process.
 
 ## Connect Proxmox
 
-For real provisioning, use Terraform 1.7+ and a Proxmox VE installation with a
+Use Terraform 1.7+ and a Proxmox VE installation with a
 cloud-init template, DHCP, and the QEMU guest agent. The
 [Debian template guide](../../proxmox/debian-vm/README.md) covers preparation;
 the [Terraform notes](../../proxmox/terraform/README.md) cover provider access
@@ -99,15 +88,13 @@ ssh -N -L 8088:127.0.0.1:8088 operator@192.0.2.40
 
 ## First VM
 
-1. Pick an unused VM ID and a name such as `test-01`.
+1. Open <http://127.0.0.1:8088>. Pick an unused VM ID and a name such as `test-01`.
 2. Select the configured node, template, and size, then launch it.
 3. Wait for the completed message. In Proxmox, check the clone task, cloud-init
    settings, and guest-agent address. Sign in with the configured SSH key as
    `labuser`. Wait for `cloud-init status --wait` to finish before testing power
    controls; first-boot package updates can delay shutdown.
-4. Launch a second VM with another ID. Check that the first VM's settings remain
-   unchanged.
-5. Use **Shut down** to request a graceful shutdown, then check its Proxmox task.
+4. Use **Shut down** to request a graceful shutdown, then check its Proxmox task.
 
 Provisioning runs asynchronously and the page refreshes while busy. Power
 controls report that Proxmox accepted the task, not that the guest has finished
@@ -171,11 +158,20 @@ after reviewing that plan. Start the portal again once state and inventory agree
 | Shutdown remains pending | First-boot updates, guest-agent/ACPI support, and the Proxmox task result |
 | Browser refuses an action | Use the loopback URL; reopen the page after restarting the portal |
 
+## Tests
+
 ```bash
 go test -race ./...
 go vet ./...
 terraform -chdir=infra fmt -check
 terraform -chdir=infra validate
 ```
+
+## Try it locally
+
+Run `./forge -demo -config config.example.json` after building to try the
+interface without connecting Proxmox. Open <http://127.0.0.1:8088>, launch a
+sample VM, and try its protection and power controls. Changes are in memory and
+reset when you stop the process.
 
 [Portal](main.go) · [Terraform/API adapter](engine.go) · [Tests](engine_test.go)

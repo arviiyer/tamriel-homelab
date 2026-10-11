@@ -22,12 +22,11 @@ importing it and adding hosts.
 
 ### Security scans
 
-[![Trivy dashboard summary](../screenshots/grafana-security-dashboard.png)](../screenshots/README.md#trivy-dashboard)
+[![Trivy findings by image and repository](../screenshots/grafana-security-dashboard.png)](../screenshots/README.md#trivy-dashboard)
 
-The Trivy dashboard shows vulnerability totals and new findings. Its secret
-panel reports file scans; Git-history scans run separately. To build a similar
-view, [load the security dashboard](../automation/monitoring/README.md) and
-connect the Trivy metrics and Falco logs.
+The Trivy dashboard groups findings by image and repository. To build a similar
+view, [load the security dashboard](security-dashboard/README.md) and connect
+Trivy metrics and Falco logs.
 
 The wider lab also has dashboards for host CPU, memory, disks, and uptime;
 Immich jobs; Forgejo activity; Falco events; and Prometheus/Alertmanager health.
@@ -83,7 +82,7 @@ application when the media host becomes unavailable.
 [![Trivy alert delivered to Discord](../screenshots/security-scan-alert.png)](../screenshots/README.md#discord-alert)
 
 An alert for eight new high-severity findings with fixes available. The
-[alerting notes](../docs/case-studies/actionable-vulnerability-management.md)
+[alerting notes](../docs/trivy-alerts.md)
 explain which changes trigger a notification.
 
 General infrastructure notifications and security findings use separate Discord
@@ -93,7 +92,7 @@ fluctuations.
 
 ## Notes
 
-- [Security dashboard configuration](../automation/monitoring/README.md)
+- [Security dashboard configuration](security-dashboard/README.md)
 - [Trivy metrics and alert rules](../automation/trivy/README.md#metrics-and-alerts)
 - [Falco event routing](../automation/falco/event-flow.md)
 - [Grafana documentation](https://grafana.com/docs/grafana/latest/)

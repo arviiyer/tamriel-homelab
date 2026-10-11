@@ -632,7 +632,7 @@
   "time": {"from": "now-7d", "to": "now"},
   "timepicker": {"refresh_intervals": ["30s", "1m", "5m", "15m", "1h"]},
   "timezone": "browser",
-  "title": "Security Control Overview",
+  "title": "Trivy and Falco",
   "uid": "security-control-overview",
   "version": 1,
   "weekStart": ""

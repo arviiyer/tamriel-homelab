@@ -75,22 +75,13 @@ the working application.
 ### Restic files
 
 The [Restic guide](restic/README.md) covers application archives, a second
-repository on another host, and restoring to a new directory. Its
-[disposable-file exercise](restic/README.md#try-it-with-disposable-files) is a
-quick way to learn the commands.
+repository on another host, and restoring to a new directory.
 
 ### A VM from PBS
 
 The [PBS guide](pbs/README.md#try-a-restore) takes a completed backup through
 restore to a new VM ID, isolated startup, and application checks. It also covers
 connecting the datastore and scheduling backups.
-
-### Archive checks
-
-I also wrote a small [archive-checking exercise](../automation/recovery/README.md)
-using generated files. It tests corrupt input, path handling, and extraction into
-a new directory. The [notes](../docs/case-studies/recovery-and-storage-dependencies.md)
-explain those checks.
 
 ## Waiting for shared storage
 
@@ -100,12 +91,6 @@ addresses the race where a VM boots before the NAS is ready.
 
 The [NFS guide](nfs/README.md#wait-for-mounts) shows the mount dependency to add
 on a Docker VM.
-
-A missing network mount can leave an ordinary local directory where the share
-should be. The [systemd example](../automation/recovery/README.md#storage-checks)
-checks for the expected read-write mount and dataset marker before starting its
-placeholder workload. Testing it with missing or incorrect mounts is on the
-[roadmap](../ROADMAP.md#lab-and-automation).
 
 ## Notes
 

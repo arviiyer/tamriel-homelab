@@ -32,8 +32,7 @@ flowchart LR
 ```
 
 Jellyfin and Seerr use private HTTPS routes. Local DNS points at the proxy at
-home, and remote clients use Tailscale. The former public media ingress has been
-retired. See [networking](../networking/README.md#dns).
+home, and remote clients use Tailscale. See [networking](../networking/README.md#dns).
 
 ## Jellyfin and the GPU
 
@@ -89,8 +88,7 @@ require recreating its dependents so they join the current namespace.
 
 Downloads and media use separate NAS exports. The applications see consistent
 download and library paths, but separate exports prevent hardlinks between them.
-Imports across that boundary copy data. A shared directory layout alone does
-not make separate filesystems support hardlinks.
+Imports across that boundary copy data.
 
 Application databases and configuration stay on the VM. PBS covers those local
 disks; the NAS files need their own backup plan. Before upgrades that migrate

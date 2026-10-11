@@ -38,8 +38,11 @@ id
 ```
 
 Set `PUID` and `PGID` to the account that owns the download and media directories.
-Set `DOWNLOADS_PATH` and `MEDIA_PATH` to existing absolute paths. For a local
-trial, create `downloads` and `media` here and use their `realpath` output.
+Set `DOWNLOADS_PATH=/mnt/nas/downloads` and `MEDIA_PATH=/mnt/nas/media` to match
+the [NFS guide](../../storage/nfs/README.md). Set `MEDIA_BIND_IP` to the media VM's
+private address, shown as `192.0.2.84` throughout these guides. Jellyfin uses the
+same address and library. For a local trial, use local directories and
+`MEDIA_BIND_IP=127.0.0.1`.
 
 The directory layout inside the containers is:
 
@@ -93,13 +96,15 @@ Gluetun must become healthy before its dependents start. Its built-in firewall
 blocks their ordinary internet route when the tunnel is unavailable. Keep that
 firewall enabled.
 
-All published ports initially bind to localhost. On a remote VM, open the setup
-interfaces through an SSH tunnel:
+The ports bind to `MEDIA_BIND_IP`. Permit the Pi proxy to the web ports you use;
+restrict other network clients at the router and Docker host, as described in
+the [access guide](../../networking/private-access/README.md#the-setup).
+For initial setup, open an SSH tunnel from your workstation:
 
 ```bash
-ssh -N -L 8180:127.0.0.1:8180 -L 8989:127.0.0.1:8989 \
-  -L 7878:127.0.0.1:7878 -L 9696:127.0.0.1:9696 \
-  -L 5055:127.0.0.1:5055 operator@media-01
+ssh -N -L 8180:192.0.2.84:8180 -L 8989:192.0.2.84:8989 \
+  -L 7878:192.0.2.84:7878 -L 9696:192.0.2.84:9696 \
+  -L 5055:192.0.2.84:5055 operator@media-01
 ```
 
 | Application | Browser address | Address for another container |
@@ -114,9 +119,8 @@ The VPN applications share one network namespace. Between them, use
 `localhost` with the application's internal port. Seerr uses `gluetun` instead.
 Host port 8180 maps to qBittorrent's internal port 8080.
 
-For daily use, follow the [private HTTPS guide](../../networking/private-access/README.md).
-A proxy on another host needs these bindings changed to the media VM's intended
-private interface, with container ingress restricted to that proxy.
+For daily use, add the [media HTTPS routes](../../networking/private-access/README.md#media-routes)
+to Caddy on the Pi.
 
 ## Connect the applications
 
@@ -159,11 +163,14 @@ Keep API keys in the applications' private configuration.
 First complete the [Jellyfin guide](../jellyfin/README.md), mapping this library
 into its read-only `/media` mount. Create Movies and TV libraries.
 
-In Seerr's wizard, select Jellyfin and use an address reachable from the Seerr
-container. For the separate Jellyfin Compose project on this VM, publish
-Jellyfin on the VM's private interface and enter that address with port 8096.
-`localhost` inside Seerr would point back to Seerr itself. Set the external
-Jellyfin URL to its private HTTPS hostname, sign in, and sync the libraries.
+In Seerr's wizard, select Jellyfin and enter `http://192.0.2.84:8096`.
+`localhost` inside Seerr points back to Seerr itself. Set the external Jellyfin
+URL to `https://media.example.com`, sign in, and sync the libraries. Both
+Compose projects run on the media VM. From the Servarr directory, check:
+
+```bash
+docker compose exec seerr wget -qO- http://192.0.2.84:8096/health
+```
 
 Add Radarr at `http://gluetun:7878` and Sonarr at `http://gluetun:8989`, using their
 API keys. Fetch their profiles and root folders, choose a profile and root for
@@ -204,7 +211,7 @@ Readarr remains in the lab inventory, but its upstream project is
 3. Test each manager's download client and Prowlarr application connection.
 4. Import a media file you own through a manager's manual import. Check the
    destination, ownership, and Jellyfin library scan and playback.
-5. Make and approve a Seerr request for content you are entitled to download.
+5. Make and approve a Seerr request.
    Confirm it appears in the intended manager with the selected profile/root.
 
 Gluetun's health check tests the VPN. Application HTTP checks test the individual
@@ -259,6 +266,6 @@ python3 scripts/check-stack-examples.py --validate
 python3 scripts/check-stack-examples.py --smoke media
 ```
 
-The smoke test checks application startup, library permissions, and Seerr's
-connection to the managers using a mock VPN namespace. Check the real VPN exit
-with your provider configuration using the steps above.
+The smoke test checks startup, library permissions, and Seerr's connections to
+the managers and a separate Jellyfin project. It substitutes a local namespace
+for the VPN; check the real tunnel using your provider configuration above.

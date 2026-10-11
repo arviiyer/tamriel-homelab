@@ -14,7 +14,7 @@ Compose inside the VMs and a separate TrueNAS system for shared bulk files.
 
 [![Three online Proxmox nodes with quorum](../screenshots/proxmox-cluster-summary.png)](../screenshots/README.md#proxmox-cluster)
 
-The cluster health view shows three nodes online with quorum established.
+The September cluster view shows the nodes, VMs, and templates.
 
 | Machine | Role |
 |---|---|

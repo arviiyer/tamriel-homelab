@@ -43,7 +43,7 @@ rules or any deployment SSH key.
 
 Requirements: a Docker host that can reach Forgejo and the image registries,
 Docker Compose, curl, and an account allowed to run Docker. The timer below also
-needs systemd. Keep its configuration outside this public checkout.
+needs systemd.
 
 On the bot host, create a new working directory and download the examples:
 
@@ -180,7 +180,7 @@ For an image update such as Homarr:
    and check results with your private maintenance notes. If an upgrade fails,
    use the matching previous image and data backup as the application requires.
 
-The [deployment example](../ci/README.md) demonstrates selecting the checked SHA,
+The [deployment example](../ci/README.md) covers selecting the checked SHA,
 a restricted SSH request, image-only changes, health checks, and rollback. It
 targets a disposable API service. Adapt its target policy and data handling
 before using that pattern for an application such as Homarr.
@@ -188,8 +188,8 @@ before using that pattern for an application such as Homarr.
 In my lab, Stirling PDF and the sandbox have manually triggered deployment
 workflows. Other services use manual apply steps after merge. The
 [runner notes](../README.md#runners-and-deployment) cover that setup, and the
-[rollback drill](../../docs/drills/2026-08-24-fail-closed-delivery-rollback.md)
-shows the public example's tested behavior.
+[rollback drill](../ci/README.md#tests)
+exercises deployment and recovery after a failed health check.
 
 ## Troubleshooting
 

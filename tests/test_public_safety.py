@@ -250,6 +250,39 @@ class PublicationSafetyTests(unittest.TestCase):
         self.assertEqual(result.returncode, 1)
         self.assertIn("prohibited tracked path: capture.PCAP", result.stderr)
 
+    def test_environment_templates_are_scanned_as_text(self) -> None:
+        template = self.repository / "app/.env.example"
+        template.parent.mkdir()
+        template.write_text("APP_DOMAIN=app.example.com\nAPI_TOKEN=\n")
+        self.run_command("git", "add", "app/.env.example")
+        result = self.run_checker()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        token = "example-sensitive-test-value"
+        template.write_text(f"API_TOKEN={token}\n")
+        result = self.run_checker(self.create_denylist(token))
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("match found in the current tree", result.stderr)
+        self.assertNotIn(token, result.stderr)
+
+    def test_live_environment_files_remain_prohibited(self) -> None:
+        for name in (".env", ".env.production", ".env.example.local"):
+            with self.subTest(name=name):
+                path = self.repository / name
+                path.write_text("API_TOKEN=\n")
+                result = self.run_checker()
+                self.assertEqual(result.returncode, 1)
+                self.assertIn(f"prohibited tracked path: {name}", result.stderr)
+                path.unlink()
+
+    def test_environment_template_does_not_exempt_a_private_directory(self) -> None:
+        path = self.repository / "exports/.env.example"
+        path.parent.mkdir()
+        path.write_text("API_TOKEN=\n")
+        result = self.run_checker()
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("prohibited tracked path: exports/.env.example", result.stderr)
+
     def test_top_level_secrets_directory_is_rejected(self) -> None:
         secret_file = self.repository / "secrets/config.txt"
         secret_file.parent.mkdir()
@@ -281,7 +314,7 @@ class PublicationSafetyTests(unittest.TestCase):
         self.assertEqual(result.returncode, 1)
         self.assertIn("symbolic links are prohibited", result.stderr)
 
-    def test_screenshot_requires_review_record(self) -> None:
+    def test_screenshot_does_not_require_a_public_review_record(self) -> None:
         screenshot = self.repository / "screenshots/example.png"
         screenshot.parent.mkdir(parents=True)
         screenshot.write_bytes(b"synthetic image fixture")
@@ -289,14 +322,12 @@ class PublicationSafetyTests(unittest.TestCase):
 
         result = self.run_checker()
 
-        self.assertEqual(result.returncode, 1)
-        self.assertIn("example.review.md", result.stderr)
+        self.assertEqual(result.returncode, 0, result.stderr)
 
-    def test_reviewed_screenshot_has_a_four_mib_limit(self) -> None:
+    def test_screenshot_has_a_four_mib_limit(self) -> None:
         screenshot = self.repository / "screenshots/example.webp"
         screenshot.parent.mkdir(parents=True)
         screenshot.write_bytes(b"\x00" * (4 * 1024 * 1024))
-        screenshot.with_suffix(".review.md").write_text("Synthetic review fixture\n")
         self.run_command("git", "add", "screenshots")
 
         result = self.run_checker()

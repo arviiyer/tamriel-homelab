@@ -9,20 +9,17 @@ confirmation before changing the request.
 
 ## Screenshots
 
-An approval demonstration using *Big Buck Bunny* (2008), an
-[openly licensed film by the Blender Foundation](https://peach.blender.org/about/).
-These captures show my running lab bot, which includes posters and richer request
-details. The public example below uses compact text messages.
+Approving a *Big Buck Bunny* request with the lab bot. It includes posters;
+the example below uses text messages.
 
 ![Big Buck Bunny request with Approve and Deny buttons](../../screenshots/seerr-approval-pending.webp)
 
 A pending request in Discord.
-[Screenshot review](../../screenshots/seerr-approval-pending.review.md).
 
 ![Bot confirmation and approved Big Buck Bunny request](../../screenshots/seerr-approved.webp)
 
 After approval, the bot confirms the action and Seerr reports the request as
-processing. [Screenshot review](../../screenshots/seerr-approved.review.md).
+processing.
 
 ## How it works
 
@@ -40,7 +37,7 @@ it. Replayed clicks and already-handled requests do not create another decision.
 The webhook stays on a shared Docker network; Discord does not need an inbound
 port into the lab.
 
-The [public implementation](bot.go) includes signed, expiring buttons,
+The [bot](bot.go) includes signed, expiring buttons,
 owner/server/channel checks, persistent message records, and a once-per-minute
 reconciliation pass.
 
@@ -173,7 +170,7 @@ Restore the files with the same ownership and start it again. State contains
 Discord message IDs and button nonces, not Seerr session cookies. A corrupt
 state file stops startup instead of silently publishing a second set of buttons.
 
-Update the reviewed Go files and module checksums, then run
+Update the Go files and module checksums, then run
 `docker compose up -d --build`. Keep a copy of the previous files and state for
 rollback. Rotate the bot token through Discord if needed; rotating the signing
 key invalidates existing buttons. A crash between sending a Discord message and
@@ -198,10 +195,7 @@ go vet ./...
 
 The tests use a local fake Seerr API to check permissions, CSRF, write retry
 behavior, stale decisions, webhook authentication, and signed actions. They
-need no Discord or Seerr credentials. The public client also passed login,
-pending-request, and title lookups against a fresh Seerr installation.
-[Test results](../../docs/drills/project-checks.md#seerr-discord-approver).
-Live button delivery for the public example still needs the first-request
-walkthrough above.
+need no Discord or Seerr credentials. Live Discord button testing remains on
+the [roadmap](../../ROADMAP.md#projects).
 
 [Seerr client](seerr.go) · [Interaction handler](bot.go) · [Tests](bot_test.go)

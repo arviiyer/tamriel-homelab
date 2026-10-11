@@ -17,9 +17,10 @@ TrueNAS; Jellyfin's database, metadata, and cache stay on the VM.
 
 ## Install
 
-Requirements: a Linux host with Docker Engine, the Compose plugin, Bash, and curl.
-The initial example works without a GPU. Download the [Compose file](compose.yml)
-into a new directory outside this checkout and prepare the data directories:
+Requirements: a Linux host with Docker Engine, Compose, Bash, curl, and the
+[media share mounted](../../storage/nfs/README.md). These guides use `media-01`
+at `192.0.2.84` and `/mnt/nas/media` for the library. Replace the address with
+your VM's private address. GPU setup follows below.
 
 ```bash
 mkdir -p "$HOME/homelab-examples"
@@ -27,32 +28,36 @@ mkdir "$HOME/homelab-examples/jellyfin"
 cd "$HOME/homelab-examples/jellyfin"
 curl --fail --location --output compose.yml \
   https://raw.githubusercontent.com/arviiyer/tamriel-homelab/main/media/jellyfin/compose.yml
-mkdir config cache media
-printf 'JELLYFIN_UID=%s\nJELLYFIN_GID=%s\n' "$(id -u)" "$(id -g)" > .env
+curl -fLO https://raw.githubusercontent.com/arviiyer/tamriel-homelab/main/media/jellyfin/environment.example
+cp environment.example .env
+mkdir config cache
+id
 ```
 
-The container runs as your host user, stores application data in those
-directories, and publishes the web interface on localhost.
+Set `JELLYFIN_UID` and `JELLYFIN_GID` to the owner of `config` and `cache`, and
+`MEDIA_BIND_IP` to the VM's private address. That user also needs read and
+directory-traversal permission on `MEDIA_PATH`. Use the same library path in
+the [download stack](../servarr/README.md#prepare-storage).
 
-Copy a small test video into `media`, then start Jellyfin:
+Permit the Pi proxy to reach TCP 8096 on this VM. Seerr, on the same Docker
+host, also needs that port. The [access guide](../../networking/private-access/README.md#the-setup)
+describes the network rules. Start Jellyfin:
 
 ```bash
 docker compose config --quiet
 docker compose up -d
 docker compose ps
-curl --fail http://127.0.0.1:8096/health
+curl --fail http://192.0.2.84:8096/health
 ```
 
-Once startup finishes, the health endpoint should return `Healthy`. Open
-<http://127.0.0.1:8096>, create an administrator, and add `/media` as a library.
-Wait for the scan and try playback. This example uses a direct server URL rather
-than publishing discovery ports.
+The health endpoint should return `Healthy`. From your workstation, use
+`ssh -N -L 8096:192.0.2.84:8096 operator@media-01`, then open
+<http://localhost:8096>. Create an administrator and libraries at `/media/movies`
+and `/media/tv`. Scan the library and try playback.
 
-For a remote VM, use `ssh -L 8096:127.0.0.1:8096 operator@media-01` to reach the
-wizard. To use NAS storage, change the bind mount's `source` to your mounted
-library. The container user needs read and directory-traversal permission on it.
-The lab's [mount checks](../../storage/README.md#waiting-for-shared-storage) run
-before Docker starts.
+For a laptop-only trial, set `MEDIA_BIND_IP=127.0.0.1` and `MEDIA_PATH=./media`,
+create `media/`, and put a video there. The NAS setup uses the
+[mount dependency](../../storage/nfs/README.md#wait-for-mounts) before Docker starts.
 
 ## Pass the GPU to the VM
 
@@ -123,17 +128,13 @@ video encoder.
 
 ## Access and sign-in
 
-The lab uses private Caddy routes with local DNS at home and Tailscale when away.
-For a hostname such as `https://media.example.com`, configure the proxy to reach
-Jellyfin's HTTP port and forward WebSocket connections. A proxy on a separate
-host needs an explicitly reachable private port; the example's loopback binding
-only accepts connections on its own host.
+Add the [media Caddy routes](../../networking/private-access/README.md#media-routes)
+on the Pi. They use `media.example.com` for Jellyfin and `requests.example.com`
+for Seerr; Caddy forwards WebSocket connections automatically.
 
 Set Jellyfin's known proxies to the proxy you actually use. See the
 [Jellyfin networking guide](https://jellyfin.org/docs/general/post-install/networking/)
-and the [lab's access layout](../../networking/README.md#caddy-and-authentik).
-The [private HTTPS guide](../../networking/private-access/README.md) includes the
-DNS and certificate setup. Use Jellyfin's own authentication on its route.
+and use Jellyfin's own authentication on its route.
 
 I use the [SSO plugin](https://github.com/9p4/jellyfin-plugin-sso) with Authentik
 for browser sign-in. Configure the provider and exact callback from the plugin's

@@ -4,12 +4,12 @@ services:
     user: "${JELLYFIN_UID:?set JELLYFIN_UID}:${JELLYFIN_GID:?set JELLYFIN_GID}"
     restart: unless-stopped
     ports:
-      - "127.0.0.1:8096:8096"
+      - "${MEDIA_BIND_IP:-127.0.0.1}:8096:8096"
     volumes:
       - ./config:/config
       - ./cache:/cache
       - type: bind
-        source: ./media
+        source: ${MEDIA_PATH:-./media}
         target: /media
         read_only: true
         bind:

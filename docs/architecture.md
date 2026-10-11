@@ -21,7 +21,7 @@ own login or Authentik's proxy outpost, as listed in the
 [sign-in table](../networking/README.md#caddy-and-authentik).
 
 The [private-access guide](../networking/private-access/README.md) walks through
-DNS, certificates, and sign-in. The [network-zone notes](network-and-identity.md)
+DNS, certificates, and sign-in. The [network-zone notes](../networking/README.md#network-zones)
 explain which clients and workloads can make those connections.
 
 ## Files and databases

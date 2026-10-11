@@ -83,13 +83,13 @@ jobs:
         run: |
           python3 -m pip install --requirement automation/ansible/requirements.txt
           python3 -m pip install --requirement automation/falco/requirements.txt
-          python3 -m pip install --requirement automation/monitoring/requirements.txt
+          python3 -m pip install --requirement monitoring/security-dashboard/requirements.txt
 
       - name: Build disposable delivery drill target
         run: bash automation/ci/tests/run_disposable_host_drill.sh --build-only
 
       - name: Check dashboard failure-count PromQL
-        run: python3 automation/monitoring/tests/validate_promql.py
+        run: python3 monitoring/security-dashboard/tests/validate_promql.py
 
       - name: Check Falco configuration and rules
         run: |
@@ -105,7 +105,7 @@ jobs:
             -r /etc/falco/falco_rules.local.yaml
 
       - name: Check Grafana provisioning and dashboard loading
-        run: python3 automation/monitoring/tests/validate_grafana.py
+        run: python3 monitoring/security-dashboard/tests/validate_grafana.py
 
       - name: Exercise ClamAV detection and error handling
         run: python3 security/clamav/check.py

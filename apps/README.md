@@ -62,7 +62,7 @@ article images so the reading view can load them locally behind sign-in.
 [![Homarr service cards and reading brief](../screenshots/homarr-home.webp)](../screenshots/README.md#homarr)
 
 Homarr is my starting page for service links, Pi-hole statistics, and the
-[Morning SOC Briefing](../projects/reading-brief/README.md). The brief shows
+[daily reading brief](../projects/reading-brief/README.md). The brief shows
 source excerpts with links back to FreshRSS.
 
 [Setup, Compose, and reading widget](homarr/README.md) ·
@@ -130,9 +130,8 @@ covers setup and GPU checks.
 
 ## Small projects
 
-The [Projects section](../projects/README.md) has dedicated guides and runnable
-examples for the Morning SOC Briefing, Forge VM provisioner, Seerr Discord
-Approver, Printer Monitor, and Tamriel Sandbox.
+The [Projects section](../projects/README.md) covers the reading brief, Forge VM
+provisioner, Seerr Discord Approver, Printer Monitor, and Tamriel Sandbox.
 
 ## Dashboards and monitoring
 
@@ -144,7 +143,7 @@ I use Grafana to view host resource use, application metrics, and security scans
 The screenshot shows Node Exporter Full on the Raspberry Pi.
 
 [Monitoring](../monitoring/README.md) ·
-[Dashboard configuration](../automation/monitoring/README.md) ·
+[Dashboard configuration](../monitoring/security-dashboard/README.md) ·
 [Grafana documentation](https://grafana.com/docs/grafana/latest/)
 
 | Service | What I use it for | Setup or notes |

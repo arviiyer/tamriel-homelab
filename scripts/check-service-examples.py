@@ -55,6 +55,7 @@ def validate() -> None:
         os.environ, JELLYFIN_UID="1000", JELLYFIN_GID="1000", RENDER_GID="123",
         SECRET_ENCRYPTION_KEY=secrets.token_hex(32), RENOVATE_TOKEN="configuration-check-only",
         SEARXNG_SECRET=secrets.token_hex(32), PDF_INITIAL_PASSWORD=secrets.token_hex(24),
+        MEDIA_BIND_IP="127.0.0.1", MEDIA_PATH="./media",
     )
     examples = {**EXAMPLES, "renovate": ROOT / "automation/renovate/compose.yml"}
     for name, path in examples.items():
@@ -128,7 +129,8 @@ class Project:
             shutil.copyfile(EXAMPLES[name], self.path)
             for folder in ("config", "cache", "media"):
                 (directory / folder).mkdir()
-            self.env.update(JELLYFIN_UID=str(os.getuid()), JELLYFIN_GID=str(os.getgid()))
+            self.env.update(JELLYFIN_UID=str(os.getuid()), JELLYFIN_GID=str(os.getgid()),
+                            MEDIA_BIND_IP="127.0.0.1", MEDIA_PATH=str(directory / "media"))
         self.project = f"tamriel-example-{uuid.uuid4().hex[:12]}"
         config = render(self.path, env=self.env)
         # !override replaces fixed ports with random loopback ports (Compose 2.24.4+).

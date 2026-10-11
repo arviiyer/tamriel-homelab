@@ -12,8 +12,8 @@ and OpenSpeedTest run on my Raspberry Pi. Stirling PDF runs on the application V
 
 ## Install
 
-Requirements: Docker Engine, Compose, curl, and OpenSSL. Create a new directory
-outside this checkout for the service, download its linked YAML file as
+Requirements: Docker Engine, Compose, curl, and OpenSSL. Create a service
+directory, download its linked YAML file as
 `compose.yml`, and run the commands in its section. For example:
 
 ```bash

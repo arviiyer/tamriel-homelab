@@ -2,82 +2,83 @@
 
 [Home](../../README.md) · [Networking](../README.md) · [Apps](../../apps/README.md)
 
-I use the same application hostname at home and away. Selected apps have Pi-hole
-records pointing at Caddy's LAN address; public DNS returns its Tailscale address.
-Caddy terminates HTTPS, then the application uses its own login or Authentik.
-This guide gives both the application and identity hostname a local DNS record.
+Caddy runs on my Raspberry Pi and forwards requests to the application VMs.
+Pi-hole resolves app names to the Pi's LAN address at home; public DNS returns
+its Tailscale address for use away from home. Authentik runs on a separate VM.
 
-This walkthrough puts a small web page behind Authentik forward authentication.
-It includes the proxy configuration and the DNS, certificate, and provider steps.
-The lab's native OIDC integrations are linked at the end.
+This guide follows that layout. I run Caddy as a host service in the lab; the
+Compose file here builds the same Cloudflare DNS module and uses host networking.
 
-- [Before starting](#before-starting)
-- [Use it with an application](#use-it-with-an-application)
-- [Changes and backups](#changes-and-backups)
-- [Checks](#checks)
+## The setup
 
-## Before starting
+Replace these addresses and `example.com` with your own:
 
-You need a Linux host with Docker Engine, Compose, curl, OpenSSL, Python 3, and
-free ports 80, 443, 2019, 8088, 9000, and 9443. Allow at least 2 cores and 2 GB RAM for
-Authentik. Use a dedicated test host if you already run a proxy on these ports.
+| Host | Address | Services |
+|---|---|---|
+| `proxy-01` | `192.0.2.5` plus its Tailscale address | Caddy, Tailscale, local DNS |
+| `identity-01` | `192.0.2.81` | Authentik on TCP 9000 |
+| `observability-01` | `192.0.2.82` | Uptime Kuma on TCP 3001 |
+| `media-01` | `192.0.2.84` | Jellyfin on TCP 8096, Seerr on TCP 5055 |
 
-You also need a domain with DNS hosted by Cloudflare, a tailnet, and a local DNS
-server. Follow the [Pi-hole and Unbound guide](../dns/README.md) for local DNS.
-Replace `example.com` and the documentation addresses with your own values.
+Use Linux hosts with Docker Engine, Compose, curl, and OpenSSL. Allow at least
+2 cores and 2 GB RAM for Authentik. Caddy needs ports 80 and 443 available.
+You also need a Cloudflare-managed domain, a tailnet, and
+[local DNS](../dns/README.md).
 
-The walkthrough puts Caddy, Authentik, and the sample page on the same host.
-My lab has Caddy on the Pi and Authentik on its own VM; in that arrangement,
-replace the loopback upstream with the identity VM's private address and allow
-the proxy to reach it.
+Configure the router and host firewalls for these connections:
+
+| Source | Destination | TCP ports |
+|---|---|---|
+| Trusted LAN and tailnet clients | Pi proxy | 443, optionally 80 for redirects |
+| Pi proxy | Identity VM | 9000 |
+| Pi proxy | Monitoring VM | 3001 |
+| Pi proxy | Media VM | 8096, 5055 |
+| Identity VM | Pi proxy | 443, for the embedded outpost |
+| Seerr's Docker network on the media VM | Media VM | 8096 |
+
+Limit backend access to those sources. For Docker-published ports, use the
+[Docker host firewall rules](https://docs.docker.com/engine/network/packet-filtering-firewalls/),
+including `DOCKER-USER` with the iptables backend; an ordinary UFW input rule
+does not filter forwarded container traffic. The lab's media rule filters
+traffic arriving on the VM's LAN interface while allowing local container
+connections. There are no WAN port forwards for these applications.
 
 ## Tailscale and DNS
 
-Install Tailscale using its [Linux instructions](https://tailscale.com/download/linux),
-then enroll the proxy host:
+On the Pi, [install Tailscale](https://tailscale.com/download/linux), then run:
 
 ```bash
 sudo tailscale up --accept-dns=false
 tailscale ip -4
 ```
 
-In the tailnet policy, permit your intended client identities to reach this
-device on TCP 443. Check that no broader default grant defeats that restriction.
-The server retains local DNS; enroll your phone or laptop as a client too.
+Permit your client identities to reach this device on TCP 443 in the tailnet
+policy. Enroll your phone or laptop too.
 
-Create two **DNS-only** public A records, `auth.example.com` and `app.example.com`,
-pointing at the proxy's Tailscale IPv4 address. In Pi-hole's local DNS records,
-point those same two names at its LAN address. Remove conflicting AAAA or CNAME
-records. The public A records provide discovery, while reaching their address
-requires Tailscale.
-
-In the router and host firewall, allow trusted LAN clients to the proxy on TCP
-443 (and optionally TCP 80 for redirects). Allow HTTPS through Tailscale and
-allow Authentik's container network to reach the proxy on TCP 443. Keep
-WAN port forwards absent. The example also checks client source addresses in
-Caddy. UDP 443 is optional for HTTP/3; HTTPS works over TCP without it.
+Create **DNS-only** public A records for `auth.example.com` and
+`status.example.com`, pointing at the Pi's Tailscale address. In Pi-hole, point
+the same names at `192.0.2.5`. Remove conflicting AAAA or CNAME records. Authentik
+must also resolve its own HTTPS name to a reachable proxy address.
 
 ## Install Authentik
 
-Create a fresh directory outside the checkout and obtain the official Compose
-file. It pins a release when downloaded:
+On **identity-01**, obtain the [official Compose file](https://docs.goauthentik.io/install-config/install/docker-compose/):
 
 ```bash
-mkdir -p "$HOME/homelab-examples"
-mkdir "$HOME/homelab-examples/authentik"
-cd "$HOME/homelab-examples/authentik"
+mkdir -p "$HOME/homelab/authentik"
+cd "$HOME/homelab/authentik"
 curl -fLo compose.yml https://docs.goauthentik.io/compose.yml
 (
   set -euC
   umask 077
-  printf 'PG_PASS=%s\nAUTHENTIK_SECRET_KEY=%s\nCOMPOSE_PORT_HTTP=127.0.0.1:9000\nCOMPOSE_PORT_HTTPS=127.0.0.1:9443\n' \
+  printf 'PG_PASS=%s\nAUTHENTIK_SECRET_KEY=%s\nCOMPOSE_PORT_HTTP=192.0.2.81:9000\nCOMPOSE_PORT_HTTPS=127.0.0.1:9443\n' \
     "$(openssl rand -hex 24)" "$(openssl rand -hex 48)" > .env
 )
 ```
 
-Remove the worker's `/var/run/docker.sock` mount from `compose.yml`. This guide
-uses the embedded outpost and does not need automatic Docker outpost deployment.
-Keep the database volume on local storage.
+Set the HTTP binding to your identity VM's address. Remove the worker's
+`/var/run/docker.sock` mount: the embedded outpost does not need it. Keep the
+database on the VM's local disk.
 
 ```bash
 docker compose config --quiet
@@ -86,26 +87,39 @@ docker compose up -d
 docker compose ps
 ```
 
-Use `ssh -L 9000:127.0.0.1:9000 operator@proxy-01` from your workstation, then
-open `http://localhost:9000/if/flow/initial-setup/` and create the administrator.
-Create a normal user for the application and a group called `homelab-users`.
-Add that user to the group. Keep the original secret key with the database backup.
+From your workstation, run `ssh -N -L 9000:192.0.2.81:9000 operator@identity-01`.
+Open `http://localhost:9000/if/flow/initial-setup/` and create the administrator.
+Create a normal user, a `homelab-users` group, and add the user to that group.
 
-[Official Authentik installation](https://docs.goauthentik.io/install-config/install/docker-compose/)
+## Start the application
+
+On **observability-01**, follow the [Uptime Kuma guide](../../monitoring/uptime-kuma/README.md)
+and create its administrator through the initial SSH tunnel. Then change the
+published port to `192.0.2.82:3001:3001` and run `docker compose up -d`.
+
+From the Pi, check both upstreams:
+
+```bash
+curl -I http://192.0.2.81:9000/if/flow/default-authentication-flow/
+curl -I http://192.0.2.82:3001/
+```
+
+Both should return an HTTP response. Resolve connectivity problems here before
+configuring HTTPS.
 
 ## Build Caddy with DNS certificates
 
-Cloudflare DNS validation lets Caddy obtain a publicly trusted certificate
-without opening an inbound WAN port. Create a Cloudflare API token with
-**Zone → DNS → Edit** and **Zone → Zone → Read**, limited to the selected zone.
+Create a Cloudflare API token with **Zone → DNS → Edit** and **Zone → Zone → Read**,
+limited to your zone. DNS validation obtains certificates without an inbound WAN
+connection. On **proxy-01**:
 
 ```bash
-mkdir "$HOME/homelab-examples/private-access"
-cd "$HOME/homelab-examples/private-access"
+mkdir -p "$HOME/homelab/private-access"
+cd "$HOME/homelab/private-access"
 (
   set -eu
   for file in compose.yml Dockerfile .dockerignore Caddyfile environment.example; do
-    curl --fail --location --output "$file" \
+    curl -fLo "$file" \
       "https://raw.githubusercontent.com/arviiyer/tamriel-homelab/main/networking/private-access/$file"
   done
 )
@@ -117,19 +131,15 @@ Edit `.env`:
 
 | Setting | Value |
 |---|---|
-| `AUTH_DOMAIN`, `APP_DOMAIN` | Your two real DNS names |
-| `AUTH_UPSTREAM` | `127.0.0.1:9000` for this walkthrough |
-| `APP_UPSTREAM` | `127.0.0.1:8088` for the sample page |
-| `PROXY_LISTEN_ADDRESSES` | Space-separated LAN and Tailscale addresses of this host |
-| `TRUSTED_CIDRS` | Space-separated allowed LAN client CIDRs and client Tailscale addresses with `/32` |
-| `CLOUDFLARE_API_TOKEN` | The zone-scoped token |
+| `AUTH_DOMAIN`, `APP_DOMAIN` | `auth.example.com`, `status.example.com` |
+| `AUTH_UPSTREAM`, `APP_UPSTREAM` | `192.0.2.81:9000`, `192.0.2.82:3001` |
+| `PROXY_LISTEN_ADDRESSES` | Space-separated LAN and Tailscale addresses of the Pi |
+| `TRUSTED_CIDRS` | Allowed client CIDRs, client Tailscale addresses with `/32`, and the identity VM's address with `/32` |
+| `CLOUDFLARE_API_TOKEN` | Your zone-scoped token |
 
-Use the source addresses the proxy actually sees. Keep tailnet access policy in
-place even when allowing a broader Tailscale address range in Caddy.
-Authentik's embedded outpost also connects to its HTTPS hostname. Include the
-source address or dedicated Docker-network subnet used by those requests in
-`TRUSTED_CIDRS`. Use `docker network inspect` on Authentik's Compose network to
-find its subnet; the container's localhost is not the host's localhost.
+The identity VM needs access because its embedded outpost connects back to the
+HTTPS identity URL. Use the source address Caddy sees, usually the VM address
+after Docker masquerading.
 
 ```bash
 docker compose build
@@ -138,163 +148,124 @@ docker compose up -d
 docker compose logs --tail=50 caddy
 ```
 
-Open your Authentik HTTPS hostname and sign in. If certificate issuance fails,
-check token permissions and DNS propagation in the Caddy logs. Certificates and
-ACME account data persist in `caddy-data`.
+Open `https://auth.example.com` and sign in. For certificate errors, check DNS
+and token permissions in the logs.
 
-## Protect the sample application
+## Add forward authentication
 
-On the proxy host, in another terminal:
+In Authentik:
 
-```bash
-mkdir -p "$HOME/homelab-examples/sample-page"
-printf 'Private application reached through Caddy\n' > "$HOME/homelab-examples/sample-page/index.html"
-python3 -m http.server 8088 --bind 127.0.0.1 \
-  --directory "$HOME/homelab-examples/sample-page"
-```
+1. Under **Applications → Applications → Create with provider**, name the app
+   `Uptime Kuma`, slug `uptime-kuma`, and select **Proxy Provider**.
+2. Choose **Forward auth (single application)** and external host
+   `https://status.example.com`. Select the default explicit-consent authorization
+   and invalidation flows offered by your release.
+3. Bind `homelab-users` on the application's **Policy / Group / User Bindings** tab.
+4. Under **Applications → Outposts**, add the app to the embedded outpost. Set
+   `authentik_host` to `https://auth.example.com/`.
+5. Open the status URL in a private browser window and sign in as the normal user.
 
-In Authentik's administration interface:
+The [Caddyfile](Caddyfile) routes outpost requests first, checks the session, then
+proxies Kuma. Keep that ordering inside `route`. Kuma retains its own login.
 
-1. Use **Applications → Applications → Create with provider**. Name the app
-   `Example app`, slug `example-app`, and choose a **Proxy Provider**.
-2. Choose **Forward auth (single application)**. Set the external host to your
-   exact `https://app.example.com` URL. Select the default explicit-consent
-   authorization flow and default invalidation flow offered by your release.
-3. On the application's **Policy / Group / User Bindings** tab, bind
-   `homelab-users`. This limits access to the intended users.
-4. Under **Applications → Outposts**, edit the embedded outpost and add this
-   application. Set its `authentik_host` to your `https://auth.example.com/`
-    hostname. This address must be reachable from both the browser and Authentik.
-    For this embedded-outpost setup, keep the HTTPS hostname in `authentik_host`.
-5. Save, then open the app in a private browser window. Sign in with the normal
-   group member. The page should display the sample text.
-
-The [Caddyfile](Caddyfile) sends outpost paths to Authentik first, checks the
-session, and only then proxies the page. Keep that ordering inside `route`.
-The upstream is bound to loopback, so clients cannot bypass the proxy.
-
-From the Authentik working directory, check that the server can reach its own
-HTTPS identity URL, replacing the hostname:
+From the Authentik directory, check the outpost's return path:
 
 ```bash
 docker compose exec -T server python -c \
   'import urllib.request; print(urllib.request.urlopen("https://auth.example.com/if/flow/default-authentication-flow/").status)'
 ```
 
-Expect `200`. A `403` points to the proxy's source-address restriction; connection
-or certificate errors need fixing before an outpost login can complete.
+Expect `200`. A `403` usually means the identity VM is missing from `TRUSTED_CIDRS`.
+
+## Use it with an application
+
+For another forward-auth application, copy the app block and configure its
+hostname, upstream, and Authentik provider. For native OIDC or the app's own
+login, omit the outpost and `forward_auth` directives:
+
+```caddyfile
+rss.example.com {
+	import private_site
+	route {
+		import private_clients
+		reverse_proxy 192.0.2.83:8080
+	}
+}
+```
+
+Publish FreshRSS on `192.0.2.83:8080:80` and allow the proxy to reach it.
+The [FreshRSS](../../apps/freshrss/README.md#sign-in),
+[Immich](../../apps/immich/README.md#authentik-sign-in), and
+[Jellyfin](../../media/jellyfin/README.md#access-and-sign-in) guides cover their
+OIDC setup. Native phone and TV clients generally need the application's login,
+without an extra forward-auth browser redirect.
+
+## Media routes
+
+The [media stack](../../media/README.md) uses the same Pi proxy. Download
+[media.caddy](media.caddy), replace its names and media VM address, and append
+its two blocks to your Caddyfile. They use the app's own login:
+
+```bash
+curl -fLo media.caddy \
+  https://raw.githubusercontent.com/arviiyer/tamriel-homelab/main/networking/private-access/media.caddy
+# Edit media.caddy first, then add it once:
+cat media.caddy >> Caddyfile
+docker compose exec caddy caddy reload --config /etc/caddy/Caddyfile
+```
+
+Add `media.example.com` and `requests.example.com` to public and local DNS using
+the same addresses as the other apps. Check Jellyfin playback and a Seerr login
+through HTTPS. In Seerr, the internal Jellyfin URL is `http://192.0.2.84:8096`;
+its browser-facing URL is `https://media.example.com`.
 
 ## Check each path
 
 | Check | Expected result |
 |---|---|
-| Home client resolves both names | Proxy's LAN address |
-| Remote client resolves both names | Proxy's Tailscale address |
-| Remote client with Tailscale connected | Valid HTTPS and Authentik login |
-| Remote client with Tailscale disconnected | Application unreachable |
-| Allowed user signs in | Sample page loads |
-| User outside `homelab-users` signs in | Access denied |
-| App opened after logging out, in a fresh private window | Sign-in required |
+| Home client resolves an app name | Pi's LAN address |
+| Remote client resolves it | Pi's Tailscale address |
+| Remote client connected to Tailscale | HTTPS and application login |
+| Remote client disconnected | Application unreachable |
+| User outside `homelab-users` opens Kuma | Authentik denies access |
+| Fresh private window after logout | Sign-in required |
 
-`dig app.example.com` checks DNS. `curl -I https://app.example.com` should show
-the unauthenticated redirect. To isolate LAN DNS from routing, use
-`curl --resolve app.example.com:443:192.0.2.5 -I https://app.example.com`, replacing
-the address and hostname while retaining TLS verification.
-
-On the test host, stop Authentik's server and retry an uncached app request.
-The request must fail rather than return the page. Start Authentik again and
-repeat a fresh login. Stop the sample Python server when finished.
-
-## Use it with an application
-
-Set `APP_UPSTREAM` to the service's reachable private address. Keep direct client
-access to that backend blocked. With Caddy on another host, account for Docker's
-forwarding rules as well as the ordinary host firewall when limiting access.
-
-For example, FreshRSS initially publishes `127.0.0.1:8080:80`. To reach it from
-the Pi's Caddy, change that binding to `192.0.2.83:8080:80`, using the app VM's
-actual private address, recreate FreshRSS, and set `APP_UPSTREAM=192.0.2.83:8080`
-in the proxy's `.env`. Permit only the proxy to that backend port. From the proxy
-host, check `curl -I http://192.0.2.83:8080` before testing the HTTPS route.
-
-For an application with its own login or native OIDC, replace the app block with
-this route. It retains the private-client check and leaves sign-in to the app:
-
-```caddyfile
-{$APP_DOMAIN} {
-	import private_site
-	route {
-		import private_clients
-		reverse_proxy {$APP_UPSTREAM}
-	}
-}
-```
-
-After changing the upstream and route, run
-`docker compose up -d --force-recreate caddy` from the proxy directory. Check the
-app's HTTPS URL from an allowed client.
-
-For OIDC, configure the provider using the app-specific guide:
-
-- [FreshRSS](../../apps/freshrss/README.md#sign-in)
-- [Immich](../../apps/immich/README.md#authentik-sign-in)
-- [Jellyfin SSO plugin](../../media/jellyfin/README.md#access-and-sign-in)
-
-Avoid putting a second forward-auth browser redirect in front of a native app
-API that phone or TV clients must use. Homarr and Stirling PDF use their own
-logins in my setup. The [sign-in table](../README.md#caddy-and-authentik) covers
-the remaining services.
+Use `dig status.example.com` for DNS and `curl -I https://status.example.com`
+for the unauthenticated redirect. To test the Pi directly while retaining TLS
+verification: `curl --resolve status.example.com:443:192.0.2.5 -I https://status.example.com`.
 
 ## Changes and backups
 
-After editing only the Caddyfile, reload with
-`docker compose exec caddy caddy reload --config /etc/caddy/Caddyfile`.
-After changing `.env`, recreate Caddy with `docker compose up -d --force-recreate caddy`.
-On the lab's host-installed Caddy, I use `sudo systemctl reload caddy`.
+Reload Caddy after editing its file. Recreate it with
+`docker compose up -d --force-recreate caddy` after changing `.env`.
+For host-installed Caddy, use `sudo systemctl reload caddy`.
 
-Back up the proxy configuration, private environment, and certificate volume.
-For Authentik, retain a consistent PostgreSQL backup, its original secret key,
-uploaded data, custom templates, and Compose definition. Follow its
-[upgrade instructions](https://docs.goauthentik.io/install-config/upgrade/)
-for release-specific migrations, then check both an existing session and a fresh
-login. Rebuild the proxy image when updating Caddy or the DNS module.
+Back up the proxy configuration, environment, and certificate volume. Authentik
+needs its PostgreSQL backup, original secret key, uploads, and custom templates.
+Follow the [upgrade notes](https://docs.goauthentik.io/install-config/upgrade/)
+and check a fresh login afterward.
 
-| Symptom | First thing to check |
+| Symptom | Check |
 |---|---|
-| DNS works but HTTPS times out | Tailscale policy, firewall, listening address, and conflicting AAAA record |
-| Caddy responds 403 | Actual client source address against `TRUSTED_CIDRS` |
-| Redirect points to an internal address | Embedded outpost's `authentik_host` URL |
-| Authentik reports application not found | Provider external host and outpost application assignment |
-| Login loops | Exact HTTPS host, cookies, clock, and outpost configuration |
-| HTTP 502 after successful login | Backend address, process, and reachability from the proxy |
-
-[Authentik's Caddy reference](https://docs.goauthentik.io/add-secure-apps/providers/proxy/server_caddy/)
+| HTTPS times out | Tailnet policy, firewall, listen addresses, and conflicting AAAA records |
+| Caddy responds 403 | Client source address against `TRUSTED_CIDRS` |
+| Redirect points at an internal address | Outpost's `authentik_host` |
+| Application not found | Provider external host and outpost assignment |
+| HTTP 502 | Backend process, binding, and reachability from the Pi |
 
 ## Checks
 
-From the repository root, with Python 3, Docker, and Compose 2.24.4 or newer:
+From the repository root with Python 3, Docker, and Compose 2.24.4+:
 
 ```bash
 python3 scripts/check-stack-examples.py --smoke access
 ```
 
-This builds the DNS-enabled proxy and tests its routing with a mock identity
-provider, including denied access and an unavailable provider.
+This tests routing, denied access, and identity outages with a mock provider.
+For real Authentik browser login, use a virtual environment with
+[requirements-test.txt](requirements-test.txt), run
+`python3 -m playwright install --with-deps chromium`, then
+`python3 networking/private-access/check_authentik.py`. The temporary stack
+needs about 4 GiB of free memory and removes its containers afterward.
 
-For a fresh Authentik instance and a real browser login, install the additional
-test dependencies in a virtual environment. Playwright's `--with-deps` option
-installs browser OS dependencies and may prompt for sudo:
-
-```bash
-python3 -m venv "$HOME/.venvs/tamriel-browser-check"
-. "$HOME/.venvs/tamriel-browser-check/bin/activate"
-python3 -m pip install -r networking/private-access/requirements-test.txt
-python3 -m playwright install --with-deps chromium
-python3 networking/private-access/check_authentik.py
-```
-
-The test creates temporary users, a group-bound application, and an embedded
-outpost. It checks local-CA HTTPS, allowed and denied logins, and an identity
-outage, then removes its containers and data. Allow about 4 GiB of free memory
-for the temporary stack and browser. Public certificate issuance and tailnet
-enrollment use your provider configuration and the walkthrough's client checks.
+[Authentik's Caddy reference](https://docs.goauthentik.io/add-secure-apps/providers/proxy/server_caddy/)

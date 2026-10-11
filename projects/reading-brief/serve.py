@@ -11,7 +11,7 @@ import xml.etree.ElementTree as ET
 def rss(payload):
     root = ET.Element("rss", version="2.0")
     channel = ET.SubElement(root, "channel")
-    ET.SubElement(channel, "title").text = "Morning SOC Briefing"
+    ET.SubElement(channel, "title").text = "Daily reading brief"
     ET.SubElement(channel, "link").text = payload["homepage_url"]
     ET.SubElement(channel, "description").text = "Source excerpts for " + payload["day"]
     for article in payload["articles"]:

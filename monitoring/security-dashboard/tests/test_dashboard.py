@@ -47,7 +47,7 @@ class DashboardStructureTests(unittest.TestCase):
     def test_dashboard_has_stable_public_identity(self) -> None:
         self.assertIsNone(self.dashboard["id"])
         self.assertEqual("security-control-overview", self.dashboard["uid"])
-        self.assertEqual("Security Control Overview", self.dashboard["title"])
+        self.assertEqual("Trivy and Falco", self.dashboard["title"])
         self.assertGreaterEqual(self.dashboard["schemaVersion"], 42)
         self.assertFalse(self.dashboard["editable"])
         self.assertEqual({"security", "trivy", "falco"}, set(self.dashboard["tags"]))

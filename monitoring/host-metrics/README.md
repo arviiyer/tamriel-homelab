@@ -125,7 +125,7 @@ enables only CPU, memory, filesystem, and host-information collectors.
 
 The [networking page](../../networking/README.md#caddy-and-authentik) describes
 Grafana's Authentik integration in the lab. The separate
-[security dashboard](../../automation/monitoring/README.md) needs Trivy metrics
+[security dashboard](../security-dashboard/README.md) needs Trivy metrics
 and Falco logs, which this example does not generate.
 
 ## Alerts and Discord
@@ -210,7 +210,7 @@ copies, stop the relevant service first. Follow the
 using both Compose files when alerts are enabled. Keep `.env` and the Discord
 webhook file with the private backup.
 
-To update, change the reviewed image digest, pull, and recreate the stack:
+To update, change the image digest, pull, and recreate the stack:
 
 ```bash
 docker compose -f compose.yml -f alerts.override.yml pull

@@ -9,8 +9,7 @@ used with a Canon PIXMA TS3720.
 
 ![Printer Monitor showing sample supplies and status](../../screenshots/printer-demo.webp)
 
-The public GTK app in sample mode.
-[Screenshot review](../../screenshots/printer-demo.review.md).
+The GTK app in sample mode.
 
 A local app fits this job: the printer is available when the laptop is on, and
 the status window does not need an exporter or a server-side dashboard. This
@@ -45,11 +44,7 @@ cd "$HOME/homelab-projects/printer-monitor"
     curl -fLo "$file" "https://raw.githubusercontent.com/arviiyer/tamriel-homelab/main/projects/printer-monitor/$file"
   done
 )
-python3 printer_monitor.py --demo
 ```
-
-The sample window works without a printer. Its buttons are disabled and its
-header says **Sample data**. For terminal output, use `--demo --status`.
 
 ## Connect your printer
 
@@ -107,7 +102,7 @@ The monitor itself reads status and does not submit, cancel, or change jobs.
 
 ## Updates and troubleshooting
 
-Download the reviewed Python file and rerun `bash install.sh` to update. Keep
+Download the updated Python file and rerun `bash install.sh` to update. Keep
 your `config.json`; the app has no database or historical metrics to back up.
 
 | Symptom | Check |
@@ -124,5 +119,11 @@ From the repository root, parsing and queue-isolation checks need only Python:
 python3 -m unittest discover -s projects/printer-monitor/tests -v
 python3 projects/printer-monitor/printer_monitor.py --demo --status
 ```
+
+## Try it locally
+
+Run `python3 printer_monitor.py --demo` to open a sample window without a printer.
+Its buttons are disabled and its header says **Sample data**. Use
+`--demo --status` for JSON output instead.
 
 [Source](printer_monitor.py) · [IPP-over-USB](https://github.com/OpenPrinting/ipp-usb)

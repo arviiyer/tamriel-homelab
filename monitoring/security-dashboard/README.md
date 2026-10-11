@@ -1,7 +1,6 @@
-# Grafana dashboard
+# Trivy and Falco dashboard
 
-[Home](../../README.md) · [Monitoring](../../monitoring/README.md) ·
-[Automation](../README.md)
+[Home](../../README.md) · [Monitoring](../README.md)
 
 Load Trivy scan results and Falco events into a Grafana dashboard. It combines
 finding totals with scanner health, so a failed scan remains visible alongside
@@ -16,9 +15,9 @@ zero only if a successful scan has been recorded. Missing health data stays
 ## Setup
 
 Requirements: Docker Compose, Bash, curl, Grafana with administrator access,
-Prometheus collecting [Trivy metrics](../trivy/README.md#metrics-and-alerts), and Loki receiving
-[Falcosidekick events](../falco/event-flow.md). Start with the
-[host-metrics guide](../../monitoring/host-metrics/README.md) if Grafana is new.
+Prometheus collecting [Trivy metrics](../../automation/trivy/README.md#metrics-and-alerts), and Loki receiving
+[Falcosidekick events](../../automation/falco/event-flow.md). Start with the
+[host-metrics guide](../host-metrics/README.md) if Grafana is new.
 
 In your Grafana working directory, download the dashboard and its provisioning
 files. This uses the same `provisioning/` layout as the host-metrics guide:
@@ -29,10 +28,10 @@ files. This uses the same `provisioning/` layout as the host-metrics guide:
   mkdir -p provisioning/dashboards provisioning/datasources security-dashboard
   for file in provisioning/dashboards/security.yml provisioning/datasources/security.yml; do
     curl --fail --location --output "$file" \
-      "https://raw.githubusercontent.com/arviiyer/tamriel-homelab/main/automation/monitoring/grafana/$file"
+      "https://raw.githubusercontent.com/arviiyer/tamriel-homelab/main/monitoring/security-dashboard/grafana/$file"
   done
   curl --fail --location --output security-dashboard/security-control-overview.json \
-    https://raw.githubusercontent.com/arviiyer/tamriel-homelab/main/automation/monitoring/grafana/dashboards/security-control-overview.json
+    https://raw.githubusercontent.com/arviiyer/tamriel-homelab/main/monitoring/security-dashboard/grafana/dashboards/security-control-overview.json
 )
 ```
 
@@ -51,8 +50,8 @@ these files into its provisioning directory first. The resulting mounts are:
 ```
 
 Recreate Grafana with `docker compose up -d grafana`, retaining any `-f`
-arguments used by your stack. Open **Dashboards → Security → Security Control
-Overview**. Check both datasources under **Connections → Data sources**, then
+arguments used by your stack. Open **Dashboards → Security → Trivy and Falco**.
+Check both datasources under **Connections → Data sources**, then
 compare a finding total with its Prometheus query and a recent event with Loki
 Explore. A fresh complete Trivy scan should supply the scanner-health panels.
 
@@ -60,7 +59,7 @@ The [provider](grafana/provisioning/dashboards/security.yml) polls files every
 30 seconds and disables UI edits. Change the downloaded JSON to edit panels;
 keep it and the provisioning files with your Grafana configuration backups.
 
-Prometheus panels use the [Trivy metrics](../trivy/README.md#metrics-and-alerts)
+Prometheus panels use the [Trivy metrics](../../automation/trivy/README.md#metrics-and-alerts)
 for scan attempts, complete baselines, success, findings, and metadata changes.
 Loki panels select `{source="syscall"}` and require Falcosidekick to preserve
 `source`, `priority`, `hostname`, and `rule` stream labels.
@@ -77,9 +76,9 @@ Loki panels select `{source="syscall"}` and require Falcosidekick to preserve
 From the repository root, with Docker and the dependencies in [requirements.txt](requirements.txt):
 
 ```bash
-python3 -m unittest discover -s automation/monitoring/tests -p 'test_*.py' -v
-python3 automation/monitoring/tests/validate_promql.py
-python3 automation/monitoring/tests/validate_grafana.py
+python3 -m unittest discover -s monitoring/security-dashboard/tests -p 'test_*.py' -v
+python3 monitoring/security-dashboard/tests/validate_promql.py
+python3 monitoring/security-dashboard/tests/validate_grafana.py
 ```
 
 The Grafana check starts a pinned 12.4.1 container, loads the files read-only,

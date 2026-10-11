@@ -3,7 +3,7 @@
 [Home](../../README.md) · [Apps](../README.md) · [Networking](../../networking/README.md)
 
 FreshRSS is my browser-based feed reader. It holds security news and technical
-articles and supplies the input for the [Morning SOC Briefing](../../projects/reading-brief/README.md).
+articles and supplies the input for the [daily reading brief](../../projects/reading-brief/README.md).
 
 [![FreshRSS feed categories and articles](../../screenshots/freshrss-reader.webp)](../../screenshots/README.md#freshrss)
 
@@ -26,7 +26,7 @@ Tailscale. Both paths retain the same HTTPS hostname and OIDC callback.
 ## Install
 
 Requirements: Docker Engine, the Compose plugin, and curl. Download the
-[Compose file](compose.yml) into a new directory outside this checkout:
+[Compose file](compose.yml) into a new service directory:
 
 ```bash
 mkdir -p "$HOME/homelab-examples"

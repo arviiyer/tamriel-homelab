@@ -3,21 +3,21 @@
 [Home](../../README.md) · [Apps](../README.md) · [FreshRSS](../freshrss/README.md)
 
 Homarr is my starting page for the lab. It brings service links and the
-[Morning SOC Briefing](../../projects/reading-brief/README.md) onto one board.
+[daily reading brief](../../projects/reading-brief/README.md) onto one board.
 I use its local login, with Caddy providing the private HTTPS route.
 
 [![Homarr service cards and reading brief](../../screenshots/homarr-home.webp)](../../screenshots/README.md#homarr)
 
 - [Install](#install)
 - [Add service cards](#add-service-cards)
-- [Morning SOC Briefing](#morning-soc-briefing)
+- [Daily reading brief](#daily-reading-brief)
 - [Backups and restore](#backups-and-restore)
 - [Updates](#updates)
 
 ## Install
 
 Requirements: Docker Engine, the Compose plugin, curl, and OpenSSL. Download the
-[Compose file](compose.yml) into a new directory outside this checkout:
+[Compose file](compose.yml) into a new service directory:
 
 ```bash
 mkdir -p "$HOME/homelab-examples"
@@ -74,7 +74,7 @@ browser URLs. A Docker-only hostname will not normally resolve on your laptop.
 Service cards do not need Docker access. The Compose example has no Docker socket
 mount; add a Docker integration only if you want container discovery or controls.
 
-## Morning SOC Briefing
+## Daily reading brief
 
 My reading worker selects articles from FreshRSS and publishes source excerpts
 as JSON. Homarr fetches that file every five minutes through a Custom API widget.
@@ -104,7 +104,7 @@ Under **Management → Custom Widgets**, create a definition in the v2 workbench
 
 | Setting | Value |
 |---|---|
-| Name | Morning SOC Briefing |
+| Name | Daily reading brief |
 | HTTP source ID | `default` |
 | Source base URL | Your feed server, for example `http://reading-digest-feed:8080` |
 | Network scope | `private` for a Docker/private-network feed |
@@ -143,7 +143,7 @@ Use this JSX in the template editor:
 ```
 
 Run **Test and preview**, check the complete text and article links, and save.
-In board edit mode, choose **Add widget → Custom widgets → Morning SOC Briefing**.
+In board edit mode, choose **Add widget → Custom widgets → Daily reading brief**.
 Set the refresh-interval slider to 300 seconds, save the widget, then save the
 board. Use **Move / resize item** to give the excerpts enough room; the widget
 scrolls when its content is taller than its panel. Keep article content in text

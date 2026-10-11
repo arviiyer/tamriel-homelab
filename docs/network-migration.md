@@ -21,4 +21,4 @@ limiting which networks could reach it.
 The useful lesson was to separate Layer 2 transport, DHCP/DNS, firewall policy,
 and host address changes. Check a client on the new network at each stage before
 moving an existing service. The management/server split is still future work;
-the [current network notes](network-and-identity.md) describe what is in place.
+the [current network notes](../networking/README.md#network-zones) describe what is in place.

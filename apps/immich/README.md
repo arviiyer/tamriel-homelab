@@ -31,8 +31,7 @@ containers start. See [storage dependencies](../../storage/README.md#waiting-for
 
 Requirements: a Linux host with Docker Engine, the Compose plugin, Bash, curl,
 and enough memory and disk for the [Immich requirements](https://docs.immich.app/install/requirements/).
-Use a new directory outside this checkout. For a NAS-backed library, mount the
-share before starting the containers.
+For a NAS-backed library, mount the share before starting the containers.
 
 Choose a release from [Immich releases](https://github.com/immich-app/immich/releases).
 Download both files from that same release:
@@ -54,42 +53,40 @@ Edit `.env` before starting:
 | Setting | What to use |
 |---|---|
 | `IMMICH_VERSION` | The exact release tag used above |
-| `UPLOAD_LOCATION` | `./library` for a local trial, or the mounted photo directory |
+| `UPLOAD_LOCATION` | The mounted photo directory, `/mnt/nas/photos` in the [NFS guide](../../storage/nfs/README.md) |
 | `DB_DATA_LOCATION` | `./postgres` on a local disk, never the NAS share |
 | `DB_PASSWORD` | A generated password, for example from `openssl rand -hex 24` |
 | `TZ` | Your timezone |
 
 Keep the supplied server, machine-learning, and database image definitions
 together. The database image includes extensions that stock PostgreSQL lacks.
-The upstream environment variables work with the upstream Compose file; the
-lab's custom database connection URL is not needed for this installation.
-
-For the local trial, change the server's published port in `docker-compose.yml`
-to `"127.0.0.1:2283:2283"`. Then run:
+Change the server's published port in `docker-compose.yml` to
+`"192.0.2.83:2283:2283"`, using the application VM's private address. Permit
+the Pi proxy to reach that port. Then run:
 
 ```bash
 docker compose config --quiet
 docker compose pull
 docker compose up -d
 docker compose ps
-curl --fail http://127.0.0.1:2283/api/server/ping
+curl --fail http://192.0.2.83:2283/api/server/ping
 ```
 
 Startup can take a few minutes. The ping endpoint should return a `pong` response.
-Open <http://127.0.0.1:2283>, create the administrator account, and upload a test
-photo. Check that its thumbnail loads and that you can download the original.
-On a remote VM, an SSH tunnel lets you use the same local URL:
+From your workstation, open a tunnel to the application VM:
 
 ```bash
-ssh -L 2283:127.0.0.1:2283 operator@apps-01
+ssh -N -L 2283:192.0.2.83:2283 operator@apps-01
 ```
 
-For access from other devices, configure the private HTTPS hostname before
-setting up phone backups. A host-installed Caddy on the same machine can reach
-the loopback port. A proxy on another machine needs a port bound to the intended
-private interface and a firewall rule allowing that proxy. See
-[private HTTPS setup](../../networking/private-access/README.md) and Immich's
-[reverse-proxy requirements](https://docs.immich.app/administration/reverse-proxy/).
+Open <http://localhost:2283>, create the administrator, and upload a photo.
+Check its thumbnail and download the original. For other devices, configure
+`photos.example.com` with upstream `192.0.2.83:2283` using the
+[private HTTPS guide](../../networking/private-access/README.md#use-it-with-an-application)
+and Immich's [proxy requirements](https://docs.immich.app/administration/reverse-proxy/).
+
+For a local trial without a NAS, use `UPLOAD_LOCATION=./library` and the
+port binding `127.0.0.1:2283:2283` instead.
 
 ## Phone backups
 

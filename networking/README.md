@@ -16,16 +16,34 @@ USW-Lite-16-PoE switch and U6-Plus access point provide wired and wireless
 connections, managed through UniFi Network in its own VM. The Raspberry Pi
 supplies DNS and the reverse proxy.
 
-The network separates infrastructure, trusted clients, work devices, guests,
-media, and sandbox workloads. Connections between zones are allowed for specific
-needs. The [network-zone table](../docs/network-and-identity.md#network-zones)
-lists the roles and restrictions.
-
 The infrastructure machines still share the original LAN. The separate client
 VLANs and media segment are in use; splitting management and ordinary servers
 into their own VLANs remains future work. The
 [network migration notes](../docs/network-migration.md) explain what went wrong
 with the first attempt and why I narrowed the next change.
+
+## Network zones
+
+Management is an access role within the infrastructure LAN, rather than a
+separate VLAN. Connections between routed zones are blocked unless explicitly
+allowed.
+
+| Zone or role | Use | Access |
+|---|---|---|
+| Management | Infrastructure administration | Tailscale and a login for each service |
+| Infrastructure | Hypervisors, storage, identity, and DNS | Specific connections from clients and workloads |
+| Trusted clients | Personal devices | Private apps through Caddy |
+| Managed work | Business use and external services | No personal infrastructure or data |
+| Untrusted devices | Restricted devices | DNS and internet access |
+| Guest | Visitors | Internet access |
+| Media | Playback and downloads | Required apps, storage shares, DNS, and external services |
+| Sandbox | Analysis worker | Separate administration and limited outbound access; no trusted-zone access |
+
+Services have access to their required identity, DNS, and storage dependencies.
+Monitoring collects metrics and logs. Deployment requests go through the
+[restricted SSH helper](../automation/ci/README.md). Work, untrusted, and guest
+zones cannot reach private zones; the sandbox worker cannot reach trusted or
+infrastructure zones.
 
 ## DNS
 
@@ -59,10 +77,6 @@ Tailscale gives me remote access to private apps and administration interfaces.
 Hypervisor, gateway, and storage management stay off the public internet. Each management
 service still requires its own login.
 
-This makes administration depend on Tailscale and trusted devices. The
-[access notes](../docs/network-and-identity.md#when-something-fails) describe the
-expected behavior when a dependency fails.
-
 ## Caddy and Authentik
 
 Trusted clients reach web applications through Caddy. Authentik supplies OIDC
@@ -83,8 +97,8 @@ The [FreshRSS notes](../apps/freshrss/README.md#sign-in) cover its callback and
 username mapping. These integrations are configured per application; adding a
 Caddy route does not automatically add Authentik.
 
-The [private-access walkthrough](private-access/README.md) takes a sample app
-through each step, including certificate issuance and an Authentik group binding.
+The [private-access guide](private-access/README.md) connects Caddy on the Pi to
+Authentik and application VMs, including DNS, certificates, and media routes.
 
 ## Try a reverse proxy
 
@@ -94,7 +108,10 @@ adding real DNS, TLS, or an identity provider.
 
 ## Notes
 
-- [Network zones and allowed connections](../docs/network-and-identity.md)
+The [DNS](dns/README.md#checks) and [browser sign-in](private-access/README.md#checks)
+guides include isolated checks, including sign-in failure when Authentik is
+unavailable. Routed VLAN and tailnet client tests are on the [roadmap](../ROADMAP.md).
+
 - [SSH configuration example](../automation/ansible/README.md)
 - [OPNsense documentation](https://docs.opnsense.org/)
 - [Tailscale documentation](https://tailscale.com/kb)

@@ -1,46 +1,18 @@
-# New top-level paths are ignored until reviewed and added to this list.
-*
-
-!.gitignore
-!LICENSE
-!README.md
-!ROADMAP.md
-!SECURITY.md
-
-!.github/
-!.github/**
-!apps/
-!apps/**
-!projects/
-!projects/**
-!media/
-!media/**
-!proxmox/
-!proxmox/**
-!networking/
-!networking/**
-!storage/
-!storage/**
-!monitoring/
-!monitoring/**
-!security/
-!security/**
-!automation/
-!automation/**
-!diagrams/
-!diagrams/**
-!docs/
-!docs/**
-!screenshots/
-!scripts/
-!scripts/**
-!tests/
-!tests/**
+# Local credentials and application data.
+.env
+.env.*
+!.env.example
+secrets/
+*.log
+*.sqlite*
+*.db
+*.dump
+*.bak
 
 # Keep agent instructions local.
 AGENTS.md
 
-# Keep generated validation output out of the repository.
+# Generated files.
 **/__pycache__/
 *.py[cod]
 automation/trivy/repositories.tsv

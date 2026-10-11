@@ -1,4 +1,4 @@
-# Morning SOC Briefing
+# Daily reading brief
 
 [Home](../../README.md) · [Projects](../README.md) · [FreshRSS](../../apps/freshrss/README.md)
 
@@ -8,9 +8,7 @@ source excerpts into a daily brief. Links open the full article in FreshRSS.
 
 ![Live reading worker output on a fresh Homarr board](../../screenshots/reading-live.webp)
 
-The public worker's output on a fresh Homarr installation, using two Debian
-advisories and a synthetic restore article.
-[Screenshot review](../../screenshots/reading-live.review.md).
+The brief in Homarr, using two Debian advisories and a sample restore article.
 
 ## How it works
 
@@ -40,15 +38,9 @@ Limits per source and topic keep one feed from filling the whole list. A failed
 ranking or excerpt step keeps the last completed brief. An empty successful
 selection publishes an empty list for that day.
 
-The [live check](../../docs/drills/project-checks.md#reading-brief) covers Jev,
-local Qwen, FreshRSS links, and the Homarr display. HTML source line wrapping is
-collapsed before sentence selection so excerpts retain complete sentences.
+## Install
 
-## Try it with sample articles
-
-Requirements: Python 3.11+ and Git. This first run does not use an API key,
-FreshRSS, Docker, or a model. Download the repository for its examples, then
-copy this project into your own working directory:
+Requirements: Python 3.11+ and Git. Copy the project into your working directory:
 
 ```bash
 git clone https://github.com/arviiyer/tamriel-homelab.git
@@ -56,14 +48,7 @@ mkdir -p "$HOME/homelab-projects"
 cp -R tamriel-homelab/projects/reading-brief "$HOME/homelab-projects/"
 cd "$HOME/homelab-projects/reading-brief"
 cp profile.example.json profile.json
-python3 brief.py demo --input articles.example.ndjson --data /tmp/reading-brief-demo
-python3 serve.py --directory /tmp/reading-brief-demo/public
 ```
-
-Open <http://127.0.0.1:8094/briefing.json> or subscribe to
-<http://127.0.0.1:8094/feed.xml>. Expect two invented articles about restores and
-scan freshness. Demo mode uses deterministic selection, so this checks the
-publication path rather than model quality. Stop the server with Ctrl+C.
 
 ## Connect FreshRSS and the models
 
@@ -152,7 +137,7 @@ networks:
 ```
 
 Recreate Homarr, then follow the
-[Custom API widget instructions](../../apps/homarr/README.md#morning-soc-briefing)
+[Custom API widget instructions](../../apps/homarr/README.md#daily-reading-brief)
 with `http://feed:8080` as the source base URL. The JSON shape matches that
 widget. Use `/feed.xml` for an RSS reader instead.
 
@@ -198,6 +183,18 @@ does not rewrite a completed day's list.
 python3 -m unittest discover -s tests -v
 docker compose config --quiet
 ```
+
+## Try it locally
+
+To try the feed without FreshRSS or models, run from the project directory:
+
+```bash
+python3 brief.py demo --input articles.example.ndjson --data /tmp/reading-brief-demo
+python3 serve.py --directory /tmp/reading-brief-demo/public
+```
+
+Open <http://127.0.0.1:8094/briefing.json> or <http://127.0.0.1:8094/feed.xml>.
+Demo mode publishes two sample articles with fixed selections. Stop with Ctrl+C.
 
 [Worker](brief.py) · [Tests](tests/test_brief.py) ·
 [llama.cpp](https://github.com/ggml-org/llama.cpp) ·

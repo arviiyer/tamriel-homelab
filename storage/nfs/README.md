@@ -100,8 +100,8 @@ access after a reboot. If the NAS arrives after a mount timeout, restore NFS
 connectivity, start the mount units, and then start Docker and the stacks.
 
 My lab additionally waits for the NAS's NFS listener before trying the mounts.
-For a service-specific check of the expected filesystem and a marker file,
-see the [storage-check example](../../automation/recovery/README.md#storage-checks).
+After changing an export, check `findmnt -no SOURCE,FSTYPE,TARGET` against the
+intended NAS and dataset before starting the applications.
 
 ## Snapshots and file recovery
 

@@ -9,7 +9,7 @@ the media stack.
 ## Install
 
 Requirements: Docker Engine, Compose, curl, and local persistent storage. In a
-new directory outside this checkout, download [compose.yml](compose.yml):
+new service directory, download [compose.yml](compose.yml):
 
 ```bash
 mkdir -p "$HOME/homelab-examples"

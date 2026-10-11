@@ -3,8 +3,9 @@
 [Home](../../README.md) · [Security](../../security/README.md) ·
 [Automation](../README.md)
 
-An Ansible role for Falco's modern eBPF engine, two rule-tuning examples,
-and Falcosidekick event routing.
+Falco watches runtime activity on the service VMs. Falcosidekick on the security
+VM sends events to Loki and Alertmanager. The Ansible role here installs the
+modern eBPF engine and includes two rule-tuning examples.
 
 ## Setup
 
@@ -48,14 +49,9 @@ docker compose up -d
 docker compose logs --tail=30 falcosidekick
 ```
 
-Falcosidekick 2.34.1 is digest-pinned, non-root, and read-only, with capabilities
-dropped and `no-new-privileges`. See the [event routing](event-flow.md) for Loki
-and Alertmanager settings.
-
-The example receiver uses plain HTTP on a documentation address. An adapted
-deployment needs a private address and port 2801 restricted to approved sensors;
-use an authenticated TLS proxy if the network cannot provide that protection.
-Host firewall configuration is environment-specific and is not included here.
+Restrict TCP 2801 to your sensors; use an authenticated TLS proxy across untrusted
+networks. The [event-routing notes](event-flow.md) explain the Loki and Alertmanager
+settings.
 
 Send the [warning fixture](tests/fixtures/falco-event.json) to the receiver,
 replacing the URL with your private endpoint. Download the fixture as

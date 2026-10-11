@@ -8,7 +8,7 @@ on the setup, screenshots, scripts, and configuration examples from building it.
 ## Table of Contents
 
 - [Apps](apps/) - Apps and services running in the lab.
-- [Projects](projects/) - Tools I've built, with setup guides and runnable examples.
+- [Projects](projects/) - Tools I've built around the lab.
 - [Media](media/) - Jellyfin, Seerr, the *arr stack, and GPU transcoding.
 - [Proxmox](proxmox/) - Proxmox cluster and virtual machine setup.
 - [Networking](networking/) - Firewall, DNS, remote access, and sign-in.
@@ -84,48 +84,15 @@ and Jellyfin for media. Homarr brings the service links and reading brief togeth
 
 [![Homarr service cards and reading brief](screenshots/homarr-home.webp)](apps/homarr/README.md)
 
-| Job | Tools |
-|---|---|
-| Files, photos, and documents | [Syncthing, Immich, Stirling PDF](apps/README.md#files-photos-and-documents) |
-| Reading and utilities | [FreshRSS, Homarr, Vaultwarden, SearXNG](apps/README.md#reading-and-utilities) |
-| Media | [Jellyfin, Seerr, Servarr, Gluetun](media/README.md) |
-| Networking and access | [OPNsense, Tailscale, Caddy, Authentik](apps/README.md#networking-and-sign-in) |
-| Storage and backups | [TrueNAS, ZFS, Proxmox Backup Server, Restic](apps/README.md#storage-and-backups) |
-| Git and updates | [Forgejo, Renovate, Ansible](apps/README.md#git-and-updates) |
-| Metrics, logs, and alerts | [Prometheus, Loki, Grafana, Alertmanager](apps/README.md#dashboards-and-monitoring) |
-| Security | [Trivy, Falco, CrowdSec, ClamAV](apps/README.md#security) |
-
-The [Projects](projects/README.md) section covers Forge VM provisioning, Discord
-request approvals, the reading brief, Printer Monitor, and Tamriel Sandbox.
+[All apps and services](apps/README.md) · [My projects](projects/README.md)
 
 ## Setup guides
 
-Start with one app or follow the VM, storage, and access guides to build out a
-host. Each guide lists its requirements and configuration files. Work in your
-own service directory; if you already cloned this repo, copy the linked files
-there instead of downloading them again. Replace example addresses, domains,
-and hostnames with your own.
-
-| Start with | Guide |
-|---|---|
-| A VM for your containers | [Debian on Proxmox](proxmox/debian-vm/README.md), [Terraform clone](proxmox/terraform/README.md) |
-| Shared storage and backups | [TrueNAS and NFS](storage/nfs/README.md), [PBS](storage/pbs/README.md), [Restic](storage/restic/README.md) |
-| Private application access | [Pi-hole and Unbound](networking/dns/README.md), [Caddy, Tailscale, and Authentik](networking/private-access/README.md) |
-| Files, photos, reading, and a homepage | [Syncthing](apps/syncthing/README.md), [Immich](apps/immich/README.md), [FreshRSS](apps/freshrss/README.md), [Homarr](apps/homarr/README.md) |
-| Media requests and playback | [Download stack](media/servarr/README.md), [Jellyfin and GPU transcoding](media/jellyfin/README.md) |
-| Passwords, search, and utilities | [Vaultwarden, SearXNG, Stirling PDF, OpenSpeedTest](apps/utilities/README.md) |
-| Dashboards and notifications | [Host metrics and alerts](monitoring/host-metrics/README.md), [Loki and Alloy](monitoring/logs/README.md), [Uptime Kuma](monitoring/uptime-kuma/README.md) |
-| Security tools | [CrowdSec](security/crowdsec/README.md), [ClamAV](security/clamav/README.md), [Trivy](automation/trivy/README.md), [Falco](automation/falco/README.md) |
-
-## Automation
-
-I review Renovate's image updates in Forgejo, back up the affected application,
-and apply the checked change. Ansible handles host configuration and OS updates.
-The [automation page](automation/README.md) explains that routine and links to
-the scripts and playbooks.
-
-[Set up Renovate](automation/renovate/README.md) ·
-[Host maintenance](automation/ansible/README.md)
+Start with an [app](apps/README.md), or prepare a
+[Debian Docker VM](proxmox/debian-vm/README.md), its
+[NAS mounts](storage/nfs/README.md), and [private HTTPS access](networking/private-access/README.md).
+Each guide lists the requirements, configuration files, and commands. Copy the
+examples into your own service directory and replace the example addresses.
 
 ## Screenshots
 
@@ -138,7 +105,6 @@ Jellyfin, Seerr, Grafana, TrueNAS, and PBS.
 ## Notes
 
 - [What went wrong with the first network migration](docs/network-migration.md)
-- [Making vulnerability alerts useful](docs/case-studies/actionable-vulnerability-management.md)
-- [Deploying the commit that passed CI](docs/case-studies/fail-closed-infrastructure-delivery.md)
-- [Restoring without overwriting live data](docs/case-studies/recovery-and-storage-dependencies.md)
+- [Making vulnerability alerts useful](docs/trivy-alerts.md)
+- [Deploying the commit that passed CI](automation/ci/README.md)
 - [Next steps](ROADMAP.md)

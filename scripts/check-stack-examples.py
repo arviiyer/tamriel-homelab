@@ -70,7 +70,7 @@ def media_environment(path):
                 DOWNLOADS_PATH=str(path / "downloads"), MEDIA_PATH=str(path / "media"),
                 WIREGUARD_PRIVATE_KEY=base64.b64encode(secrets.token_bytes(32)).decode(),
                 WIREGUARD_ADDRESSES="192.0.2.2/32", SERVER_COUNTRIES="Sweden",
-                COMPOSE_PROFILES="music,usenet,indexer-helper")
+                COMPOSE_PROFILES="music,usenet,indexer-helper", MEDIA_BIND_IP="127.0.0.1")
 
 
 def validate():
@@ -98,6 +98,16 @@ def validate():
             mounts = {v["target"]: v["source"] for v in apps[manager]["volumes"]}
             assert mounts["/data/downloads"] == str(path / "downloads")
             assert mounts["/data/media"] == str(path / "media")
+        # The separate projects must agree on the private interface and library.
+        lan_env = dict(media_environment(path), MEDIA_BIND_IP="192.0.2.84",
+                       JELLYFIN_UID="1000", JELLYFIN_GID="1000")
+        lan = services.render(ROOT / "media/servarr/compose.yml", env=lan_env)
+        jellyfin = services.render(ROOT / "media/jellyfin/compose.yml", env=lan_env)
+        for app in [*lan["services"].values(), jellyfin["services"]["jellyfin"]]:
+            for port in app.get("ports", []):
+                assert port["host_ip"] == "192.0.2.84"
+        library = next(v for v in jellyfin["services"]["jellyfin"]["volumes"] if v["target"] == "/media")
+        assert library["source"] == str(path / "media") and library["read_only"]
         proxy = Project(path / "access", "networking/private-access")
         shutil.copyfile(proxy.directory / "environment.example", proxy.directory / ".env")
         proxy.compose("config", "--quiet")
@@ -157,7 +167,29 @@ def media(project):
     for port, endpoint in ((9696, "/ping"), (8686, "/ping"), (8080, "/"), (6789, "/")):
         url = project.url("gluetun", port)
         wait_for(str(port), lambda: request(url + endpoint)[0] in (200, 401), seconds=180)
-    print("PASS: media startup, writable library roots, and cross-namespace manager access (mock VPN)")
+    # Model the VM's private interface with this temporary Docker bridge gateway.
+    # Seerr reaches Jellyfin through a host-published port in a separate project.
+    container = project.compose("ps", "-q", "seerr").stdout.strip()
+    network = json.loads(run("docker", "inspect", container).stdout)[0]["NetworkSettings"]["Networks"]
+    gateway = next(iter(network.values()))["Gateway"]
+    peer_dir = project.directory / "jellyfin"
+    peer_dir.mkdir()
+    peer = services.Project("jellyfin", peer_dir)
+    peer.env["MEDIA_PATH"] = str(project.directory / "media")
+    (peer_dir / "ports.yml").write_text(
+        f"services:\n  jellyfin:\n    ports: !override\n      - '{gateway}::8096'\n")
+    try:
+        peer.compose("up", "-d", "--pull", "missing")
+        endpoint = "http://" + peer.compose("port", "jellyfin", "8096").stdout.strip() + "/health"
+        wait_for("Jellyfin private port", lambda: request(endpoint) == (200, "Healthy"))
+        result = project.compose("exec", "-T", "seerr", "wget", "-qO-", endpoint)
+        assert result.stdout.strip() == "Healthy"
+        project.compose("exec", "-T", "radarr", "touch", "/data/media/.shared-library-check")
+        peer.exec("jellyfin", "sh", "-c",
+                  "test -r /media/.shared-library-check && test ! -w /media/.shared-library-check")
+    finally:
+        peer.compose("down", "--volumes", "--remove-orphans", check=False)
+    print("PASS: media startup, manager access, Seerr-to-Jellyfin connection, and shared library (mock VPN)")
 
 
 def access(project):
@@ -171,6 +203,7 @@ def access(project):
                        PROXY_LISTEN_ADDRESSES="0.0.0.0", TRUSTED_CIDRS="0.0.0.0/0",
                        CLOUDFLARE_API_TOKEN=secrets.token_hex(24))
     original = project.directory / "Caddyfile"
+    original.write_text(original.read_text() + "\n" + (project.directory / "media.caddy").read_text())
     arguments = ["docker", "run", "--rm"]
     for key, value in environment.items():
         arguments += ["-e", f"{key}={value}"]
@@ -178,6 +211,10 @@ def access(project):
         "caddy", "adapt", "--config", "/etc/caddy/Caddyfile", "--validate")
     config = original.read_text().replace("admin localhost:2019", "admin off")
     config = config.replace("\ttls {\n\t\tdns cloudflare {env.CLOUDFLARE_API_TOKEN}\n\t}\n", "")
+    config = config.replace("media.example.com {", "http://media.example.com {")
+    config = config.replace("requests.example.com {", "http://requests.example.com {")
+    config = config.replace("192.0.2.84:8096", "application:8088")
+    config = config.replace("192.0.2.84:5055", "identity:9000")
     original.write_text(config)
     environment.update(AUTH_DOMAIN="http://auth.example.com", APP_DOMAIN="http://app.example.com")
     (project.directory / "identity.Caddyfile").write_text(""":9000 {
@@ -215,14 +252,20 @@ def access(project):
     assert request(url, headers={**headers, "Cookie": "session=denied"})[0] == 403
     assert request(url, headers={**headers, "Cookie": "session=allowed"}) == (200, "private app")
     assert request(url + "/outpost.goauthentik.io/start", headers=headers) == (200, "outpost")
+    # Media routes use application login, so no forward-auth cookie is required.
+    assert request(url, headers={"Host": "media.example.com"}) == (200, "private app")
+    assert request(url, headers={"Host": "requests.example.com"}) == (200, "outpost")
     project.compose("stop", "identity")
     assert request(url, headers={**headers, "Cookie": "session=allowed"})[0] == 502
+    assert request(url, headers={"Host": "media.example.com"}) == (200, "private app")
     project.compose("exec", "-T", "application", "wget", "-qO-", "http://localhost:8088")
     environment["TRUSTED_CIDRS"] = "192.0.2.0/24"
     (project.directory / "compose.yml").write_text(json.dumps(compose))
     project.compose("up", "-d", "--no-deps", "caddy")
     url = project.url("caddy", 80)
     wait_for("source rejection", lambda: request(url, headers=headers)[0] == 403)
+    for host in ("media.example.com", "requests.example.com"):
+        assert request(url, headers={"Host": host})[0] == 403
     print("PASS: Caddy DNS module/config, redirects, access denial, outpost routing, and identity failure (mock identity)")
 
 

@@ -120,7 +120,7 @@ def main() -> None:
         metadata = response.get("meta", {})
         if dashboard.get("uid") != "security-control-overview":
             raise RuntimeError("Grafana did not load the expected dashboard UID")
-        if dashboard.get("title") != "Security Control Overview":
+        if dashboard.get("title") != "Trivy and Falco":
             raise RuntimeError("Grafana did not load the expected dashboard title")
         if metadata.get("folderUid") != "security":
             raise RuntimeError("Grafana did not use the expected public folder UID")

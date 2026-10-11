@@ -3,10 +3,11 @@
 [Home](../../README.md) · [Security](../../security/README.md) ·
 [Automation](../README.md)
 
-Scans repository files and images listed in Compose files, compares results with
-the last complete scan, and exports Prometheus metrics.
+I run Trivy from the security VM against the service repositories and their
+Compose images. This scanner compares each run with the last complete scan and
+sends metrics to Prometheus through Pushgateway.
 
-[How the alerting works](../../docs/case-studies/actionable-vulnerability-management.md)
+[How the alerting works](../../docs/trivy-alerts.md)
 
 ## Setup
 
@@ -219,7 +220,7 @@ trivy_scan_duration_seconds          trivy_scan_repository_success
 ```
 
 [Alert rules](prometheus-rules.yml) implement the
-[alert policy](../../docs/case-studies/actionable-vulnerability-management.md#what-triggers-an-alert)
+[alert policy](../../docs/trivy-alerts.md#what-triggers-an-alert)
 and flag failed or stale scans. The example freshness window is eight days.
 
 ## Limitations

@@ -2,8 +2,9 @@
 
 [Home](../../README.md) · [Automation](../README.md)
 
-Ansible examples for key-only SSH, automatic security updates, and full upgrades
-one host at a time.
+I run Ansible from the security VM to maintain the lab hosts. These playbooks
+configure key-only SSH, automatic security updates, and full upgrades one host
+at a time.
 
 ## Setup
 
